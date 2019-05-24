@@ -43,11 +43,11 @@ class ParserAnybaseocr:
 	                json_data = json.load(json_file)
 	    else:
 	        parameter_path = os.path.dirname(os.path.realpath(__file__))
-	        if not os.path.exists(os.path.join(parameter_path, 'ocrd-anybaseocr-parameter.json')):
+	        if not os.path.exists(os.path.join(parameter_path, 'ocrd-tools.json')):
 	            print("Error : Parameter file does not exists.")
 	            sys.exit(0)
 	        else:
-	            with open(os.path.join(parameter_path, 'ocrd-anybaseocr-parameter.json')) as json_file:
+	            with open(os.path.join(parameter_path, 'ocrd-tools.json')) as json_file:
 	                json_data = json.load(json_file)
 	    parser = self.parse_data(json_data['tools'][param_block]['parameters'])
 	    parameters = parser.parse_args()
