@@ -8,7 +8,7 @@ Contact Email: Saqib.Bukhari@dfki.de, Mohammad_mohsin.reza@dfki.de
 Note: 
 1. this work has been done in DFKI, Kaiserslautern, Germany, as a part of the DFG research project "Scalable Methods of Text and Structure Recognition for the Full-Text Digitization of Historical Prints" Part 2: Layout Analysis "
 Link: http://gepris.dfg.de/gepris/projekt/394346204?language=en
-2. The parameters values are read from ocrd-anybaseocr-parameter.json file. The values can be changed in that file.
+2. The parameters values are read from ocrd-tools.json file. The values can be changed in that file.
 3. The command line IO usage is based on "OCR-D" project guidelines (https://ocr-d.github.io/). 
 4. The sequence of operations is: binarization, deskewing, cropping, dewarping and text-nontext (or can also be: binarization, dewarping, deskewing, cropping and text-nontext; depends upon use-case).
 5. Sample files are available at [OCR-D/assets](https://github.com/OCR-D/ocrd-assets/tree/master/data/dfki-testdata)

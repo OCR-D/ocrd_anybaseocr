@@ -16,6 +16,8 @@ Edited for OCRD by: Martin Jenckel
 
 example useage:
 python block_segmentation.py --initial_meta_to_learn /path/to/model/*.ckpt.meta --initial_weight_to_learn /path/to/model/*.ckpt --input_path /path/to/img_data --results_csv /path/to/output/result.csv --dataset_mean_pixels x y z
+download model from:
+https://cloud.dfki.de/owncloud/index.php/s/r9zjrDEwaNczfLN
 '''
 
 from __future__ import division
