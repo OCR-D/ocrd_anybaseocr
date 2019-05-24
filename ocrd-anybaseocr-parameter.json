@@ -90,6 +90,34 @@
       "description": "separate text and non-text part with anyBaseOCR",
       "parameters": {
       }
-    }    
+    },
+    "ocrd-anybaseocr-textline": {
+      "executable": "ocrd-anybaseocr-textline",
+      "categories": ["text line segment"],
+      "steps": [
+        "text/line/segment"
+      ],
+      "description": "separate each text line",
+      "parameters": {        
+        "minscale": {"type": "float", "default": 12.0, "description": "minimum scale permitted"},
+        "maxlines": {"type": "float", "default": 300, "description": "non-standard scaling of horizontal parameters"},
+        "scale": {"type": "float", "default": 0.0, "description": "the basic scale of the document (roughly, xheight) 0=automatic"},
+        "hscale": {"type": "float", "default": 1.0, "description": "non-standard scaling of horizontal parameters"},
+        "vscale": {"type": "float", "default": 1.7, "description": "non-standard scaling of vertical parameters"},
+        "threshold": {"type": "float", "default": 0.2, "description": "baseline threshold"},
+        "noise": {"type": "int", "default": 8, "description": "noise threshold for removing small components from lines"},
+        "usegauss": {"type": "str", "action": "store_true", "default": 0, "description": "use gaussian instead of uniform"},
+        "maxseps": {"type": "int", "default": 2, "description": "maximum black column separators"},
+        "sepwiden": {"type": "int", "default": 10, "description": "widen black separators (to account for warping)"},
+        "blackseps": {"type": "str", "action": "store_true", "default": 0, "description": "also check for black column separators"},
+        "maxcolseps": {"type": "int", "default": 2, "description": "maximum # whitespace column separators"},
+        "csminaspect": {"type": "float", "default": 1.1, "description": "minimum aspect ratio for column separators"},
+        "csminheight": {"type": "float", "default": 6.5, "description": "minimum column height (units=scale)"},
+        "pad": {"type": "int", "default": 3, "description": "padding for extracted lines"},
+        "expand": {"type": "int", "default": 3, "description": "expand mask for grayscale extraction"},
+        "parallel": {"type": "int", "default": 0, "description": "number of CPUs to use"},
+        "libpath": {"type": "str", "default": ".", "description": "Library Path for C Executables"}
+      }
+    }
   }
 }
