@@ -147,10 +147,10 @@ class finetune(object):
 
                     all_img_test_count += img_batch.shape[0]
                     # print "PREDICTED: %s, GT: %s" % ( predict_arr, gt_arr)
-                    print "PREDICTED: %s" %([class_dict[p] for p in predict_arr])
+                    print ("PREDICTED: %s" %([class_dict[p] for p in predict_arr]))
                     
                 except Exception,e:
-                    print "EXCEPTION:%s"%e
+                    print ("EXCEPTION:%s"%e)
                     continue
             print("{} Testing Accuracy = {:.4f}".format(datetime.now(),
                                                         1))
