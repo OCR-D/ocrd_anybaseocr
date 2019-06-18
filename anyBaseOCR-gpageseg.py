@@ -15,7 +15,8 @@ from pylab import *
 import argparse,glob,os,os.path
 import traceback
 from scipy.ndimage import measurements
-from scipy.misc import imsave
+#from scipy.misc import imsave
+import imageio
 from scipy.ndimage.filters import gaussian_filter,uniform_filter,maximum_filter
 from multiprocessing import Pool
 import ocrolib
@@ -125,7 +126,7 @@ def DSAVE(title,image):
         image = transpose(array(image),[1,2,0])
     fname = "_"+title+".png"
     print ("debug",fname)
-    imsave(fname,image)
+    imageio.imwrite(fname,image)
 
 
 
@@ -360,7 +361,7 @@ def compute_line_seeds(binary,bottom,top,colseps,scale):
     seeds = zeros(binary.shape,'i')
     delta = max(3,int(scale/2))
     for x in range(bmarked.shape[1]):
-        transitions = sorted([(y,1) for y in find(bmarked[:,x])]+[(y,0) for y in find(tmarked[:,x])])[::-1]
+        transitions = sorted([(y,1) for y in psegutils.find(bmarked[:,x])]+[(y,0) for y in psegutils.find(tmarked[:,x])])[::-1]
         transitions += [(0,0)]
         for l in range(len(transitions)-1):
             y0,s0 = transitions[l]

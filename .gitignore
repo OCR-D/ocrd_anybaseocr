@@ -8,3 +8,6 @@ debug*
 *.egg-info
 repo
 tests/assets
+samples
+__pycache__
+work_dir

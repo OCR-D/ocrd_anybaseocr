@@ -12,7 +12,7 @@
 from scipy import ones, zeros, array, where, shape, ndimage, sum, logical_or, logical_and
 import copy
 from pylab import unique
-from ocrolib.toplevel import *
+import ocrolib
 from ParserAnybaseocr import *
 
 

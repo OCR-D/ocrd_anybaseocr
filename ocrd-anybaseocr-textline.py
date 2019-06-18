@@ -5,7 +5,6 @@ from pylab import median, imread
 
 from PIL import Image
 import ocrolib
-from ocrolib import hocr
 from re import split
 from ParserAnybaseocr import *
 
