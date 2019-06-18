@@ -1,0 +1,123 @@
+{
+  "git_url": "https://github.com/syedsaqibbukhari/docanalysis",
+  "version": "0.0.1",
+  "tools": {
+    "ocrd-anybaseocr-bin": {
+      "executable": "ocrd-anybaseocr-bin",
+      "categories": [
+        "image preprocessing"
+      ],
+      "steps": [
+        "preprocessing/optimization/binarization"
+      ],
+      "description": "Binarize OCR-D images with anyBaseOCR",
+      "parameters": {
+        "threshold": {"type": "float", "default": 0.5, "description": "determines lightness threshold"},
+        "zoom": {"type": "float", "default": 0.5, "description": "zoom for page background estimation, smaller value is faster"},
+        "escale": {"type": "float", "default": 1.0, "description": "scale for estimating a mask over the text region"},
+        "bignore": {"type": "float", "default": 0.1, "description": "ignore this much of the border for threshold estimation"},
+        "perc": {"type": "int", "default": 80, "description": "percentage for filters"},
+        "range": {"type": "int", "default": 20, "description": "range for filters"},
+        "lo": {"type": "int", "default": 5, "description": "percentile for black estimation"},
+        "hi": {"type": "int", "default": 90, "description": "percentile for white estimation"},
+        "debug": {"type": "int", "default": 0, "enum": [0, 1], "description": "display intermediate results"},
+        "nocheck": {"type": "str", "action": "store_true", "default": 0, "description": "disable error checking on inputs"},
+        "gray": {"type": "str", "action": "store_true", "default": 0, "description": "force grayscale processing even if image seems binary"},
+        "parallel": {"type": "int", "default": 0, "description": "indicates single processing of images"}
+      }
+    },
+    "ocrd-anybaseocr-deskew": {
+      "executable": "ocrd-anybaseocr-deskew",
+      "categories": [
+        "Layout analysis"
+      ],
+      "steps": [
+        "layout/analysis/correction"
+      ],
+      "description": "Corrected OCR-D skewed images with anyBaseOCR",
+      "parameters": {
+        "threshold": {"type": "float", "default": 0.5, "description": "determines lightness threshold"},
+        "bignore": {"type": "float", "default": 0.1, "description": "ignore this much of the border for threshold estimation"},
+        "escale": {"type": "float", "default": 1.0, "description": "scale for estimating a mask over the text region"},
+        "lo": {"type": "int", "default": 5, "description": "percentile for black estimation"},
+        "hi": {"type": "int", "default": 90, "description": "percentile for white estimation"},
+        "maxskew": {"type": "float", "default": 2.0, "description": "skew angle estimation parameters (degrees)"},
+        "skewsteps": {"type": "int", "default": 8, "description": "steps for skew angle estimation (per degree)"},
+        "debug": {"type": "int", "default": 0, "enum": [0, 1], "description": "display intermediate results"},
+        "parallel": {"type": "int", "default": 0, "description": "indicates single processing of images"}
+      }
+    },
+    "ocrd-anybaseocr-crop": {
+      "executable": "ocrd-anybaseocr-crop",
+      "categories": ["noise removal"],
+      "steps": [
+        "detect-boundary/crop-area"
+      ],
+      "description": "crop page boundary area with anyBaseOCR",
+      "parameters": {
+        "maxRularArea": {"type": "float", "default": 0.3, "description": "maximum area of the image to predict as a ruler"},
+        "minRularArea": {"type": "float", "default": 0.01, "description": "minimum area of the image to predict as a ruler"},
+        "rulerWidth": {"type": "float", "default": 0.95, "description": "probability of ruler width of the image"},
+        "positionLeft": {"type": "float", "default": 0.4, "description": "find ruler position in the left side of the image area"},
+        "positionRight": {"type": "float", "default": 0.6, "description": "find ruler position in the right side of the image area"},
+        "positionBelow": {"type": "float", "default": 0.75, "description": "find ruler position in the bottom side of the image area"},
+        "rulerRatioMax": {"type": "float", "default": 10.0, "description": "propable ruler width/height ratio"},
+        "rulerRatioMin": {"type": "float", "default": 3.0, "description": "probable ruler height/width ratio"},
+        "colSeparator": {"type": "float", "default": 25.0, "description": "columns distance in case of content hold multiple columns"},
+        "minArea": {"type": "float", "default": 0.05, "description": "check whether it is text area or noise area"}
+      }
+    },
+    "ocrd-anybaseocr-dewarp": {
+      "executable": "ocrd-anybaseocr-dewarp",
+      "categories": ["Layout analysis"],
+      "steps": [
+        "layout/analysis/dewarp"
+      ],
+      "description": "dewarp image with anyBaseOCR",
+      "parameters": {
+        "gpu_id": {"type": "int", "default": 0, "description": "gpu id"},
+        "imgresize": {"type": "str", "default": "resize_and_crop", "description": "run on original size image"},
+        "resizeHeight": {"type": "int", "default": 1024, "description": "resized image height"},
+        "resizeWidth": {"type": "int", "default": 1024, "description": "resized image width"}
+      }
+    },
+    "ocrd-anybaseocr-tiseg": {
+      "executable": "ocrd-anybaseocr-tiseg",
+      "categories": ["text non-text segment"],
+      "steps": [
+        "text/non-text/segment"
+      ],
+      "description": "separate text and non-text part with anyBaseOCR",
+      "parameters": {
+      }
+    },
+    "ocrd-anybaseocr-textline": {
+      "executable": "ocrd-anybaseocr-textline",
+      "categories": ["text line segment"],
+      "steps": [
+        "text/line/segment"
+      ],
+      "description": "separate each text line",
+      "parameters": {        
+        "minscale": {"type": "float", "default": 12.0, "description": "minimum scale permitted"},
+        "maxlines": {"type": "float", "default": 300, "description": "non-standard scaling of horizontal parameters"},
+        "scale": {"type": "float", "default": 0.0, "description": "the basic scale of the document (roughly, xheight) 0=automatic"},
+        "hscale": {"type": "float", "default": 1.0, "description": "non-standard scaling of horizontal parameters"},
+        "vscale": {"type": "float", "default": 1.7, "description": "non-standard scaling of vertical parameters"},
+        "threshold": {"type": "float", "default": 0.2, "description": "baseline threshold"},
+        "noise": {"type": "int", "default": 8, "description": "noise threshold for removing small components from lines"},
+        "usegauss": {"type": "str", "action": "store_true", "default": 0, "description": "use gaussian instead of uniform"},
+        "maxseps": {"type": "int", "default": 2, "description": "maximum black column separators"},
+        "sepwiden": {"type": "int", "default": 10, "description": "widen black separators (to account for warping)"},
+        "blackseps": {"type": "str", "action": "store_true", "default": 0, "description": "also check for black column separators"},
+        "maxcolseps": {"type": "int", "default": 2, "description": "maximum # whitespace column separators"},
+        "csminaspect": {"type": "float", "default": 1.1, "description": "minimum aspect ratio for column separators"},
+        "csminheight": {"type": "float", "default": 6.5, "description": "minimum column height (units=scale)"},
+        "pad": {"type": "int", "default": 3, "description": "padding for extracted lines"},
+        "expand": {"type": "int", "default": 3, "description": "expand mask for grayscale extraction"},
+        "parallel": {"type": "int", "default": 0, "description": "number of CPUs to use"},
+        "libpath": {"type": "str", "default": ".", "description": "Library Path for C Executables"}
+      }
+    }
+  }
+}

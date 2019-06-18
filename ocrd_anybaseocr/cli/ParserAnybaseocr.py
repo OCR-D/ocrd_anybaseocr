@@ -3,6 +3,7 @@ import argparse,os,os.path,glob
 import json
 from xml.dom import minidom
 import ocrolib
+import sys
 
 class ParserAnybaseocr:
 	def __init__(self):
