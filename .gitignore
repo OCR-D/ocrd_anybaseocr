@@ -11,3 +11,13 @@ tests/assets
 samples
 __pycache__
 work_dir
+
+# Packages
+dist
+build
+lib
+lib64
+
+**/ocrd_anybaseocr/samples
+**/ocrd_anybaseocr/work_dir
+**/ocrd_anybaseocr/OCR-D-*

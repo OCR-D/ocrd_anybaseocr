@@ -17,8 +17,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'ocrd-anybaseocr-tiseg = ocrd_anybaseocr.cli.ocrd_anybaseocr_tiseg:main',
-            'ocrd-anybaseocr-textline = ocrd_anybaseocr.cli.ocrd_anybaseocr_textline:main'            
+            'ocrd-anybaseocr-tiseg = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_tiseg'
+            #'ocrd-anybaseocr-textline = ocrd_anybaseocr.cli.ocrd_anybaseocr_textline:main'            
         ]
     },
 )

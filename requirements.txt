@@ -1,1 +1,4 @@
-ocrd-fork-ocropy >= 1.4.0a1
+ocrd-fork-ocropy >= 1.4.0a3
+click
+ocrd==1.0.0b10
+ocrd_modelfactory

@@ -13,54 +13,70 @@ from scipy import ones, zeros, array, where, shape, ndimage, sum, logical_or, lo
 import copy
 from pylab import unique
 import ocrolib
-import argparse
-import sys
-import os
-import os.path
-import sys
 import json
 
-from ..utils import parseXML, write_to_xml, print_info, parse_params_with_defaults, print_error
+
 from ..constants import OCRD_TOOL
 
+from ocrd import Processor
+from ocrd_modelfactory import page_from_file
+from ocrd_models.ocrd_page import to_xml
+from ocrd_utils import concat_padded
 
-class OcrdAnybaseocrTiseg:
+class OcrdAnybaseocrTiseg(Processor):
 
-	def __init__(self, param):
-		self.param = param
+	def __init__(self, *args, **kwargs):
+		kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-tiseg']
+		kwargs['version'] = OCRD_TOOL['version']
+		super(OcrdAnybaseocrTiseg, self).__init__(*args, **kwargs)
 
 
-	def textimageseg(self,imf):
-		# I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png
-		I = ocrolib.read_image_binary(imf)
-		I = 1-I/I.max()
-		rows,cols = I.shape
-		
-		# Generate Mask and Seed Images
-		Imask, Iseed = self.pixMorphSequence_mask_seed_fill_holes(I)
-		
-		# Iseedfill: Union of Mask and Seed Images
-		Iseedfill = self.pixSeedfillBinary(Imask, Iseed)
-		
-		# Dilation of Iseedfill
-		mask = ones((3,3))
-		Iseedfill = ndimage.binary_dilation(Iseedfill,mask)
-		
-		# Expansion of Iseedfill to become equal in size of I
-		Iseedfill = self.expansion(Iseedfill,(rows,cols))
-		
-		# Write  Text and Non-Text images
-		image_part = array((1-I*Iseedfill),dtype=int)
-		image_part[0,0] = 0 # only for visualisation purpose
-		text_part = array((1-I*(1-Iseedfill)),dtype=int)
-		text_part[0,0] = 0 # only for visualisation purpose
-		
-		base,_ = ocrolib.allsplitext(imf)
-		ocrolib.write_image_binary(base + ".ts.png",text_part)
-		
-		#imf_image = imf[0:-3] + "nts.png"
-		ocrolib.write_image_binary(base + ".nts.png",image_part)
-		return [base + ".ts.png", base + ".nts.png"]
+	def process(self):
+		for (n, input_file) in enumerate(self.input_files):            
+			pcgts = page_from_file(self.workspace.download_file(input_file))                
+			binImg = self.workspace.resolve_image_as_pil(pcgts.get_Page().imageFilename)
+			# I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png
+			fname = pcgts.get_Page().imageFilename        
+			I = ocrolib.read_image_binary(fname)
+			I = 1-I/I.max()
+			rows,cols = I.shape
+			
+			# Generate Mask and Seed Images
+			Imask, Iseed = self.pixMorphSequence_mask_seed_fill_holes(I)
+			
+			# Iseedfill: Union of Mask and Seed Images
+			Iseedfill = self.pixSeedfillBinary(Imask, Iseed)
+			
+			# Dilation of Iseedfill
+			mask = ones((3,3))
+			Iseedfill = ndimage.binary_dilation(Iseedfill,mask)
+			
+			# Expansion of Iseedfill to become equal in size of I
+			Iseedfill = self.expansion(Iseedfill,(rows,cols))
+			
+			# Write  Text and Non-Text images
+			image_part = array((1-I*Iseedfill),dtype=int)
+			image_part[0,0] = 0 # only for visualisation purpose
+			text_part = array((1-I*(1-Iseedfill)),dtype=int)
+			text_part[0,0] = 0 # only for visualisation purpose
+			
+			base,_ = ocrolib.allsplitext(fname)
+			ocrolib.write_image_binary(base + ".ts.png",text_part)
+			
+			#imf_image = imf[0:-3] + "nts.png"
+			ocrolib.write_image_binary(base + ".nts.png",image_part)
+			#return [base + ".ts.png", base + ".nts.png"]
+			ID = concat_padded(self.output_file_grp, n)
+			self.workspace.add_file(
+                ID=ID,
+                file_grp=self.output_file_grp,
+                pageId=input_file.pageId,
+                mimetype="image/png",
+                url=base + ".ts.png",
+                local_filename='%s/%s' % (self.output_file_grp, ID),
+                content=to_xml(pcgts).encode('utf-8')
+                )
+            
 		
 	def pixMorphSequence_mask_seed_fill_holes(self, I):
 		Imask = self.reduction_T_1(I)
@@ -123,65 +139,3 @@ class OcrdAnybaseocrTiseg:
 		A[:,2:4*c:4] = A[:,0:4*c:4]
 		A[:,3:4*c:4] = A[:,0:4*c:4]
 		return A
-
-
-def main():
-	parser = argparse.ArgumentParser("""
-	Image Text and Non-Text detection.
-
-			  
-			ocrd-anybaseocr-tiseg -m -m (mets input file path) -I (input-file-grp name) -O (output-file-grp name) -w (Working directory)
-
-	This is a compute-intensive text/non-text segmentation method that works on degraded
-	and historical book pages.
-	""")
-
-	parser.add_argument('-p', '--parameter', type=str, help="Parameter file location")
-	parser.add_argument('-w', '--work', type=str, help="Working directory location", default=".")
-	parser.add_argument('-I', '--Input', default=None, help="Input directory")
-	parser.add_argument('-O', '--Output', default=None, help="output directory")
-	parser.add_argument('-m', '--mets', default=None, help="METs input file")
-	parser.add_argument('-o', '--OutputMets', default=None, help="METs output file")
-	parser.add_argument('-g', '--group', default=None, help="METs image group id")
-	args = parser.parse_args()
-
-	param = {}
-	if args.parameter:
-		with open(args.parameter, 'r') as param_file:
-			param = json.loads(param_file.read())
-	param = parse_params_with_defaults(param, OCRD_TOOL['tools']['ocrd-anybaseocr-tiseg']['parameters'])
-
-	if not args.mets or not args.Input or not args.Output or not args.work:
-		parser.print_help()
-		print("Example: ocrd_anyBaseOCR_tigseg -m (mets input file path) -I (input-file-grp name) -O (output-file-grp name) -w (Working directory)")
-		sys.exit(0)
-
-	if args.work:
-		if not os.path.exists(args.work):
-			os.mkdir(args.work)
-	
-	tiseg = OcrdAnybaseocrTiseg(param)
-	files = parseXML(args.mets, args.Input)
-	fnames = []
-	block=[]
-	for i, fname in enumerate(files):
-		print_info("Process file: %s" % str(fname))
-		block.append(tiseg.textimageseg(str(fname)))
-		fnames.append(str(fname))
-	write_to_xml(fnames, args.mets, args.Output, args.OutputMets, args.work)
-
-	'''
-	if __name__ == "__main__":
-		myparser = ParserAnybaseocr()
-		args = myparser.get_parameters('ocrd-anybaseocr-tiseg')
-
-		files = myparser.parseXML()
-		fname = []
-		block=[]
-		for i, f in enumerate(files):
-			myparser.print_info("Process file: %s" % str(f))
-			block.append(textimageseg(str(f)))
-			fname.append(str(f))
-
-		myparser.write_to_xml(fname, 'TS_', block)
-'''
