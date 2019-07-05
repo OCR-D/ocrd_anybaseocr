@@ -1,0 +1,81 @@
+{
+    "justi_abhandlung01_1758_0133": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                181,
+                241
+            ],
+            "all_y_values": [
+                311,
+                1067
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                181,
+                241
+            ],
+            "all_y_values": [
+                1067,
+                1161
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                283,
+                586
+            ],
+            "all_y_values": [
+                196,
+                1163
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                712,
+                2116
+            ],
+            "all_y_values": [
+                197,
+                1168
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                716,
+                961
+            ],
+            "all_y_values": [
+                1172,
+                1328
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2121,
+                2173
+            ],
+            "all_y_values": [
+                677,
+                1039
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2121,
+                2173
+            ],
+            "all_y_values": [
+                1039,
+                1168
+            ]
+        }
+    ]
+}

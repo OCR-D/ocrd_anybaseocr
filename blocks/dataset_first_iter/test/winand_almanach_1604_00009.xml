@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
+    <Metadata>
+        <Creator>OCR-D</Creator>
+        <Created>2016-11-16T19:16:49.715+01:00</Created>
+        <LastChange>2017-03-02T13:39:42.108+01:00</LastChange>
+        
+    </Metadata>
+    <Page imageFilename="winand_almanach_1604_00009.tif" imageWidth="1428" imageHeight="1653" type="title">
+        <PrintSpace>
+            <Coords points="90,153 901,161 909,1202 98,1194"/>
+        </PrintSpace>
+        <ReadingOrder>
+            <OrderedGroup id="ro_1488458382184" caption="Regions reading order">
+                <RegionRefIndexed index="0" regionRef="region_1488457886153_439"/>
+                <RegionRefIndexed index="1" regionRef="region_1479320464719_201"/>
+                <RegionRefIndexed index="2" regionRef="region_1479320492477_203"/>
+                <RegionRefIndexed index="4" regionRef="region_1479320510658_204"/>
+                <RegionRefIndexed index="5" regionRef="region_1479320522570_205"/>
+            </OrderedGroup>
+        </ReadingOrder>
+        <TextRegion type="drop-capital" id="region_1488457886153_439" custom="readingOrder {index:0;} structure {type:drop-capital;}">
+            <Coords points="105,203 339,203 339,453 105,453"/>
+            <TextLine id="line_1488457896905_440" custom="readingOrder {index:0;}">
+                <Coords points="114,214 336,214 336,443 114,443"/>
+                <Baseline points="122,428 321,429"/>
+                <Word id="word_1488457911967_441" custom="readingOrder {index:0;}">
+                    <Coords points="120,222 330,222 330,442 120,442"/>
+                    <TextEquiv>
+                        <Unicode>A</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>A</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextEquiv>
+                <Unicode>A</Unicode>
+            </TextEquiv>
+        </TextRegion>
+        <TextRegion type="heading" id="region_1479320464719_201" custom="readingOrder {index:1;} structure {type:heading;}">
+            <Coords points="349,199 848,202 848,478 349,475"/>
+            <TextLine id="line_1479320633961_217" custom="readingOrder {index:0;}">
+                <Coords points="351,212 832,217 827,383 346,378"/>
+                <Baseline points="356,351 861,360"/>
+                <Word id="word_1479320697722_227" custom="readingOrder {index:0;}">
+                    <Coords points="356,216 827,216 824,385 353,385"/>
+                    <TextEquiv>
+                        <Unicode>lmanach</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>Almanach</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_1479320575518_208" custom="readingOrder {index:1;}">
+                <Coords points="359,388 840,388 841,466 360,466"/>
+                <Baseline points="361,454 830,461"/>
+                <Word id="word_1479320701467_228" custom="readingOrder {index:0;}">
+                    <Coords points="357,387 522,388 522,460 357,459"/>
+                    <TextEquiv>
+                        <Unicode>vnde</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320704720_229" custom="readingOrder {index:1;}">
+                    <Coords points="542,389 833,389 832,474 541,474"/>
+                    <TextEquiv>
+                        <Unicode>Practica/</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>unde Practica/</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextEquiv>
+                <Unicode>Almanach
+unde Practica/</Unicode>
+            </TextEquiv>
+        </TextRegion>
+        <TextRegion type="heading" id="region_1479320492477_203" custom="readingOrder {index:2;} structure {type:heading;}">
+            <Coords points="100,469 842,469 843,679 101,679"/>
+            <TextLine id="line_1479320587201_209" custom="readingOrder {index:0;}">
+                <Coords points="102,475 846,475 847,539 103,539"/>
+                <Baseline points="95,527 845,534"/>
+                <Word id="word_1479320707744_230" custom="readingOrder {index:0;}">
+                    <Coords points="104,481 201,481 202,531 105,531"/>
+                    <TextEquiv>
+                        <Unicode>van</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320711906_231" custom="readingOrder {index:1;}">
+                    <Coords points="208,478 400,478 400,529 208,529"/>
+                    <TextEquiv>
+                        <Unicode>wedder/</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320716929_232" custom="readingOrder {index:2;}">
+                    <Coords points="404,475 583,475 582,530 403,530"/>
+                    <TextEquiv>
+                        <Unicode>winde/</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320721096_233" custom="readingOrder {index:3;}">
+                    <Coords points="590,477 733,477 733,535 590,535"/>
+                    <TextEquiv>
+                        <Unicode>gluͤcke</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320724111_234" custom="readingOrder {index:4;}">
+                    <Coords points="739,487 837,487 837,538 739,538"/>
+                    <TextEquiv>
+                        <Unicode>vnd</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>van wedder/ winde/ gluͤcke vnd</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_1479320644300_219" custom="readingOrder {index:1;}">
+                <Coords points="104,536 829,543 829,593 104,586"/>
+                <Baseline points="103,589 828,596"/>
+                <Word id="word_1479916062705_88" custom="readingOrder {index:0;}">
+                    <Coords points="102,541 276,541 275,591 101,591"/>
+                    <TextEquiv>
+                        <Unicode>vngluͤcke</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916066340_89" custom="readingOrder {index:1;}">
+                    <Coords points="281,541 351,541 352,592 282,592"/>
+                    <TextEquiv>
+                        <Unicode>tho</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916069179_90" custom="readingOrder {index:2;}">
+                    <Coords points="359,550 474,550 473,586 358,586"/>
+                    <TextEquiv>
+                        <Unicode>water</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916071300_91" custom="readingOrder {index:3;}">
+                    <Coords points="481,545 561,545 561,588 481,588"/>
+                    <TextEquiv>
+                        <Unicode>vnd</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916074030_92" custom="readingOrder {index:4;}">
+                    <Coords points="566,546 631,546 631,596 566,596"/>
+                    <TextEquiv>
+                        <Unicode>tho</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916078554_93" custom="readingOrder {index:5;}">
+                    <Coords points="642,546 771,546 771,591 642,591"/>
+                    <TextEquiv>
+                        <Unicode>Lande/</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916081846_94" custom="readingOrder {index:6;}">
+                    <Coords points="778,552 825,552 825,592 778,592"/>
+                    <TextEquiv>
+                        <Unicode>vp</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>vngluͤcke tho water und tho lande/ vp</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_1479320597373_211" custom="readingOrder {index:2;}">
+                <Coords points="156,596 761,596 761,638 156,638"/>
+                <Baseline points="165,629 756,631"/>
+                <Word id="word_1479320756047_242" custom="readingOrder {index:0;}">
+                    <Coords points="158,600 222,600 223,632 159,632"/>
+                    <TextEquiv>
+                        <Unicode>dat</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320765566_244" custom="readingOrder {index:1;}">
+                    <Coords points="234,599 333,598 329,636 230,637"/>
+                    <TextEquiv>
+                        <Unicode>Jahr</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916135214_95" custom="readingOrder {index:2;}">
+                    <Coords points="338,598 393,598 393,631 338,631"/>
+                    <TextEquiv>
+                        <Unicode>na</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916136945_96" custom="readingOrder {index:3;}">
+                    <Coords points="396,596 462,595 462,627 396,628"/>
+                    <TextEquiv>
+                        <Unicode>der</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916140096_97" custom="readingOrder {index:4;}">
+                    <Coords points="466,597 631,597 631,629 466,629"/>
+                    <TextEquiv>
+                        <Unicode>Gebordt</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916143606_98" custom="readingOrder {index:5;}">
+                    <Coords points="639,599 753,600 753,641 639,640"/>
+                    <TextEquiv>
+                        <Unicode>vnſers</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>dat Jahr na der Gebordt vnſers</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_1479320601664_212" custom="readingOrder {index:3;}">
+                <Coords points="268,639 654,639 654,682 268,682"/>
+                <Baseline points="266,674 651,677"/>
+                <Word id="word_1479916165790_99" custom="readingOrder {index:0;}">
+                    <Coords points="272,636 411,637 411,677 272,676"/>
+                    <TextEquiv>
+                        <Unicode>HEren</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916169159_100" custom="readingOrder {index:1;}">
+                    <Coords points="414,638 499,638 499,680 414,680"/>
+                    <TextEquiv>
+                        <Unicode>Jeſu</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320786170_250" custom="readingOrder {index:2;}">
+                    <Coords points="505,639 649,639 649,677 505,677"/>
+                    <TextEquiv>
+                        <Unicode>Chriſti</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>HEren Jeſu Chriſti</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextEquiv>
+                <Unicode>van wedder/ winde/ gluͤcke vnd
+vngluͤcke tho water und tho lande/ vp
+dat Jahr na der Gebordt vnſers
+HEren Jeſu Chriſti</Unicode>
+            </TextEquiv>
+        </TextRegion>
+        <SeparatorRegion id="Separator_1488457966669_442" custom="readingOrder {index:3;}">
+            <Coords points="113,697 811,697 811,681 113,681"/>
+        </SeparatorRegion>
+        <TextRegion id="region_1479320510658_204" custom="readingOrder {index:4;}">
+            <Coords points="205,699 762,699 762,792 205,792"/>
+            <TextLine id="line_1479320606253_213" custom="readingOrder {index:0;}">
+                <Coords points="219,702 687,702 687,782 219,782"/>
+                <Baseline points="226,772 689,776"/>
+                <Word id="word_1479320790159_251" custom="readingOrder {index:0;}">
+                    <Coords points="222,703 329,703 328,776 220,775"/>
+                    <TextEquiv>
+                        <Unicode>M.</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320792481_252" custom="readingOrder {index:1;}">
+                    <Coords points="358,704 538,704 538,780 358,780"/>
+                    <TextEquiv>
+                        <Unicode>DC.</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320795654_253" custom="readingOrder {index:2;}">
+                    <Coords points="582,711 684,711 685,780 583,780"/>
+                    <TextEquiv>
+                        <Unicode>V.</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>M. DC. V.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextEquiv>
+                <Unicode>M. DC. V.</Unicode>
+            </TextEquiv>
+        </TextRegion>
+        <TextRegion id="region_1479320522570_205" custom="readingOrder {index:5;}">
+            <Coords points="133,795 847,795 847,937 133,937"/>
+            <TextLine id="line_1479320609999_214" custom="readingOrder {index:0;}">
+                <Coords points="323,796 603,796 603,846 323,846"/>
+                <Baseline points="327,835 595,835"/>
+                <Word id="word_1479320800179_254" custom="readingOrder {index:0;}">
+                    <Coords points="323,797 489,797 488,842 322,842"/>
+                    <TextEquiv>
+                        <Unicode>Geſtellet</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479320803208_255" custom="readingOrder {index:1;}">
+                    <Coords points="496,802 601,802 601,845 496,845"/>
+                    <TextEquiv>
+                        <Unicode>doͤrch</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>Geſtellet doͤrch</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_1479320675078_225" custom="readingOrder {index:1;}">
+                <Coords points="132,848 791,851 793,886 134,883"/>
+                <Baseline points="137,881 777,883"/>
+                <Word id="word_1479916250981_101" custom="readingOrder {index:0;}">
+                    <Coords points="132,848 454,848 454,884 132,884"/>
+                    <TextEquiv>
+                        <Unicode>HENRICUM</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916256301_102" custom="readingOrder {index:1;}">
+                    <Coords points="465,849 790,849 791,889 466,889"/>
+                    <TextEquiv>
+                        <Unicode>WINANDUM</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>HENRICUM WINANDUM</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextLine id="line_1479320618299_216" custom="readingOrder {index:2;}">
+                <Coords points="253,893 643,893 643,949 253,949"/>
+                <Baseline points="258,935 643,936"/>
+                <Word id="word_1479320814995_258" custom="readingOrder {index:0;}">
+                    <Coords points="268,897 445,896 445,939 268,940"/>
+                    <TextEquiv>
+                        <Unicode>Ofenburg.</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916278546_103" custom="readingOrder {index:1;}">
+                    <Coords points="459,900 584,900 584,935 459,935"/>
+                    <TextEquiv>
+                        <Unicode>Scholæ</Unicode>
+                    </TextEquiv>
+                </Word>
+                <Word id="word_1479916281573_104" custom="readingOrder {index:2;}">
+                    <Coords points="592,901 638,901 638,938 592,938"/>
+                    <TextEquiv>
+                        <Unicode>L.</Unicode>
+                    </TextEquiv>
+                </Word>
+                <TextEquiv>
+                    <Unicode>Ofenbrug. Scholæ L.</Unicode>
+                </TextEquiv>
+            </TextLine>
+            <TextEquiv>
+                <Unicode>Geſtellet doͤrch
+HENRICUM WINANDUM
+Ofenbrug. Scholæ L.</Unicode>
+            </TextEquiv>
+        </TextRegion>
+        <GraphicRegion id="Graphic_1480927973057_1" custom="readingOrder {index:6;}">
+            <Coords points="103,967 811,967 811,1162 103,1162"/>
+        </GraphicRegion>
+    </Page>
+</PcGts>

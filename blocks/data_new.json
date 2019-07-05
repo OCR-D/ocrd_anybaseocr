@@ -1,0 +1,7394 @@
+{
+    "werenfels_basilensis_1692_00013": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                422,
+                1493,
+                1493,
+                422
+            ],
+            "all_y_values": [
+                318,
+                318,
+                1508,
+                1508
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                1443,
+                1707,
+                1707,
+                1443
+            ],
+            "all_y_values": [
+                1502,
+                1502,
+                1690,
+                1690
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1493,
+                2363,
+                2363,
+                1493
+            ],
+            "all_y_values": [
+                316,
+                316,
+                320,
+                320
+            ]
+        },
+        {
+            "block_class": "footer",
+            "all_x_values": [
+                2344,
+                2387,
+                2387,
+                2344
+            ],
+            "all_y_values": [
+                1036,
+                1036,
+                1086,
+                1086
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2331,
+                2381,
+                2381,
+                2331
+            ],
+            "all_y_values": [
+                1423,
+                1423,
+                1519,
+                1519
+            ]
+        }
+    ],
+    "praetorius_syntagma02_1619_0032": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                165,
+                254,
+                254,
+                165
+            ],
+            "all_y_values": [
+                250,
+                250,
+                1583,
+                1583
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1853,
+                1940,
+                1940,
+                1853
+            ],
+            "all_y_values": [
+                1129,
+                1129,
+                1755,
+                1755
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2072,
+                2100,
+                2100,
+                2072
+            ],
+            "all_y_values": [
+                215,
+                215,
+                732,
+                732
+            ]
+        }
+    ],
+    "wecker_kochbuch_1598_0007": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                77,
+                131,
+                131,
+                77
+            ],
+            "all_y_values": [
+                51,
+                51,
+                787,
+                787
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                288,
+                444,
+                444,
+                288
+            ],
+            "all_y_values": [
+                56,
+                56,
+                209,
+                209
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                301,
+                438,
+                438,
+                301
+            ],
+            "all_y_values": [
+                207,
+                207,
+                209,
+                209
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                501,
+                867,
+                867,
+                501
+            ],
+            "all_y_values": [
+                64,
+                64,
+                796,
+                796
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                896,
+                991,
+                991,
+                896
+            ],
+            "all_y_values": [
+                371,
+                371,
+                590,
+                590
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1020,
+                1117,
+                1117,
+                1020
+            ],
+            "all_y_values": [
+                435,
+                435,
+                799,
+                799
+            ]
+        }
+    ],
+    "wecker_kochbuch_1598_0029": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                89,
+                116,
+                116,
+                89
+            ],
+            "all_y_values": [
+                298,
+                298,
+                489,
+                489
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                95,
+                122,
+                122,
+                95
+            ],
+            "all_y_values": [
+                759,
+                759,
+                801,
+                801
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                126,
+                594,
+                594,
+                126
+            ],
+            "all_y_values": [
+                40,
+                40,
+                792,
+                792
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                601,
+                639,
+                639,
+                601
+            ],
+            "all_y_values": [
+                169,
+                169,
+                675,
+                675
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                643,
+                742,
+                742,
+                643
+            ],
+            "all_y_values": [
+                46,
+                46,
+                131,
+                131
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                646,
+                743,
+                743,
+                646
+            ],
+            "all_y_values": [
+                48,
+                48,
+                130,
+                130
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                844,
+                884,
+                884,
+                844
+            ],
+            "all_y_values": [
+                242,
+                242,
+                543,
+                543
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                886,
+                984,
+                984,
+                886
+            ],
+            "all_y_values": [
+                52,
+                52,
+                149,
+                149
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                888,
+                988,
+                988,
+                888
+            ],
+            "all_y_values": [
+                146,
+                146,
+                149,
+                149
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1175,
+                1209,
+                1209,
+                1175
+            ],
+            "all_y_values": [
+                471,
+                471,
+                508,
+                508
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1174,
+                1209,
+                1209,
+                1174
+            ],
+            "all_y_values": [
+                705,
+                705,
+                801,
+                801
+            ]
+        }
+    ],
+    "wecker_kochbuch_1598_0017": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                80,
+                108,
+                108,
+                80
+            ],
+            "all_y_values": [
+                346,
+                346,
+                532,
+                532
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                76,
+                105,
+                105,
+                76
+            ],
+            "all_y_values": [
+                773,
+                773,
+                807,
+                807
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                117,
+                151,
+                151,
+                117
+            ],
+            "all_y_values": [
+                334,
+                334,
+                513,
+                513
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                164,
+                263,
+                263,
+                164
+            ],
+            "all_y_values": [
+                50,
+                50,
+                133,
+                133
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                157,
+                266,
+                266,
+                157
+            ],
+            "all_y_values": [
+                131,
+                131,
+                135,
+                135
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                460,
+                506,
+                506,
+                460
+            ],
+            "all_y_values": [
+                190,
+                190,
+                672,
+                672
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                536,
+                642,
+                642,
+                536
+            ],
+            "all_y_values": [
+                53,
+                53,
+                124,
+                124
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                535,
+                565,
+                565,
+                535
+            ],
+            "all_y_values": [
+                124,
+                124,
+                798,
+                798
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1161,
+                1205,
+                1205,
+                1161
+            ],
+            "all_y_values": [
+                488,
+                488,
+                581,
+                581
+            ]
+        }
+    ],
+    "valentinus_occulta_1603_0005": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                80,
+                142,
+                142,
+                80
+            ],
+            "all_y_values": [
+                393,
+                393,
+                605,
+                605
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                167,
+                1281,
+                1281,
+                167
+            ],
+            "all_y_values": [
+                60,
+                60,
+                931,
+                931
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1444,
+                1531,
+                1531,
+                1444
+            ],
+            "all_y_values": [
+                466,
+                466,
+                925,
+                925
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1531,
+                1613,
+                1613,
+                1531
+            ],
+            "all_y_values": [
+                466,
+                466,
+                785,
+                785
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1531,
+                1613,
+                1613,
+                1531
+            ],
+            "all_y_values": [
+                785,
+                785,
+                925,
+                925
+            ]
+        }
+    ],
+    "valentinus_occulta_1603_0004": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                83,
+                141,
+                141,
+                83
+            ],
+            "all_y_values": [
+                433,
+                433,
+                646,
+                646
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                167,
+                1562,
+                1562,
+                167
+            ],
+            "all_y_values": [
+                88,
+                88,
+                994,
+                994
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1562,
+                1612,
+                1612,
+                1562
+            ],
+            "all_y_values": [
+                915,
+                915,
+                986,
+                986
+            ]
+        }
+    ],
+    "winand_almanach_1604_00044": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                194,
+                1181,
+                1181,
+                194
+            ],
+            "all_y_values": [
+                562,
+                562,
+                1308,
+                1308
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1183,
+                1221,
+                1221,
+                1183
+            ],
+            "all_y_values": [
+                1199,
+                1199,
+                1303,
+                1303
+            ]
+        }
+    ],
+    "sachs_drey_1553_0011": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                201,
+                893,
+                893,
+                201
+            ],
+            "all_y_values": [
+                141,
+                141,
+                1114,
+                1114
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                911,
+                1004,
+                1004,
+                911
+            ],
+            "all_y_values": [
+                451,
+                451,
+                899,
+                899
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1023,
+                2185,
+                2185,
+                1023
+            ],
+            "all_y_values": [
+                120,
+                120,
+                1185,
+                1185
+            ]
+        }
+    ],
+    "praetorius_syntagma02_1619_0132": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                85,
+                136,
+                136,
+                85
+            ],
+            "all_y_values": [
+                202,
+                202,
+                297,
+                297
+            ]
+        },
+        {
+            "block_class": "header",
+            "all_x_values": [
+                85,
+                136,
+                136,
+                85
+            ],
+            "all_y_values": [
+                297,
+                297,
+                1449,
+                1449
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                182,
+                253,
+                253,
+                182
+            ],
+            "all_y_values": [
+                197,
+                197,
+                1888,
+                1888
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                358,
+                551,
+                551,
+                358
+            ],
+            "all_y_values": [
+                194,
+                194,
+                1889,
+                1889
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                779,
+                852,
+                852,
+                779
+            ],
+            "all_y_values": [
+                359,
+                359,
+                1891,
+                1891
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                955,
+                1085,
+                1085,
+                955
+            ],
+            "all_y_values": [
+                200,
+                200,
+                1892,
+                1892
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1078,
+                1140,
+                1140,
+                1078
+            ],
+            "all_y_values": [
+                323,
+                323,
+                1892,
+                1892
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1553,
+                1813,
+                1813,
+                1553
+            ],
+            "all_y_values": [
+                204,
+                204,
+                1893,
+                1893
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2223,
+                2365,
+                2365,
+                2223
+            ],
+            "all_y_values": [
+                211,
+                211,
+                1894,
+                1894
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2354,
+                2404,
+                2404,
+                2354
+            ],
+            "all_y_values": [
+                1811,
+                1811,
+                1897,
+                1897
+            ]
+        }
+    ],
+    "praetorius_syntagma02_1619_0020": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                114,
+                200,
+                200,
+                114
+            ],
+            "all_y_values": [
+                916,
+                916,
+                1188,
+                1188
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                606,
+                673,
+                673,
+                606
+            ],
+            "all_y_values": [
+                878,
+                878,
+                1204,
+                1204
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                738,
+                1023,
+                1023,
+                738
+            ],
+            "all_y_values": [
+                239,
+                239,
+                1866,
+                1866
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1016,
+                1128,
+                1128,
+                1016
+            ],
+            "all_y_values": [
+                672,
+                672,
+                1427,
+                1427
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1129,
+                1197,
+                1197,
+                1129
+            ],
+            "all_y_values": [
+                743,
+                743,
+                1364,
+                1364
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1196,
+                1268,
+                1268,
+                1196
+            ],
+            "all_y_values": [
+                393,
+                393,
+                1866,
+                1866
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1494,
+                1542,
+                1542,
+                1494
+            ],
+            "all_y_values": [
+                232,
+                232,
+                1044,
+                1044
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1802,
+                1930,
+                1930,
+                1802
+            ],
+            "all_y_values": [
+                229,
+                229,
+                1038,
+                1038
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2096,
+                2289,
+                2289,
+                2096
+            ],
+            "all_y_values": [
+                228,
+                228,
+                1033,
+                1033
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1494,
+                1556,
+                1556,
+                1494
+            ],
+            "all_y_values": [
+                1044,
+                1044,
+                1852,
+                1852
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1619,
+                1687,
+                1687,
+                1619
+            ],
+            "all_y_values": [
+                1173,
+                1173,
+                1749,
+                1749
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1688,
+                1741,
+                1741,
+                1688
+            ],
+            "all_y_values": [
+                1058,
+                1058,
+                1792,
+                1792
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1741,
+                1802,
+                1802,
+                1741
+            ],
+            "all_y_values": [
+                1058,
+                1058,
+                1792,
+                1792
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1802,
+                1930,
+                1930,
+                1802
+            ],
+            "all_y_values": [
+                1038,
+                1038,
+                1838,
+                1838
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1924,
+                1990,
+                1990,
+                1924
+            ],
+            "all_y_values": [
+                1036,
+                1036,
+                1786,
+                1786
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1985,
+                2053,
+                2053,
+                1985
+            ],
+            "all_y_values": [
+                1035,
+                1035,
+                1785,
+                1785
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2040,
+                2112,
+                2112,
+                2040
+            ],
+            "all_y_values": [
+                1056,
+                1056,
+                1852,
+                1852
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2214,
+                2289,
+                2289,
+                2214
+            ],
+            "all_y_values": [
+                1033,
+                1033,
+                1756,
+                1756
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2278,
+                2367,
+                2367,
+                2278
+            ],
+            "all_y_values": [
+                1032,
+                1032,
+                1596,
+                1596
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2345,
+                2412,
+                2412,
+                2345
+            ],
+            "all_y_values": [
+                1654,
+                1654,
+                1849,
+                1849
+            ]
+        }
+    ],
+    "valentinus_occulta_1603_0031": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                68,
+                125,
+                125,
+                68
+            ],
+            "all_y_values": [
+                424,
+                424,
+                499,
+                499
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                132,
+                1451,
+                1451,
+                132
+            ],
+            "all_y_values": [
+                43,
+                43,
+                897,
+                897
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1450,
+                1507,
+                1507,
+                1450
+            ],
+            "all_y_values": [
+                757,
+                757,
+                898,
+                898
+            ]
+        }
+    ],
+    "rehtmeyer_syndicus_1710_00006": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                975,
+                984,
+                984,
+                975
+            ],
+            "all_y_values": [
+                827,
+                827,
+                2287,
+                2287
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1765,
+                1766,
+                1766,
+                1765
+            ],
+            "all_y_values": [
+                822,
+                822,
+                2292,
+                2292
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1766,
+                2208,
+                2208,
+                1766
+            ],
+            "all_y_values": [
+                822,
+                822,
+                2292,
+                2292
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2210,
+                2261,
+                2261,
+                2210
+            ],
+            "all_y_values": [
+                2248,
+                2248,
+                2283,
+                2283
+            ]
+        }
+    ],
+    "winand_almanach_1604_00009": [
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                203,
+                453,
+                453,
+                203
+            ],
+            "all_y_values": [
+                105,
+                105,
+                339,
+                339
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                199,
+                478,
+                478,
+                199
+            ],
+            "all_y_values": [
+                349,
+                349,
+                848,
+                848
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                469,
+                679,
+                679,
+                469
+            ],
+            "all_y_values": [
+                100,
+                100,
+                842,
+                842
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                699,
+                792,
+                792,
+                699
+            ],
+            "all_y_values": [
+                205,
+                205,
+                762,
+                762
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                795,
+                937,
+                937,
+                795
+            ],
+            "all_y_values": [
+                133,
+                133,
+                847,
+                847
+            ]
+        }
+    ],
+    "reinkingk_policey_1653_0017": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                258,
+                319,
+                319,
+                258
+            ],
+            "all_y_values": [
+                607,
+                607,
+                1063,
+                1063
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                312,
+                2094,
+                2094,
+                312
+            ],
+            "all_y_values": [
+                196,
+                196,
+                1488,
+                1488
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                929,
+                2198,
+                2198,
+                929
+            ],
+            "all_y_values": [
+                1490,
+                1490,
+                1492,
+                1492
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                2299,
+                2374,
+                2374,
+                2299
+            ],
+            "all_y_values": [
+                341,
+                341,
+                1087,
+                1087
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2091,
+                2148,
+                2148,
+                2091
+            ],
+            "all_y_values": [
+                1383,
+                1383,
+                1486,
+                1486
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2088,
+                2159,
+                2159,
+                2088
+            ],
+            "all_y_values": [
+                990,
+                990,
+                1187,
+                1187
+            ]
+        }
+    ],
+    "schmuck_symbolon_1620_00005": [
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                482,
+                651,
+                651,
+                482
+            ],
+            "all_y_values": [
+                761,
+                761,
+                1598,
+                1598
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                642,
+                738,
+                738,
+                642
+            ],
+            "all_y_values": [
+                971,
+                971,
+                1347,
+                1347
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                738,
+                994,
+                994,
+                738
+            ],
+            "all_y_values": [
+                409,
+                409,
+                1596,
+                1596
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                987,
+                1587,
+                1587,
+                987
+            ],
+            "all_y_values": [
+                607,
+                607,
+                1340,
+                1340
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                1589,
+                1741,
+                1741,
+                1589
+            ],
+            "all_y_values": [
+                482,
+                482,
+                1562,
+                1562
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                1765,
+                1862,
+                1862,
+                1765
+            ],
+            "all_y_values": [
+                728,
+                728,
+                1326,
+                1326
+            ]
+        }
+    ],
+    "praetorius_syntagma02_1619_0031": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                214,
+                359,
+                359,
+                214
+            ],
+            "all_y_values": [
+                115,
+                115,
+                1754,
+                1754
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                866,
+                1025,
+                1025,
+                866
+            ],
+            "all_y_values": [
+                318,
+                318,
+                1541,
+                1541
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1335,
+                1402,
+                1402,
+                1335
+            ],
+            "all_y_values": [
+                681,
+                681,
+                1143,
+                1143
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                1576,
+                1837,
+                1837,
+                1576
+            ],
+            "all_y_values": [
+                102,
+                102,
+                365,
+                365
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1594,
+                1833,
+                1833,
+                1594
+            ],
+            "all_y_values": [
+                364,
+                364,
+                366,
+                366
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2352,
+                2407,
+                2407,
+                2352
+            ],
+            "all_y_values": [
+                1594,
+                1594,
+                1723,
+                1723
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2335,
+                2363,
+                2363,
+                2335
+            ],
+            "all_y_values": [
+                937,
+                937,
+                1012,
+                1012
+            ]
+        }
+    ],
+    "zinck_autorArcanii_1703_00003": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                354,
+                1264,
+                1264,
+                354
+            ],
+            "all_y_values": [
+                113,
+                113,
+                1979,
+                1979
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1636,
+                1648,
+                1648,
+                1636
+            ],
+            "all_y_values": [
+                108,
+                108,
+                1977,
+                1977
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1648,
+                2246,
+                2246,
+                1648
+            ],
+            "all_y_values": [
+                108,
+                108,
+                1974,
+                1974
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2264,
+                2563,
+                2563,
+                2264
+            ],
+            "all_y_values": [
+                138,
+                138,
+                1973,
+                1973
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2542,
+                2614,
+                2614,
+                2542
+            ],
+            "all_y_values": [
+                977,
+                977,
+                1131,
+                1131
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2555,
+                2622,
+                2622,
+                2555
+            ],
+            "all_y_values": [
+                1873,
+                1873,
+                1976,
+                1976
+            ]
+        }
+    ],
+    "reinkingk_policey_1653_0139": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                331,
+                417,
+                417,
+                331
+            ],
+            "all_y_values": [
+                394,
+                394,
+                1336,
+                1336
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                331,
+                417,
+                417,
+                331
+            ],
+            "all_y_values": [
+                1336,
+                1336,
+                1425,
+                1425
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                425,
+                826,
+                826,
+                425
+            ],
+            "all_y_values": [
+                148,
+                148,
+                1437,
+                1437
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                930,
+                1042,
+                1042,
+                930
+            ],
+            "all_y_values": [
+                488,
+                488,
+                1108,
+                1108
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                1231,
+                1395,
+                1395,
+                1231
+            ],
+            "all_y_values": [
+                161,
+                161,
+                346,
+                346
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1224,
+                1285,
+                1285,
+                1224
+            ],
+            "all_y_values": [
+                345,
+                345,
+                1438,
+                1438
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1480,
+                1954,
+                1954,
+                1480
+            ],
+            "all_y_values": [
+                159,
+                159,
+                1439,
+                1439
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1937,
+                2054,
+                2054,
+                1937
+            ],
+            "all_y_values": [
+                223,
+                223,
+                1391,
+                1391
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2301,
+                2364,
+                2364,
+                2301
+            ],
+            "all_y_values": [
+                1241,
+                1241,
+                1443,
+                1443
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2305,
+                2360,
+                2360,
+                2305
+            ],
+            "all_y_values": [
+                916,
+                916,
+                971,
+                971
+            ]
+        }
+    ],
+    "vespucci_insule_1506_0009": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                99,
+                1969,
+                1969,
+                99
+            ],
+            "all_y_values": [
+                100,
+                100,
+                1280,
+                1280
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1921,
+                2005,
+                2005,
+                1921
+            ],
+            "all_y_values": [
+                1103,
+                1103,
+                1250,
+                1250
+            ]
+        }
+    ],
+    "praetorius_syntagma02_1619_0021": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                127,
+                143,
+                143,
+                127
+            ],
+            "all_y_values": [
+                185,
+                185,
+                492,
+                492
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                239,
+                259,
+                259,
+                239
+            ],
+            "all_y_values": [
+                752,
+                752,
+                1005,
+                1005
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                248,
+                317,
+                317,
+                248
+            ],
+            "all_y_values": [
+                182,
+                182,
+                974,
+                974
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                311,
+                331,
+                331,
+                311
+            ],
+            "all_y_values": [
+                185,
+                185,
+                577,
+                577
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                369,
+                379,
+                379,
+                369
+            ],
+            "all_y_values": [
+                185,
+                185,
+                489,
+                489
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                430,
+                453,
+                453,
+                430
+            ],
+            "all_y_values": [
+                185,
+                185,
+                478,
+                478
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                491,
+                506,
+                506,
+                491
+            ],
+            "all_y_values": [
+                183,
+                183,
+                528,
+                528
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                565,
+                641,
+                641,
+                565
+            ],
+            "all_y_values": [
+                285,
+                285,
+                873,
+                873
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                655,
+                719,
+                719,
+                655
+            ],
+            "all_y_values": [
+                180,
+                180,
+                970,
+                970
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                780,
+                853,
+                853,
+                780
+            ],
+            "all_y_values": [
+                173,
+                173,
+                968,
+                968
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                847,
+                911,
+                911,
+                847
+            ],
+            "all_y_values": [
+                174,
+                174,
+                972,
+                972
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                966,
+                983,
+                983,
+                966
+            ],
+            "all_y_values": [
+                163,
+                163,
+                476,
+                476
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1029,
+                1096,
+                1096,
+                1029
+            ],
+            "all_y_values": [
+                164,
+                164,
+                965,
+                965
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1152,
+                1177,
+                1177,
+                1152
+            ],
+            "all_y_values": [
+                163,
+                163,
+                475,
+                475
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1213,
+                1236,
+                1236,
+                1213
+            ],
+            "all_y_values": [
+                164,
+                164,
+                502,
+                502
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1276,
+                1340,
+                1340,
+                1276
+            ],
+            "all_y_values": [
+                160,
+                160,
+                964,
+                964
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1338,
+                1408,
+                1408,
+                1338
+            ],
+            "all_y_values": [
+                160,
+                160,
+                955,
+                955
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1403,
+                1424,
+                1424,
+                1403
+            ],
+            "all_y_values": [
+                160,
+                160,
+                478,
+                478
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1459,
+                1483,
+                1483,
+                1459
+            ],
+            "all_y_values": [
+                144,
+                144,
+                535,
+                535
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1521,
+                1591,
+                1591,
+                1521
+            ],
+            "all_y_values": [
+                151,
+                151,
+                954,
+                954
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                130,
+                148,
+                148,
+                130
+            ],
+            "all_y_values": [
+                1014,
+                1014,
+                1418,
+                1418
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                187,
+                215,
+                215,
+                187
+            ],
+            "all_y_values": [
+                1005,
+                1005,
+                1315,
+                1315
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                256,
+                267,
+                267,
+                256
+            ],
+            "all_y_values": [
+                1012,
+                1012,
+                1396,
+                1396
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                317,
+                331,
+                331,
+                317
+            ],
+            "all_y_values": [
+                1084,
+                1084,
+                1432,
+                1432
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                379,
+                444,
+                444,
+                379
+            ],
+            "all_y_values": [
+                989,
+                989,
+                1808,
+                1808
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                438,
+                503,
+                503,
+                438
+            ],
+            "all_y_values": [
+                1009,
+                1009,
+                1811,
+                1811
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                500,
+                507,
+                507,
+                500
+            ],
+            "all_y_values": [
+                1011,
+                1011,
+                1614,
+                1614
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                556,
+                573,
+                573,
+                556
+            ],
+            "all_y_values": [
+                1011,
+                1011,
+                1614,
+                1614
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                621,
+                688,
+                688,
+                621
+            ],
+            "all_y_values": [
+                1010,
+                1010,
+                1798,
+                1798
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                744,
+                756,
+                756,
+                744
+            ],
+            "all_y_values": [
+                1007,
+                1007,
+                1472,
+                1472
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                800,
+                813,
+                813,
+                800
+            ],
+            "all_y_values": [
+                1007,
+                1007,
+                1472,
+                1472
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                870,
+                925,
+                925,
+                870
+            ],
+            "all_y_values": [
+                1670,
+                1670,
+                1796,
+                1796
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                924,
+                926,
+                926,
+                924
+            ],
+            "all_y_values": [
+                1009,
+                1009,
+                1386,
+                1386
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                983,
+                1009,
+                1009,
+                983
+            ],
+            "all_y_values": [
+                989,
+                989,
+                1272,
+                1272
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1048,
+                1112,
+                1112,
+                1048
+            ],
+            "all_y_values": [
+                1004,
+                1004,
+                1797,
+                1797
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1695,
+                1857,
+                1857,
+                1695
+            ],
+            "all_y_values": [
+                658,
+                658,
+                1381,
+                1381
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1867,
+                1917,
+                1917,
+                1867
+            ],
+            "all_y_values": [
+                523,
+                523,
+                1379,
+                1379
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1941,
+                2014,
+                2014,
+                1941
+            ],
+            "all_y_values": [
+                311,
+                311,
+                1777,
+                1777
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2233,
+                2313,
+                2313,
+                2233
+            ],
+            "all_y_values": [
+                1572,
+                1572,
+                1775,
+                1775
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2246,
+                2265,
+                2265,
+                2246
+            ],
+            "all_y_values": [
+                887,
+                887,
+                988,
+                988
+            ]
+        }
+    ],
+    "silesius_seelenlust01_1657_0009": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                106,
+                198,
+                198,
+                106
+            ],
+            "all_y_values": [
+                408,
+                408,
+                722,
+                722
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                197,
+                357,
+                357,
+                197
+            ],
+            "all_y_values": [
+                106,
+                106,
+                1047,
+                1047
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                353,
+                620,
+                620,
+                353
+            ],
+            "all_y_values": [
+                110,
+                110,
+                1041,
+                1041
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                928,
+                992,
+                992,
+                928
+            ],
+            "all_y_values": [
+                485,
+                485,
+                664,
+                664
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1294,
+                1433,
+                1433,
+                1294
+            ],
+            "all_y_values": [
+                114,
+                114,
+                1049,
+                1049
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1417,
+                1510,
+                1510,
+                1417
+            ],
+            "all_y_values": [
+                281,
+                281,
+                833,
+                833
+            ]
+        }
+    ],
+    "rhegius_artzney_1529_0014": [
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                212,
+                270,
+                270,
+                212
+            ],
+            "all_y_values": [
+                124,
+                124,
+                276,
+                276
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                157,
+                420,
+                420,
+                157
+            ],
+            "all_y_values": [
+                276,
+                276,
+                1134,
+                1134
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                440,
+                606,
+                606,
+                440
+            ],
+            "all_y_values": [
+                358,
+                358,
+                1064,
+                1064
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                624,
+                1561,
+                1561,
+                624
+            ],
+            "all_y_values": [
+                286,
+                286,
+                1131,
+                1131
+            ]
+        }
+    ],
+    "rhegius_artzney_1529_0019": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                117,
+                606,
+                606,
+                117
+            ],
+            "all_y_values": [
+                117,
+                117,
+                965,
+                965
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                998,
+                1533,
+                1533,
+                998
+            ],
+            "all_y_values": [
+                128,
+                128,
+                971,
+                971
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                1129,
+                1212,
+                1212,
+                1129
+            ],
+            "all_y_values": [
+                989,
+                989,
+                1138,
+                1138
+            ]
+        }
+    ],
+    "schmuck_symbolon_1620_00001": [
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                468,
+                1363,
+                1363,
+                468
+            ],
+            "all_y_values": [
+                319,
+                319,
+                1524,
+                1524
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                1906,
+                2044,
+                2044,
+                1906
+            ],
+            "all_y_values": [
+                535,
+                535,
+                1297,
+                1297
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                2059,
+                2111,
+                2111,
+                2059
+            ],
+            "all_y_values": [
+                722,
+                722,
+                1093,
+                1093
+            ]
+        }
+    ],
+    "valentinus_occulta_1603_0032": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                89,
+                145,
+                145,
+                89
+            ],
+            "all_y_values": [
+                541,
+                541,
+                631,
+                631
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                146,
+                1538,
+                1538,
+                146
+            ],
+            "all_y_values": [
+                174,
+                174,
+                1044,
+                1044
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1516,
+                1576,
+                1576,
+                1516
+            ],
+            "all_y_values": [
+                916,
+                916,
+                1044,
+                1044
+            ]
+        }
+    ],
+    "silesius_seelenlust01_1657_0021": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                122,
+                160,
+                160,
+                122
+            ],
+            "all_y_values": [
+                907,
+                907,
+                939,
+                939
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                159,
+                218,
+                218,
+                159
+            ],
+            "all_y_values": [
+                319,
+                319,
+                670,
+                670
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                419,
+                458,
+                458,
+                419
+            ],
+            "all_y_values": [
+                364,
+                364,
+                650,
+                650
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                807,
+                930,
+                930,
+                807
+            ],
+            "all_y_values": [
+                112,
+                112,
+                952,
+                952
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1264,
+                1359,
+                1359,
+                1264
+            ],
+            "all_y_values": [
+                91,
+                91,
+                899,
+                899
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                1478,
+                1641,
+                1641,
+                1478
+            ],
+            "all_y_values": [
+                28,
+                28,
+                187,
+                187
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1530,
+                1599,
+                1599,
+                1530
+            ],
+            "all_y_values": [
+                193,
+                193,
+                710,
+                710
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1666,
+                1741,
+                1741,
+                1666
+            ],
+            "all_y_values": [
+                499,
+                499,
+                936,
+                936
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1666,
+                1741,
+                1741,
+                1666
+            ],
+            "all_y_values": [
+                443,
+                443,
+                499,
+                499
+            ]
+        }
+    ],
+    "rollenhagen_reysen_1603_0012": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                262,
+                324,
+                324,
+                262
+            ],
+            "all_y_values": [
+                1079,
+                1079,
+                1147,
+                1147
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                316,
+                1795,
+                1795,
+                316
+            ],
+            "all_y_values": [
+                489,
+                489,
+                1759,
+                1759
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1785,
+                2081,
+                2081,
+                1785
+            ],
+            "all_y_values": [
+                517,
+                517,
+                1765,
+                1765
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2065,
+                2221,
+                2221,
+                2065
+            ],
+            "all_y_values": [
+                519,
+                519,
+                1763,
+                1763
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2205,
+                2275,
+                2275,
+                2205
+            ],
+            "all_y_values": [
+                1676,
+                1676,
+                1771,
+                1771
+            ]
+        }
+    ],
+    "pinder_epiphanie_1506_0045": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                229,
+                306,
+                306,
+                229
+            ],
+            "all_y_values": [
+                255,
+                255,
+                1177,
+                1177
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                229,
+                306,
+                306,
+                229
+            ],
+            "all_y_values": [
+                1177,
+                1177,
+                1346,
+                1346
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                298,
+                535,
+                535,
+                298
+            ],
+            "all_y_values": [
+                127,
+                127,
+                1410,
+                1410
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                539,
+                624,
+                624,
+                539
+            ],
+            "all_y_values": [
+                391,
+                391,
+                1132,
+                1132
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                643,
+                1596,
+                1596,
+                643
+            ],
+            "all_y_values": [
+                112,
+                112,
+                1404,
+                1404
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                1020,
+                1119,
+                1119,
+                1020
+            ],
+            "all_y_values": [
+                1409,
+                1409,
+                1611,
+                1611
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1632,
+                1707,
+                1707,
+                1632
+            ],
+            "all_y_values": [
+                583,
+                583,
+                880,
+                880
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1725,
+                2179,
+                2179,
+                1725
+            ],
+            "all_y_values": [
+                107,
+                107,
+                1378,
+                1378
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2171,
+                2215,
+                2215,
+                2171
+            ],
+            "all_y_values": [
+                1212,
+                1212,
+                1323,
+                1323
+            ]
+        }
+    ],
+    "praetorius_verrichtung_1668_0026": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                202,
+                224,
+                224,
+                202
+            ],
+            "all_y_values": [
+                320,
+                320,
+                341,
+                341
+            ]
+        },
+        {
+            "block_class": "header",
+            "all_x_values": [
+                187,
+                233,
+                233,
+                187
+            ],
+            "all_y_values": [
+                486,
+                486,
+                1014,
+                1014
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                231,
+                390,
+                390,
+                231
+            ],
+            "all_y_values": [
+                316,
+                316,
+                481,
+                481
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                394,
+                935,
+                935,
+                394
+            ],
+            "all_y_values": [
+                313,
+                313,
+                1140,
+                1140
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                392,
+                837,
+                837,
+                392
+            ],
+            "all_y_values": [
+                144,
+                144,
+                313,
+                313
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                934,
+                965,
+                965,
+                934
+            ],
+            "all_y_values": [
+                144,
+                144,
+                306,
+                306
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                952,
+                1734,
+                1734,
+                952
+            ],
+            "all_y_values": [
+                311,
+                311,
+                1177,
+                1177
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                952,
+                1734,
+                1734,
+                952
+            ],
+            "all_y_values": [
+                141,
+                141,
+                311,
+                311
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1732,
+                1783,
+                1783,
+                1732
+            ],
+            "all_y_values": [
+                1083,
+                1083,
+                1133,
+                1133
+            ]
+        }
+    ],
+    "weigel_gnothi02_1618_0003": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                496,
+                502,
+                502,
+                496
+            ],
+            "all_y_values": [
+                252,
+                252,
+                991,
+                991
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1563,
+                2168,
+                2168,
+                1563
+            ],
+            "all_y_values": [
+                249,
+                249,
+                1444,
+                1444
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2168,
+                2237,
+                2237,
+                2168
+            ],
+            "all_y_values": [
+                932,
+                932,
+                1060,
+                1060
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2168,
+                2237,
+                2237,
+                2168
+            ],
+            "all_y_values": [
+                1349,
+                1349,
+                1444,
+                1444
+            ]
+        }
+    ],
+    "trota_mordtbrenner_1540_0021": [],
+    "silesius_seelenlust01_1657_0022": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                137,
+                160,
+                160,
+                137
+            ],
+            "all_y_values": [
+                217,
+                217,
+                240,
+                240
+            ]
+        },
+        {
+            "block_class": "header",
+            "all_x_values": [
+                107,
+                172,
+                172,
+                107
+            ],
+            "all_y_values": [
+                368,
+                368,
+                866,
+                866
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                158,
+                412,
+                412,
+                158
+            ],
+            "all_y_values": [
+                327,
+                327,
+                936,
+                936
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                447,
+                484,
+                484,
+                447
+            ],
+            "all_y_values": [
+                646,
+                646,
+                691,
+                691
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                883,
+                1278,
+                1278,
+                883
+            ],
+            "all_y_values": [
+                359,
+                359,
+                1014,
+                1014
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1292,
+                1696,
+                1696,
+                1292
+            ],
+            "all_y_values": [
+                365,
+                365,
+                1035,
+                1035
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1661,
+                1736,
+                1736,
+                1661
+            ],
+            "all_y_values": [
+                956,
+                956,
+                1130,
+                1130
+            ]
+        }
+    ],
+    "vespucci_insule_1506_0019": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                26,
+                630,
+                630,
+                26
+            ],
+            "all_y_values": [
+                90,
+                90,
+                1219,
+                1219
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                616,
+                715,
+                715,
+                616
+            ],
+            "all_y_values": [
+                336,
+                336,
+                911,
+                911
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                703,
+                1234,
+                1234,
+                703
+            ],
+            "all_y_values": [
+                61,
+                61,
+                1218,
+                1218
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1556,
+                1651,
+                1651,
+                1556
+            ],
+            "all_y_values": [
+                372,
+                372,
+                899,
+                899
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1639,
+                1779,
+                1779,
+                1639
+            ],
+            "all_y_values": [
+                81,
+                81,
+                1195,
+                1195
+            ]
+        }
+    ],
+    "pistoris_regiment_1506_0011": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                252,
+                1084,
+                1084,
+                252
+            ],
+            "all_y_values": [
+                316,
+                316,
+                1588,
+                1588
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1130,
+                1238,
+                1238,
+                1130
+            ],
+            "all_y_values": [
+                528,
+                528,
+                1268,
+                1268
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1388,
+                1958,
+                1958,
+                1388
+            ],
+            "all_y_values": [
+                726,
+                726,
+                1119,
+                1119
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1957,
+                2018,
+                2018,
+                1957
+            ],
+            "all_y_values": [
+                1308,
+                1308,
+                1308,
+                1308
+            ]
+        }
+    ],
+    "schmuck_symbolon_1620_00004": [
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                484,
+                1222,
+                1222,
+                484
+            ],
+            "all_y_values": [
+                844,
+                844,
+                1909,
+                1909
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                1222,
+                1576,
+                1576,
+                1222
+            ],
+            "all_y_values": [
+                871,
+                871,
+                1978,
+                1978
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                1588,
+                1903,
+                1903,
+                1588
+            ],
+            "all_y_values": [
+                844,
+                844,
+                1994,
+                1994
+            ]
+        },
+        {
+            "block_class": "unknown",
+            "all_x_values": [
+                1911,
+                2195,
+                2195,
+                1911
+            ],
+            "all_y_values": [
+                1198,
+                1198,
+                2055,
+                2055
+            ]
+        }
+    ],
+    "rhegius_artzney_1529_0007": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                121,
+                233,
+                233,
+                121
+            ],
+            "all_y_values": [
+                138,
+                138,
+                983,
+                983
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                223,
+                400,
+                400,
+                223
+            ],
+            "all_y_values": [
+                147,
+                147,
+                949,
+                949
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                414,
+                572,
+                572,
+                414
+            ],
+            "all_y_values": [
+                315,
+                315,
+                978,
+                978
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1252,
+                1520,
+                1520,
+                1252
+            ],
+            "all_y_values": [
+                145,
+                145,
+                991,
+                991
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1510,
+                1555,
+                1555,
+                1510
+            ],
+            "all_y_values": [
+                758,
+                758,
+                872,
+                872
+            ]
+        }
+    ],
+    "reinkingk_policey_1653_0144": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                239,
+                348,
+                348,
+                239
+            ],
+            "all_y_values": [
+                799,
+                799,
+                907,
+                907
+            ]
+        },
+        {
+            "block_class": "header",
+            "all_x_values": [
+                239,
+                348,
+                348,
+                239
+            ],
+            "all_y_values": [
+                907,
+                907,
+                1714,
+                1714
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                850,
+                1108,
+                1108,
+                850
+            ],
+            "all_y_values": [
+                807,
+                807,
+                2104,
+                2104
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                949,
+                1354,
+                1354,
+                949
+            ],
+            "all_y_values": [
+                626,
+                626,
+                806,
+                806
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1388,
+                1423,
+                1423,
+                1388
+            ],
+            "all_y_values": [
+                811,
+                811,
+                1038,
+                1038
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1504,
+                1603,
+                1603,
+                1504
+            ],
+            "all_y_values": [
+                1158,
+                1158,
+                1726,
+                1726
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                2041,
+                2241,
+                2241,
+                2041
+            ],
+            "all_y_values": [
+                800,
+                800,
+                934,
+                934
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2044,
+                2251,
+                2251,
+                2044
+            ],
+            "all_y_values": [
+                805,
+                805,
+                938,
+                938
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2387,
+                2440,
+                2440,
+                2387
+            ],
+            "all_y_values": [
+                1960,
+                1960,
+                2083,
+                2083
+            ]
+        }
+    ],
+    "werenfels_basilensis_1692_00020": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                478,
+                1686,
+                1686,
+                478
+            ],
+            "all_y_values": [
+                1286,
+                1286,
+                2465,
+                2465
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1686,
+                2371,
+                2371,
+                1686
+            ],
+            "all_y_values": [
+                1286,
+                1286,
+                1286,
+                1286
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2353,
+                2413,
+                2413,
+                2353
+            ],
+            "all_y_values": [
+                2265,
+                2265,
+                2475,
+                2475
+            ]
+        }
+    ],
+    "reinkingk_policey_1653_0151": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                292,
+                389,
+                389,
+                292
+            ],
+            "all_y_values": [
+                394,
+                394,
+                1357,
+                1357
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                292,
+                389,
+                389,
+                292
+            ],
+            "all_y_values": [
+                1357,
+                1357,
+                1430,
+                1430
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                374,
+                501,
+                501,
+                374
+            ],
+            "all_y_values": [
+                153,
+                153,
+                1430,
+                1430
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                478,
+                918,
+                918,
+                478
+            ],
+            "all_y_values": [
+                152,
+                152,
+                1433,
+                1433
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1035,
+                1186,
+                1186,
+                1035
+            ],
+            "all_y_values": [
+                157,
+                157,
+                1431,
+                1431
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1390,
+                1524,
+                1524,
+                1390
+            ],
+            "all_y_values": [
+                155,
+                155,
+                1429,
+                1429
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1535,
+                1783,
+                1783,
+                1535
+            ],
+            "all_y_values": [
+                158,
+                158,
+                1430,
+                1430
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1930,
+                2077,
+                2077,
+                1930
+            ],
+            "all_y_values": [
+                161,
+                161,
+                1433,
+                1433
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2057,
+                2342,
+                2342,
+                2057
+            ],
+            "all_y_values": [
+                157,
+                157,
+                1431,
+                1431
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                1482,
+                2300,
+                2300,
+                1482
+            ],
+            "all_y_values": [
+                1429,
+                1429,
+                1612,
+                1612
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2315,
+                2383,
+                2383,
+                2315
+            ],
+            "all_y_values": [
+                949,
+                949,
+                1083,
+                1083
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2312,
+                2372,
+                2372,
+                2312
+            ],
+            "all_y_values": [
+                1346,
+                1346,
+                1438,
+                1438
+            ]
+        }
+    ],
+    "silesius_seelenlust01_1657_0010": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                432,
+                506,
+                506,
+                432
+            ],
+            "all_y_values": [
+                334,
+                334,
+                834,
+                834
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                531,
+                848,
+                848,
+                531
+            ],
+            "all_y_values": [
+                128,
+                128,
+                451,
+                451
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                558,
+                877,
+                877,
+                558
+            ],
+            "all_y_values": [
+                122,
+                122,
+                455,
+                455
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1622,
+                1674,
+                1674,
+                1622
+            ],
+            "all_y_values": [
+                959,
+                959,
+                1051,
+                1051
+            ]
+        }
+    ],
+    "witzstat_buchszbaum_1540_0021": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                118,
+                176,
+                176,
+                118
+            ],
+            "all_y_values": [
+                67,
+                67,
+                526,
+                526
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                212,
+                590,
+                590,
+                212
+            ],
+            "all_y_values": [
+                79,
+                79,
+                911,
+                911
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                624,
+                832,
+                832,
+                624
+            ],
+            "all_y_values": [
+                85,
+                85,
+                914,
+                914
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1032,
+                1355,
+                1355,
+                1032
+            ],
+            "all_y_values": [
+                90,
+                90,
+                922,
+                922
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1353,
+                1417,
+                1417,
+                1353
+            ],
+            "all_y_values": [
+                681,
+                681,
+                816,
+                816
+            ]
+        }
+    ],
+    "weigel_gnothi02_1618_0112": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                296,
+                406,
+                406,
+                296
+            ],
+            "all_y_values": [
+                686,
+                686,
+                788,
+                788
+            ]
+        },
+        {
+            "block_class": "header",
+            "all_x_values": [
+                296,
+                406,
+                406,
+                296
+            ],
+            "all_y_values": [
+                1045,
+                1045,
+                1560,
+                1560
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                387,
+                505,
+                505,
+                387
+            ],
+            "all_y_values": [
+                687,
+                687,
+                1867,
+                1867
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                737,
+                1092,
+                1092,
+                737
+            ],
+            "all_y_values": [
+                682,
+                682,
+                1870,
+                1870
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1086,
+                1383,
+                1383,
+                1086
+            ],
+            "all_y_values": [
+                686,
+                686,
+                1868,
+                1868
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1374,
+                1727,
+                1727,
+                1374
+            ],
+            "all_y_values": [
+                683,
+                683,
+                1869,
+                1869
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1720,
+                2078,
+                2078,
+                1720
+            ],
+            "all_y_values": [
+                676,
+                676,
+                1861,
+                1861
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2055,
+                2152,
+                2152,
+                2055
+            ],
+            "all_y_values": [
+                682,
+                682,
+                1863,
+                1863
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2145,
+                2201,
+                2201,
+                2145
+            ],
+            "all_y_values": [
+                1761,
+                1761,
+                1852,
+                1852
+            ]
+        }
+    ],
+    "werenfels_basilensis_1692_00009": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                487,
+                528,
+                528,
+                487
+            ],
+            "all_y_values": [
+                351,
+                351,
+                1557,
+                1557
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                472,
+                604,
+                604,
+                472
+            ],
+            "all_y_values": [
+                1559,
+                1559,
+                1730,
+                1730
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                759,
+                2418,
+                2418,
+                759
+            ],
+            "all_y_values": [
+                337,
+                337,
+                338,
+                338
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2413,
+                2470,
+                2470,
+                2413
+            ],
+            "all_y_values": [
+                1055,
+                1055,
+                1156,
+                1156
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2422,
+                2459,
+                2459,
+                2422
+            ],
+            "all_y_values": [
+                1386,
+                1386,
+                1537,
+                1537
+            ]
+        }
+    ],
+    "rehtmeyer_syndicus_1710_00017": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                323,
+                514,
+                514,
+                323
+            ],
+            "all_y_values": [
+                225,
+                225,
+                1680,
+                1680
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2230,
+                2319,
+                2319,
+                2230
+            ],
+            "all_y_values": [
+                976,
+                976,
+                1068,
+                1068
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2240,
+                2324,
+                2324,
+                2240
+            ],
+            "all_y_values": [
+                1541,
+                1541,
+                1701,
+                1701
+            ]
+        }
+    ],
+    "weigel_gnothi02_1618_0016": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                321,
+                371,
+                371,
+                321
+            ],
+            "all_y_values": [
+                670,
+                670,
+                704,
+                704
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                298,
+                442,
+                442,
+                298
+            ],
+            "all_y_values": [
+                979,
+                979,
+                1518,
+                1518
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                754,
+                1390,
+                1390,
+                754
+            ],
+            "all_y_values": [
+                666,
+                666,
+                1860,
+                1860
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1396,
+                2041,
+                2041,
+                1396
+            ],
+            "all_y_values": [
+                668,
+                668,
+                1859,
+                1859
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2026,
+                2218,
+                2218,
+                2026
+            ],
+            "all_y_values": [
+                663,
+                663,
+                1852,
+                1852
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2214,
+                2270,
+                2270,
+                2214
+            ],
+            "all_y_values": [
+                1774,
+                1774,
+                1851,
+                1851
+            ]
+        }
+    ],
+    "pistoris_regiment_1506_0009": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                239,
+                565,
+                565,
+                239
+            ],
+            "all_y_values": [
+                312,
+                312,
+                1496,
+                1496
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                597,
+                1186,
+                1186,
+                597
+            ],
+            "all_y_values": [
+                316,
+                316,
+                1567,
+                1567
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1171,
+                1285,
+                1285,
+                1171
+            ],
+            "all_y_values": [
+                316,
+                316,
+                1485,
+                1485
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1273,
+                1390,
+                1390,
+                1273
+            ],
+            "all_y_values": [
+                314,
+                314,
+                1483,
+                1483
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1376,
+                1753,
+                1753,
+                1376
+            ],
+            "all_y_values": [
+                318,
+                318,
+                1493,
+                1493
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1732,
+                1854,
+                1854,
+                1732
+            ],
+            "all_y_values": [
+                641,
+                641,
+                1556,
+                1556
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1835,
+                1966,
+                1966,
+                1835
+            ],
+            "all_y_values": [
+                320,
+                320,
+                1490,
+                1490
+            ]
+        }
+    ],
+    "weigel_gnothi02_1618_0004": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                334,
+                397,
+                397,
+                334
+            ],
+            "all_y_values": [
+                1155,
+                1155,
+                1381,
+                1381
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                407,
+                2217,
+                2217,
+                407
+            ],
+            "all_y_values": [
+                621,
+                621,
+                1867,
+                1867
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2195,
+                2268,
+                2268,
+                2195
+            ],
+            "all_y_values": [
+                1563,
+                1563,
+                1818,
+                1818
+            ]
+        }
+    ],
+    "rehtmeyer_syndicus_1710_00012": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                308,
+                987,
+                987,
+                308
+            ],
+            "all_y_values": [
+                779,
+                779,
+                2237,
+                2237
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2302,
+                2372,
+                2372,
+                2302
+            ],
+            "all_y_values": [
+                2167,
+                2167,
+                2240,
+                2240
+            ]
+        }
+    ],
+    "praetorius_verrichtung_1668_0108": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                145,
+                193,
+                193,
+                145
+            ],
+            "all_y_values": [
+                342,
+                342,
+                397,
+                397
+            ]
+        },
+        {
+            "block_class": "header",
+            "all_x_values": [
+                145,
+                193,
+                193,
+                145
+            ],
+            "all_y_values": [
+                397,
+                397,
+                1049,
+                1049
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                193,
+                299,
+                299,
+                193
+            ],
+            "all_y_values": [
+                342,
+                342,
+                1049,
+                1049
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                1344,
+                1684,
+                1684,
+                1344
+            ],
+            "all_y_values": [
+                169,
+                169,
+                346,
+                346
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1318,
+                1667,
+                1667,
+                1318
+            ],
+            "all_y_values": [
+                354,
+                354,
+                1157,
+                1157
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1667,
+                1716,
+                1716,
+                1667
+            ],
+            "all_y_values": [
+                1037,
+                1037,
+                1155,
+                1155
+            ]
+        }
+    ],
+    "zinck_autorArcanii_1703_00007": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                446,
+                919,
+                919,
+                446
+            ],
+            "all_y_values": [
+                90,
+                90,
+                1917,
+                1917
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                929,
+                1305,
+                1305,
+                929
+            ],
+            "all_y_values": [
+                96,
+                96,
+                1907,
+                1907
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1285,
+                1506,
+                1506,
+                1285
+            ],
+            "all_y_values": [
+                240,
+                240,
+                1625,
+                1625
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1984,
+                1993,
+                1993,
+                1984
+            ],
+            "all_y_values": [
+                72,
+                72,
+                1927,
+                1927
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1993,
+                2634,
+                2634,
+                1993
+            ],
+            "all_y_values": [
+                72,
+                72,
+                1927,
+                1927
+            ]
+        }
+    ],
+    "silesius_seelenlust01_1657_0423": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                168,
+                253,
+                253,
+                168
+            ],
+            "all_y_values": [
+                388,
+                388,
+                656,
+                656
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                398,
+                457,
+                457,
+                398
+            ],
+            "all_y_values": [
+                486,
+                486,
+                557,
+                557
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                445,
+                566,
+                566,
+                445
+            ],
+            "all_y_values": [
+                62,
+                62,
+                159,
+                159
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                463,
+                574,
+                574,
+                463
+            ],
+            "all_y_values": [
+                156,
+                156,
+                157,
+                157
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                830,
+                902,
+                902,
+                830
+            ],
+            "all_y_values": [
+                470,
+                470,
+                553,
+                553
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                907,
+                1022,
+                1022,
+                907
+            ],
+            "all_y_values": [
+                57,
+                57,
+                986,
+                986
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1162,
+                1229,
+                1229,
+                1162
+            ],
+            "all_y_values": [
+                475,
+                475,
+                553,
+                553
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1234,
+                1287,
+                1287,
+                1234
+            ],
+            "all_y_values": [
+                59,
+                59,
+                983,
+                983
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1296,
+                1366,
+                1366,
+                1296
+            ],
+            "all_y_values": [
+                470,
+                470,
+                553,
+                553
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1368,
+                1518,
+                1518,
+                1368
+            ],
+            "all_y_values": [
+                55,
+                55,
+                980,
+                980
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1683,
+                1721,
+                1721,
+                1683
+            ],
+            "all_y_values": [
+                869,
+                869,
+                976,
+                976
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1674,
+                1718,
+                1718,
+                1674
+            ],
+            "all_y_values": [
+                451,
+                451,
+                550,
+                550
+            ]
+        }
+    ],
+    "praetorius_verrichtung_1668_0110": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                145,
+                193,
+                193,
+                145
+            ],
+            "all_y_values": [
+                344,
+                344,
+                392,
+                392
+            ]
+        },
+        {
+            "block_class": "header",
+            "all_x_values": [
+                154,
+                202,
+                202,
+                154
+            ],
+            "all_y_values": [
+                519,
+                519,
+                1007,
+                1007
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                199,
+                295,
+                295,
+                199
+            ],
+            "all_y_values": [
+                348,
+                348,
+                1122,
+                1122
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                736,
+                816,
+                816,
+                736
+            ],
+            "all_y_values": [
+                610,
+                610,
+                888,
+                888
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                911,
+                1048,
+                1048,
+                911
+            ],
+            "all_y_values": [
+                352,
+                352,
+                483,
+                483
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                909,
+                1052,
+                1052,
+                909
+            ],
+            "all_y_values": [
+                486,
+                486,
+                487,
+                487
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1710,
+                1764,
+                1764,
+                1710
+            ],
+            "all_y_values": [
+                1006,
+                1006,
+                1144,
+                1144
+            ]
+        }
+    ],
+    "reinkingk_policey_1653_0016": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                279,
+                344,
+                344,
+                279
+            ],
+            "all_y_values": [
+                1182,
+                1182,
+                1654,
+                1654
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2045,
+                2062,
+                2062,
+                2045
+            ],
+            "all_y_values": [
+                825,
+                825,
+                2106,
+                2106
+            ]
+        },
+        {
+            "block_class": "marginalia",
+            "all_x_values": [
+                344,
+                2134,
+                2134,
+                344
+            ],
+            "all_y_values": [
+                620,
+                620,
+                779,
+                779
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2034,
+                2108,
+                2108,
+                2034
+            ],
+            "all_y_values": [
+                1984,
+                1984,
+                2112,
+                2112
+            ]
+        }
+    ],
+    "praetorius_syntagma02_1619_0011": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                123,
+                276,
+                276,
+                123
+            ],
+            "all_y_values": [
+                163,
+                163,
+                1826,
+                1826
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                549,
+                827,
+                827,
+                549
+            ],
+            "all_y_values": [
+                160,
+                160,
+                1809,
+                1809
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1241,
+                1351,
+                1351,
+                1241
+            ],
+            "all_y_values": [
+                307,
+                307,
+                1806,
+                1806
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1578,
+                2126,
+                2126,
+                1578
+            ],
+            "all_y_values": [
+                157,
+                157,
+                1807,
+                1807
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2204,
+                2278,
+                2278,
+                2204
+            ],
+            "all_y_values": [
+                1241,
+                1241,
+                1819,
+                1819
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2204,
+                2278,
+                2278,
+                2204
+            ],
+            "all_y_values": [
+                1037,
+                1037,
+                1241,
+                1241
+            ]
+        }
+    ],
+    "valentinus_occulta_1603_0033": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                73,
+                132,
+                132,
+                73
+            ],
+            "all_y_values": [
+                421,
+                421,
+                487,
+                487
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                138,
+                524,
+                524,
+                138
+            ],
+            "all_y_values": [
+                28,
+                28,
+                885,
+                885
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1513,
+                1578,
+                1578,
+                1513
+            ],
+            "all_y_values": [
+                480,
+                480,
+                568,
+                568
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1508,
+                1583,
+                1583,
+                1508
+            ],
+            "all_y_values": [
+                737,
+                737,
+                893,
+                893
+            ]
+        }
+    ],
+    "praetorius_syntagma02_1619_0017": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                108,
+                199,
+                199,
+                108
+            ],
+            "all_y_values": [
+                99,
+                99,
+                1701,
+                1701
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                509,
+                821,
+                821,
+                509
+            ],
+            "all_y_values": [
+                93,
+                93,
+                392,
+                392
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                512,
+                827,
+                827,
+                512
+            ],
+            "all_y_values": [
+                397,
+                397,
+                399,
+                399
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1672,
+                2060,
+                2060,
+                1672
+            ],
+            "all_y_values": [
+                83,
+                83,
+                1708,
+                1708
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2352,
+                2411,
+                2411,
+                2352
+            ],
+            "all_y_values": [
+                1544,
+                1544,
+                1698,
+                1698
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2338,
+                2404,
+                2404,
+                2338
+            ],
+            "all_y_values": [
+                929,
+                929,
+                1078,
+                1078
+            ]
+        }
+    ],
+    "schultes_formular_1633_00015": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                216,
+                256,
+                256,
+                216
+            ],
+            "all_y_values": [
+                474,
+                474,
+                540,
+                540
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                294,
+                562,
+                562,
+                294
+            ],
+            "all_y_values": [
+                748,
+                748,
+                851,
+                851
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                625,
+                857,
+                857,
+                625
+            ],
+            "all_y_values": [
+                114,
+                114,
+                910,
+                910
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1273,
+                1274,
+                1274,
+                1273
+            ],
+            "all_y_values": [
+                109,
+                109,
+                905,
+                905
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1274,
+                1678,
+                1678,
+                1274
+            ],
+            "all_y_values": [
+                110,
+                110,
+                900,
+                900
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1673,
+                1747,
+                1747,
+                1673
+            ],
+            "all_y_values": [
+                786,
+                786,
+                894,
+                894
+            ]
+        }
+    ],
+    "schmuck_symbolon_1620_00003": [
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                514,
+                653,
+                653,
+                514
+            ],
+            "all_y_values": [
+                354,
+                354,
+                470,
+                470
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                493,
+                1659,
+                1659,
+                493
+            ],
+            "all_y_values": [
+                361,
+                361,
+                1554,
+                1554
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                1772,
+                1923,
+                1923,
+                1772
+            ],
+            "all_y_values": [
+                373,
+                373,
+                463,
+                463
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1760,
+                2144,
+                2144,
+                1760
+            ],
+            "all_y_values": [
+                359,
+                359,
+                365,
+                365
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2118,
+                2201,
+                2201,
+                2118
+            ],
+            "all_y_values": [
+                1405,
+                1405,
+                1547,
+                1547
+            ]
+        }
+    ],
+    "trota_mordtbrenner_1540_0011": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                319,
+                438,
+                438,
+                319
+            ],
+            "all_y_values": [
+                233,
+                233,
+                1259,
+                1259
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                485,
+                549,
+                549,
+                485
+            ],
+            "all_y_values": [
+                236,
+                236,
+                942,
+                942
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                593,
+                759,
+                759,
+                593
+            ],
+            "all_y_values": [
+                236,
+                236,
+                1259,
+                1259
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                811,
+                876,
+                876,
+                811
+            ],
+            "all_y_values": [
+                235,
+                235,
+                877,
+                877
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                914,
+                973,
+                973,
+                914
+            ],
+            "all_y_values": [
+                234,
+                234,
+                1258,
+                1258
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1132,
+                1245,
+                1245,
+                1132
+            ],
+            "all_y_values": [
+                232,
+                232,
+                1258,
+                1258
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1294,
+                1356,
+                1356,
+                1294
+            ],
+            "all_y_values": [
+                233,
+                233,
+                777,
+                777
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1401,
+                1455,
+                1455,
+                1401
+            ],
+            "all_y_values": [
+                238,
+                238,
+                1046,
+                1046
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1505,
+                1567,
+                1567,
+                1505
+            ],
+            "all_y_values": [
+                235,
+                235,
+                766,
+                766
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1608,
+                1835,
+                1835,
+                1608
+            ],
+            "all_y_values": [
+                237,
+                237,
+                1258,
+                1258
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1882,
+                1939,
+                1939,
+                1882
+            ],
+            "all_y_values": [
+                319,
+                319,
+                898,
+                898
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1989,
+                2047,
+                2047,
+                1989
+            ],
+            "all_y_values": [
+                234,
+                234,
+                792,
+                792
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2046,
+                2106,
+                2106,
+                2046
+            ],
+            "all_y_values": [
+                891,
+                891,
+                1036,
+                1036
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2046,
+                2106,
+                2106,
+                2046
+            ],
+            "all_y_values": [
+                1036,
+                1036,
+                1257,
+                1257
+            ]
+        }
+    ],
+    "pistoris_regiment_1506_0010": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                253,
+                1974,
+                1974,
+                253
+            ],
+            "all_y_values": [
+                174,
+                174,
+                1355,
+                1355
+            ]
+        }
+    ],
+    "praetorius_verrichtung_1668_0025": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                148,
+                196,
+                196,
+                148
+            ],
+            "all_y_values": [
+                392,
+                392,
+                596,
+                596
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                161,
+                191,
+                191,
+                161
+            ],
+            "all_y_values": [
+                485,
+                485,
+                509,
+                509
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                356,
+                420,
+                420,
+                356
+            ],
+            "all_y_values": [
+                284,
+                284,
+                729,
+                729
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                465,
+                599,
+                599,
+                465
+            ],
+            "all_y_values": [
+                218,
+                218,
+                788,
+                788
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                661,
+                714,
+                714,
+                661
+            ],
+            "all_y_values": [
+                374,
+                374,
+                658,
+                658
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                703,
+                775,
+                775,
+                703
+            ],
+            "all_y_values": [
+                105,
+                105,
+                917,
+                917
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                823,
+                1034,
+                1034,
+                823
+            ],
+            "all_y_values": [
+                108,
+                108,
+                316,
+                316
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                830,
+                1031,
+                1031,
+                830
+            ],
+            "all_y_values": [
+                308,
+                308,
+                323,
+                323
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1692,
+                1749,
+                1749,
+                1692
+            ],
+            "all_y_values": [
+                492,
+                492,
+                816,
+                816
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1692,
+                1749,
+                1749,
+                1692
+            ],
+            "all_y_values": [
+                816,
+                816,
+                925,
+                925
+            ]
+        }
+    ],
+    "trota_mordtbrenner_1540_0013": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                245,
+                423,
+                423,
+                245
+            ],
+            "all_y_values": [
+                169,
+                169,
+                1190,
+                1190
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                465,
+                695,
+                695,
+                465
+            ],
+            "all_y_values": [
+                170,
+                170,
+                1194,
+                1194
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                785,
+                1086,
+                1086,
+                785
+            ],
+            "all_y_values": [
+                425,
+                425,
+                1195,
+                1195
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1341,
+                1568,
+                1568,
+                1341
+            ],
+            "all_y_values": [
+                471,
+                471,
+                1209,
+                1209
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1726,
+                1902,
+                1902,
+                1726
+            ],
+            "all_y_values": [
+                179,
+                179,
+                1212,
+                1212
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1944,
+                2006,
+                2006,
+                1944
+            ],
+            "all_y_values": [
+                941,
+                941,
+                1209,
+                1209
+            ]
+        }
+    ],
+    "rollenhagen_reysen_1603_0011": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                273,
+                341,
+                341,
+                273
+            ],
+            "all_y_values": [
+                859,
+                859,
+                916,
+                916
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                337,
+                488,
+                488,
+                337
+            ],
+            "all_y_values": [
+                455,
+                455,
+                1363,
+                1363
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                868,
+                927,
+                927,
+                868
+            ],
+            "all_y_values": [
+                767,
+                767,
+                999,
+                999
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                951,
+                1073,
+                1073,
+                951
+            ],
+            "all_y_values": [
+                491,
+                491,
+                1281,
+                1281
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                1079,
+                1425,
+                1425,
+                1079
+            ],
+            "all_y_values": [
+                260,
+                260,
+                611,
+                611
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1090,
+                1435,
+                1435,
+                1090
+            ],
+            "all_y_values": [
+                613,
+                613,
+                616,
+                616
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2089,
+                2242,
+                2242,
+                2089
+            ],
+            "all_y_values": [
+                261,
+                261,
+                1514,
+                1514
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2233,
+                2302,
+                2302,
+                2233
+            ],
+            "all_y_values": [
+                933,
+                933,
+                1203,
+                1203
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2233,
+                2302,
+                2302,
+                2233
+            ],
+            "all_y_values": [
+                1203,
+                1203,
+                1512,
+                1512
+            ]
+        }
+    ],
+    "praetorius_verrichtung_1668_0109": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                177,
+                220,
+                220,
+                177
+            ],
+            "all_y_values": [
+                364,
+                364,
+                851,
+                851
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                177,
+                220,
+                220,
+                177
+            ],
+            "all_y_values": [
+                851,
+                851,
+                898,
+                898
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                227,
+                920,
+                920,
+                227
+            ],
+            "all_y_values": [
+                103,
+                103,
+                926,
+                926
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                957,
+                1061,
+                1061,
+                957
+            ],
+            "all_y_values": [
+                110,
+                110,
+                901,
+                901
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                1698,
+                1750,
+                1750,
+                1698
+            ],
+            "all_y_values": [
+                498,
+                498,
+                606,
+                606
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1698,
+                1744,
+                1744,
+                1698
+            ],
+            "all_y_values": [
+                756,
+                756,
+                898,
+                898
+            ]
+        }
+    ],
+    "zinck_autorArcanii_1703_00001": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                194,
+                294,
+                294,
+                194
+            ],
+            "all_y_values": [
+                739,
+                739,
+                1383,
+                1383
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                315,
+                531,
+                531,
+                315
+            ],
+            "all_y_values": [
+                636,
+                636,
+                1511,
+                1511
+            ]
+        },
+        {
+            "block_class": "caption",
+            "all_x_values": [
+                539,
+                636,
+                636,
+                539
+            ],
+            "all_y_values": [
+                348,
+                348,
+                1752,
+                1752
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                619,
+                706,
+                706,
+                619
+            ],
+            "all_y_values": [
+                963,
+                963,
+                1990,
+                1990
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                873,
+                987,
+                987,
+                873
+            ],
+            "all_y_values": [
+                276,
+                276,
+                1498,
+                1498
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                966,
+                2173,
+                2173,
+                966
+            ],
+            "all_y_values": [
+                123,
+                123,
+                1978,
+                1978
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                2489,
+                2570,
+                2570,
+                2489
+            ],
+            "all_y_values": [
+                972,
+                972,
+                1030,
+                1030
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2492,
+                2569,
+                2569,
+                2492
+            ],
+            "all_y_values": [
+                1769,
+                1769,
+                1971,
+                1971
+            ]
+        }
+    ],
+    "wecker_kochbuch_1598_0011": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                109,
+                141,
+                141,
+                109
+            ],
+            "all_y_values": [
+                379,
+                379,
+                481,
+                481
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                142,
+                270,
+                270,
+                142
+            ],
+            "all_y_values": [
+                55,
+                55,
+                794,
+                794
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                254,
+                357,
+                357,
+                254
+            ],
+            "all_y_values": [
+                56,
+                56,
+                792,
+                792
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                342,
+                581,
+                581,
+                342
+            ],
+            "all_y_values": [
+                57,
+                57,
+                792,
+                792
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                572,
+                1058,
+                1058,
+                572
+            ],
+            "all_y_values": [
+                60,
+                60,
+                799,
+                799
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1057,
+                1087,
+                1087,
+                1057
+            ],
+            "all_y_values": [
+                331,
+                331,
+                463,
+                463
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1078,
+                1105,
+                1105,
+                1078
+            ],
+            "all_y_values": [
+                393,
+                393,
+                575,
+                575
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1099,
+                1128,
+                1128,
+                1099
+            ],
+            "all_y_values": [
+                446,
+                446,
+                625,
+                625
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1113,
+                1157,
+                1157,
+                1113
+            ],
+            "all_y_values": [
+                624,
+                624,
+                801,
+                801
+            ]
+        }
+    ],
+    "valentinus_occulta_1603_0006": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                204,
+                510,
+                510,
+                204
+            ],
+            "all_y_values": [
+                134,
+                134,
+                1000,
+                1000
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                668,
+                966,
+                966,
+                668
+            ],
+            "all_y_values": [
+                138,
+                138,
+                442,
+                442
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                665,
+                969,
+                969,
+                665
+            ],
+            "all_y_values": [
+                447,
+                447,
+                456,
+                456
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1592,
+                1634,
+                1634,
+                1592
+            ],
+            "all_y_values": [
+                911,
+                911,
+                1001,
+                1001
+            ]
+        }
+    ],
+    "schultes_formular_1633_00002": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                218,
+                264,
+                264,
+                218
+            ],
+            "all_y_values": [
+                967,
+                967,
+                1015,
+                1015
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                463,
+                553,
+                553,
+                463
+            ],
+            "all_y_values": [
+                604,
+                604,
+                1417,
+                1417
+            ]
+        },
+        {
+            "block_class": "caption",
+            "all_x_values": [
+                548,
+                723,
+                723,
+                548
+            ],
+            "all_y_values": [
+                646,
+                646,
+                1380,
+                1380
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                745,
+                947,
+                947,
+                745
+            ],
+            "all_y_values": [
+                610,
+                610,
+                792,
+                792
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                735,
+                1697,
+                1697,
+                735
+            ],
+            "all_y_values": [
+                603,
+                603,
+                1418,
+                1418
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1680,
+                1752,
+                1752,
+                1680
+            ],
+            "all_y_values": [
+                1229,
+                1229,
+                1417,
+                1417
+            ]
+        }
+    ],
+    "praetorius_syntagma02_1619_0133": [
+        {
+            "block_class": "header",
+            "all_x_values": [
+                73,
+                136,
+                136,
+                73
+            ],
+            "all_y_values": [
+                499,
+                499,
+                1305,
+                1305
+            ]
+        },
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                83,
+                118,
+                118,
+                83
+            ],
+            "all_y_values": [
+                1697,
+                1697,
+                1768,
+                1768
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                161,
+                727,
+                727,
+                161
+            ],
+            "all_y_values": [
+                98,
+                98,
+                1773,
+                1773
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                694,
+                993,
+                993,
+                694
+            ],
+            "all_y_values": [
+                107,
+                107,
+                1773,
+                1773
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1163,
+                1225,
+                1225,
+                1163
+            ],
+            "all_y_values": [
+                261,
+                261,
+                1767,
+                1767
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1902,
+                1953,
+                1953,
+                1902
+            ],
+            "all_y_values": [
+                704,
+                704,
+                1169,
+                1169
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                2097,
+                2297,
+                2297,
+                2097
+            ],
+            "all_y_values": [
+                116,
+                116,
+                297,
+                297
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                2086,
+                2109,
+                2109,
+                2086
+            ],
+            "all_y_values": [
+                310,
+                310,
+                560,
+                560
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2298,
+                2360,
+                2360,
+                2298
+            ],
+            "all_y_values": [
+                1631,
+                1631,
+                1779,
+                1779
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2307,
+                2364,
+                2364,
+                2307
+            ],
+            "all_y_values": [
+                1122,
+                1122,
+                1254,
+                1254
+            ]
+        }
+    ],
+    "rollenhagen_reysen_1603_0007": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                276,
+                365,
+                365,
+                276
+            ],
+            "all_y_values": [
+                288,
+                288,
+                1383,
+                1383
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1051,
+                1126,
+                1126,
+                1051
+            ],
+            "all_y_values": [
+                926,
+                926,
+                1530,
+                1530
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1296,
+                1485,
+                1485,
+                1296
+            ],
+            "all_y_values": [
+                363,
+                363,
+                1431,
+                1431
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1800,
+                1942,
+                1942,
+                1800
+            ],
+            "all_y_values": [
+                508,
+                508,
+                1291,
+                1291
+            ]
+        },
+        {
+            "block_class": "drop-capital",
+            "all_x_values": [
+                1967,
+                2204,
+                2204,
+                1967
+            ],
+            "all_y_values": [
+                274,
+                274,
+                494,
+                494
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1961,
+                2219,
+                2219,
+                1961
+            ],
+            "all_y_values": [
+                1521,
+                1521,
+                1525,
+                1525
+            ]
+        },
+        {
+            "block_class": "signature-mark",
+            "all_x_values": [
+                2213,
+                2274,
+                2274,
+                2213
+            ],
+            "all_y_values": [
+                972,
+                972,
+                1217,
+                1217
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                2213,
+                2274,
+                2274,
+                2213
+            ],
+            "all_y_values": [
+                1217,
+                1217,
+                1522,
+                1522
+            ]
+        }
+    ],
+    "witzstat_buchszbaum_1540_0018": [
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                327,
+                376,
+                376,
+                327
+            ],
+            "all_y_values": [
+                149,
+                149,
+                892,
+                892
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                382,
+                434,
+                434,
+                382
+            ],
+            "all_y_values": [
+                427,
+                427,
+                648,
+                648
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                431,
+                636,
+                636,
+                431
+            ],
+            "all_y_values": [
+                158,
+                158,
+                998,
+                998
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                689,
+                741,
+                741,
+                689
+            ],
+            "all_y_values": [
+                462,
+                462,
+                632,
+                632
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                739,
+                950,
+                950,
+                739
+            ],
+            "all_y_values": [
+                160,
+                160,
+                1000,
+                1000
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1002,
+                1051,
+                1051,
+                1002
+            ],
+            "all_y_values": [
+                465,
+                465,
+                612,
+                612
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1048,
+                1259,
+                1259,
+                1048
+            ],
+            "all_y_values": [
+                163,
+                163,
+                1004,
+                1004
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1309,
+                1365,
+                1365,
+                1309
+            ],
+            "all_y_values": [
+                464,
+                464,
+                638,
+                638
+            ]
+        }
+    ],
+    "schultes_formular_1633_00014": [
+        {
+            "block_class": "page-number",
+            "all_x_values": [
+                207,
+                249,
+                249,
+                207
+            ],
+            "all_y_values": [
+                970,
+                970,
+                1036,
+                1036
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                508,
+                797,
+                797,
+                508
+            ],
+            "all_y_values": [
+                595,
+                595,
+                1411,
+                1411
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                797,
+                1084,
+                1084,
+                797
+            ],
+            "all_y_values": [
+                594,
+                594,
+                1411,
+                1411
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1084,
+                1687,
+                1687,
+                1084
+            ],
+            "all_y_values": [
+                594,
+                594,
+                594,
+                594
+            ]
+        },
+        {
+            "block_class": "catch-word",
+            "all_x_values": [
+                1667,
+                1743,
+                1743,
+                1667
+            ],
+            "all_y_values": [
+                1292,
+                1292,
+                1413,
+                1413
+            ]
+        }
+    ],
+    "sachs_drey_1553_0010": [
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                208,
+                306,
+                306,
+                208
+            ],
+            "all_y_values": [
+                818,
+                818,
+                1308,
+                1308
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                311,
+                1480,
+                1480,
+                311
+            ],
+            "all_y_values": [
+                505,
+                505,
+                1540,
+                1540
+            ]
+        },
+        {
+            "block_class": "heading",
+            "all_x_values": [
+                1514,
+                1600,
+                1600,
+                1514
+            ],
+            "all_y_values": [
+                768,
+                768,
+                1314,
+                1314
+            ]
+        },
+        {
+            "block_class": "paragraph",
+            "all_x_values": [
+                1625,
+                2108,
+                2108,
+                1625
+            ],
+            "all_y_values": [
+                505,
+                505,
+                1473,
+                1473
+            ]
+        }
+    ]
+}
