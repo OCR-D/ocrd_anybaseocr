@@ -23,6 +23,9 @@
     <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="text/non-text/segment">
       <mets:name>ocrd-anybaseocr-tiseg v0.0.1</mets:name>
     </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="text/line/segment">
+      <mets:name>ocrd-anybaseocr-textline v0.0.1</mets:name>
+    </mets:agent>
   </mets:metsHdr>
   <mets:dmdSec ID="DMDLOG_0001">
     <mets:mdWrap MDTYPE="MODS">
