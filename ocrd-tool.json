@@ -4,20 +4,20 @@
   "tools": {
     "ocrd-anybaseocr-tiseg": {
       "executable": "ocrd-anybaseocr-tiseg",
-      "categories": ["text non-text segment"],
-      "steps": [
-        "text/non-text/segment"
-      ],
+      "input_file_grp": ["OCR-D-IMG-BIN"],
+      "output_file_grp": ["OCR-D-SEG-TI-ANY"],
+      "categories": ["Layout analysis"],
+      "steps": ["layout/segmentation/text-image"],
       "description": "separate text and non-text part with anyBaseOCR",
       "parameters": {
       }
     },
     "ocrd-anybaseocr-textline": {
       "executable": "ocrd-anybaseocr-textline",
-      "categories": ["text line segment"],
-      "steps": [
-        "text/line/segment"
-      ],
+      "input_file_grp": ["OCR-D-SEG-TI"],
+      "output_file_grp": ["OCR-D-SEG-LINE-ANY"],
+      "categories": ["Layout analysis"],
+      "steps": ["layout/segmentation/line"],
       "description": "separate each text line",
       "parameters": {
         "minscale":    {"type": "number", "format": "float", "default": 12.0, "description": "minimum scale permitted"},
