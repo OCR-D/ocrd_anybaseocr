@@ -1,5 +1,6 @@
 from __future__ import division
 
+
 def get_class_dictionary():
     class_dict = {
         'paragraph': 1,

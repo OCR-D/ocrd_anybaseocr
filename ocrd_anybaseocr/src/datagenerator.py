@@ -1,37 +1,37 @@
 # Created on Wed May 31 14:48:46 2017
 #
 # @author: Frederik Kratzert
-#-----------------------------------------------------------------------------
-#BSD 3-Clause License
+# -----------------------------------------------------------------------------
+# BSD 3-Clause License
 #
-#Copyright (c) 2017, Frederik Kratzert
-#All rights reserved.
+# Copyright (c) 2017, Frederik Kratzert
+# All rights reserved.
 #
-#Redistribution and use in source and binary forms, with or without
-#modification, are permitted provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
 #
-#* Redistributions of source code must retain the above copyright notice, this
+# * Redistributions of source code must retain the above copyright notice, this
 #  list of conditions and the following disclaimer.
 #
-#* Redistributions in binary form must reproduce the above copyright notice,
+# * Redistributions in binary form must reproduce the above copyright notice,
 #  this list of conditions and the following disclaimer in the documentation
 #  and/or other materials provided with the distribution.
 
-#* Neither the name of the copyright holder nor the names of its
+# * Neither the name of the copyright holder nor the names of its
 #  contributors may be used to endorse or promote products derived from
 #  this software without specific prior written permission.
 
-#THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-#AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-#IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-#DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-#FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-#DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-#SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-#CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-#OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-#OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#-----------------------------------------------------------------------------
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# -----------------------------------------------------------------------------
 
 """Containes a helper class for image input pipelines in tensorflow."""
 
@@ -44,15 +44,15 @@ from tensorflow.python.framework.ops import convert_to_tensor
 
 
 IMAGENET_MEAN = tf.constant([123.68, 116.779, 103.939], dtype=tf.float32)
-#202.10
-OCRD_UNRELOCATED_227_MEAN=tf.constant([220.33,220.33,220.33],dtype=tf.float32)
-#217.46
-OCRD_RELOC_UNRELOC_227_MEAN=tf.constant([213.25, 235.99, 79.28],dtype=tf.float32)
-#233.9
-RVLCDIP_MEAN=tf.constant([233.91, 233.91, 233.91],dtype=tf.float32)
+# 202.10
+OCRD_UNRELOCATED_227_MEAN = tf.constant([220.33, 220.33, 220.33], dtype=tf.float32)
+# 217.46
+OCRD_RELOC_UNRELOC_227_MEAN = tf.constant([213.25, 235.99, 79.28], dtype=tf.float32)
+# 233.9
+RVLCDIP_MEAN = tf.constant([233.91, 233.91, 233.91], dtype=tf.float32)
 
 
-RESIZE_DIM=[227,227]
+RESIZE_DIM = [227, 227]
 
 
 class ImageDataGenerator(object):
@@ -62,7 +62,7 @@ class ImageDataGenerator(object):
     """
 
     def __init__(self, file_list, mode, batch_size, num_classes, shuffle=True,
-                 buffer_size=1000,mean_pixels=[127,127,127]):
+                 buffer_size=1000, mean_pixels=[127, 127, 127]):
         """Create a new ImageDataGenerator.
 
         Recieves a path string to a text file, which consists of many lines,
@@ -101,7 +101,7 @@ class ImageDataGenerator(object):
         self.img_paths = convert_to_tensor(self.img_paths, dtype=dtypes.string)
         self.labels = convert_to_tensor(self.labels, dtype=dtypes.int32)
 
-        self.mean_pixels=mean_pixels
+        self.mean_pixels = mean_pixels
 
         # create dataset
         data = tf.data.Dataset.from_tensor_slices((self.img_paths, self.labels))
@@ -145,7 +145,7 @@ class ImageDataGenerator(object):
 
         # load and preprocess the image
         img_string = tf.read_file(filename)
-        img_decoded=tf.image.decode_png(img_string)
+        img_decoded = tf.image.decode_png(img_string)
         #img_decoded = tf.image.decode_jpeg(img_string,channels=3)
         # h=img_decoded.get_shape().as_list()[0]
         # if h is None:
@@ -160,7 +160,7 @@ class ImageDataGenerator(object):
         """
         #img_centered = tf.subtract(img_resized, IMAGENET_MEAN)
         #img_centered = tf.subtract(img_decoded, IMAGENET_MEAN)
-        img_centered = tf.subtract(img_resized, self.mean_pixels)#OCRD_RELOC_UNRELOC_227_MEAN)
+        img_centered = tf.subtract(img_resized, self.mean_pixels)  # OCRD_RELOC_UNRELOC_227_MEAN)
 
         # RGB -> BGR
         img_bgr = img_centered[:, :, ::-1]
@@ -177,7 +177,7 @@ class ImageDataGenerator(object):
         # load and preprocess the image
         img_string = tf.read_file(filename)
         #img_decoded = tf.image.decode_png(img_string)
-        img_decoded = tf.image.decode_jpeg(img_string,channels=3)
+        img_decoded = tf.image.decode_jpeg(img_string, channels=3)
         # h = img_decoded.get_shape().as_list()[0]
         # if h is None:
         #     h = 227
@@ -189,7 +189,7 @@ class ImageDataGenerator(object):
         img_resized = tf.image.resize_images(img_decoded, [RESIZE_DIM[0], RESIZE_DIM[1]])
         #img_centered = tf.subtract(img_resized, IMAGENET_MEAN)
         #img_centered = tf.subtract(img_decoded, IMAGENET_MEAN)
-        img_centered = tf.subtract(img_resized, self.mean_pixels)#OCRD_RELOC_UNRELOC_227_MEAN)
+        img_centered = tf.subtract(img_resized, self.mean_pixels)  # OCRD_RELOC_UNRELOC_227_MEAN)
 
         # RGB -> BGR
         img_bgr = img_centered[:, :, ::-1]
