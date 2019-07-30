@@ -1,25 +1,25 @@
 {
   "git_url": "https://github.com/syedsaqibbukhari/docanalysis",
   "version": "0.0.1",
-  "tools": {            
+  "tools": {
     "ocrd-anybaseocr-tiseg": {
       "executable": "ocrd-anybaseocr-tiseg",
-      "categories": ["text non-text segment"],
-      "steps": [
-        "text/non-text/segment"
-      ],
+      "input_file_grp": ["OCR-D-IMG-BIN"],
+      "output_file_grp": ["OCR-D-SEG-TI-ANY"],
+      "categories": ["Layout analysis"],
+      "steps": ["layout/segmentation/text-image"],
       "description": "separate text and non-text part with anyBaseOCR",
       "parameters": {
       }
     },
     "ocrd-anybaseocr-textline": {
       "executable": "ocrd-anybaseocr-textline",
-      "categories": ["text line segment"],
-      "steps": [
-        "text/line/segment"
-      ],
+      "input_file_grp": ["OCR-D-SEG-TI"],
+      "output_file_grp": ["OCR-D-SEG-LINE-ANY"],
+      "categories": ["Layout analysis"],
+      "steps": ["layout/segmentation/line"],
       "description": "separate each text line",
-      "parameters": {        
+      "parameters": {
         "minscale":    {"type": "number", "format": "float", "default": 12.0, "description": "minimum scale permitted"},
         "maxlines":    {"type": "number", "format": "float", "default": 300, "description": "non-standard scaling of horizontal parameters"},
         "scale":       {"type": "number", "format": "float", "default": 0.0, "description": "the basic scale of the document (roughly, xheight) 0=automatic"},
@@ -27,10 +27,10 @@
         "vscale":      {"type": "number", "format": "float", "default": 1.7, "description": "non-standard scaling of vertical parameters"},
         "threshold":   {"type": "number", "format": "float", "default": 0.2, "description": "baseline threshold"},
         "noise":       {"type": "number", "format": "integer", "default": 8, "description": "noise threshold for removing small components from lines"},
-        "usegauss":    {"type": "string", "action": "store_true", "default": 0, "description": "use gaussian instead of uniform"},
+        "usegauss":    {"type": "boolean", "default": false, "description": "use gaussian instead of uniform"},
         "maxseps":     {"type": "number", "format": "integer", "default": 2, "description": "maximum black column separators"},
         "sepwiden":    {"type": "number", "format": "integer", "default": 10, "description": "widen black separators (to account for warping)"},
-        "blackseps":   {"type": "string", "action": "store_true", "default": 0, "description": "also check for black column separators"},
+        "blackseps":   {"type": "boolean", "default": false, "description": "also check for black column separators"},
         "maxcolseps":  {"type": "number", "format": "integer", "default": 2, "description": "maximum # whitespace column separators"},
         "csminaspect": {"type": "number", "format": "float", "default": 1.1, "description": "minimum aspect ratio for column separators"},
         "csminheight": {"type": "number", "format": "float", "default": 6.5, "description": "minimum column height (units=scale)"},
