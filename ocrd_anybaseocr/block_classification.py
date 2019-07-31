@@ -62,14 +62,14 @@ parser.add_argument('--dataset_mean_pixels', type=float,
 
 
 args = parser.parse_args()
-finetuner=finetune()
+finetuner = finetune()
 
-device="gpu"
-training_flag=False
+device = "gpu"
+training_flag = False
 file_list = []
 
-for file_path in glob.glob(os.path.join(args.input_path,"*.png")):
-    file_list.append(file_path)   
+for file_path in glob.glob(os.path.join(args.input_path, "*.png")):
+    file_list.append(file_path)
 
 finetuner.test(meta_file=args.initial_meta_to_learn,
                checkpoint_file=args.initial_weight_to_learn,

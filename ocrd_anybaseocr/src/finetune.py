@@ -1,34 +1,34 @@
-#-----------------------------------------------------------------------------
-#BSD 3-Clause License
+# -----------------------------------------------------------------------------
+# BSD 3-Clause License
 #
-#Copyright (c) 2017, Frederik Kratzert
-#All rights reserved.
+# Copyright (c) 2017, Frederik Kratzert
+# All rights reserved.
 #
-#Redistribution and use in source and binary forms, with or without
-#modification, are permitted provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
 #
-#* Redistributions of source code must retain the above copyright notice, this
+# * Redistributions of source code must retain the above copyright notice, this
 #  list of conditions and the following disclaimer.
 #
-#* Redistributions in binary form must reproduce the above copyright notice,
+# * Redistributions in binary form must reproduce the above copyright notice,
 #  this list of conditions and the following disclaimer in the documentation
 #  and/or other materials provided with the distribution.
 
-#* Neither the name of the copyright holder nor the names of its
+# * Neither the name of the copyright holder nor the names of its
 #  contributors may be used to endorse or promote products derived from
 #  this software without specific prior written permission.
 
-#THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-#AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-#IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-#DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-#FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-#DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-#SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-#CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-#OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-#OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#-----------------------------------------------------------------------------
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# -----------------------------------------------------------------------------
 
 """Script to finetune AlexNet using Tensorflow.
 
@@ -54,6 +54,8 @@ import utils
 """
 Configuration Part.
 """
+
+
 class finetune(object):
     def __init__(self):
         return
@@ -65,9 +67,9 @@ class finetune(object):
              batch_size=1,
              num_classes=16,
              device="gpu",
-             dropout_rate=[1,1,1,1,1,1,1,1,1,1,1,1,1],
+             dropout_rate=[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
              training_flag=False,
-             mean_pixels=[127,127,127],
+             mean_pixels=[127, 127, 127],
              results_csv="/results.csv"):
 
         print("mean pixels:", mean_pixels)
@@ -79,15 +81,15 @@ class finetune(object):
                                   checkpoint_file=checkpoint_file) as sess:
             with tf.device("/"+device+":0"):
                 test_data = ImageDataGenerator(file_list,
-                                              mode='inference',
-                                              batch_size=batch_size,
-                                              num_classes=num_classes,
-                                              shuffle=False,
+                                               mode='inference',
+                                               batch_size=batch_size,
+                                               num_classes=num_classes,
+                                               shuffle=False,
                                                mean_pixels=mean_pixels)
 
                 # create an reinitializable iterator given the dataset structure
                 iterator = tf.data.Iterator.from_structure(test_data.data.output_types,
-                                                   test_data.data.output_shapes)
+                                                           test_data.data.output_shapes)
                 next_batch = iterator.get_next()
 
             # Ops for initializing the two different iterators
@@ -97,21 +99,21 @@ class finetune(object):
             graph = tf.get_default_graph()
 
             # TF placeholder for graph input and output
-            x = graph.get_tensor_by_name("x:0")#("Placeholder:0")
-            y = graph.get_tensor_by_name("y:0")#("Placeholder_1:0")
-            keep_prob = graph.get_tensor_by_name("keep_prob:0")#("Placeholder_2:0")
-            train_flag = graph.get_tensor_by_name("training_flag:0")#("Placeholder_3:0")
+            x = graph.get_tensor_by_name("x:0")  # ("Placeholder:0")
+            y = graph.get_tensor_by_name("y:0")  # ("Placeholder_1:0")
+            keep_prob = graph.get_tensor_by_name("keep_prob:0")  # ("Placeholder_2:0")
+            train_flag = graph.get_tensor_by_name("training_flag:0")  # ("Placeholder_3:0")
 
-            #print tensor name
-            tensors=[n.name for n in graph.as_graph_def().node]
-            np_tensor=np.array(tensors)
-            np.savetxt("mynet_tensors.txt",np_tensor,fmt="%s")
-            ops=[o.name for o in tf.get_default_graph().get_operations()]
-            np_tensor=np.array(ops)
-            np.savetxt("mynet_op_names.txt",np_tensor,fmt="%s")
+            # print tensor name
+            tensors = [n.name for n in graph.as_graph_def().node]
+            np_tensor = np.array(tensors)
+            np.savetxt("mynet_tensors.txt", np_tensor, fmt="%s")
+            ops = [o.name for o in tf.get_default_graph().get_operations()]
+            np_tensor = np.array(ops)
+            np.savetxt("mynet_op_names.txt", np_tensor, fmt="%s")
 
-            score=graph.get_tensor_by_name("fc8/fc8:0")
-            predict_op=tf.arg_max(score,1)
+            score = graph.get_tensor_by_name("fc8/fc8:0")
+            predict_op = tf.arg_max(score, 1)
             GT_op = tf.arg_max(y, 1)
             correct_pred = tf.equal(tf.argmax(score, 1), tf.argmax(y, 1))
 
@@ -123,56 +125,54 @@ class finetune(object):
             sess.run(testing_init_op)
             test_acc = 0.
             test_count = 0
-            correct_count=0
-            all_img_test_count=0
-            predict_arr=[]
-            gt_arr=[]
-            matches=[]
+            correct_count = 0
+            all_img_test_count = 0
+            predict_arr = []
+            gt_arr = []
+            matches = []
             for _ in range(test_batches_per_epoch):
                 try:
                     img_batch, label_batch = sess.run(next_batch)
                     preds = sess.run(predict_op, feed_dict={x: img_batch,
                                                             y: label_batch,
                                                             keep_prob: dropout_rate,
-                                                            train_flag:training_flag})
+                                                            train_flag: training_flag})
                     predict_arr += [c for c in preds]
 
                     gt = sess.run(GT_op, feed_dict={x: img_batch,
                                                     y: label_batch,
                                                     keep_prob: dropout_rate,
-                                                            train_flag:training_flag})
+                                                    train_flag: training_flag})
                     gt_arr += [c for c in gt]
-                    matched=[i for i, j in zip(preds, gt) if i == j]
+                    matched = [i for i, j in zip(preds, gt) if i == j]
                     correct_count += len(matched)
 
                     all_img_test_count += img_batch.shape[0]
                     # print "PREDICTED: %s, GT: %s" % ( predict_arr, gt_arr)
-                    print ("PREDICTED: %s" %([class_dict[p] for p in predict_arr]))
-                    
+                    print("PREDICTED: %s" % ([class_dict[p] for p in predict_arr]))
+
                 except Exception as e:
-                    print ("EXCEPTION:%s"%e)
+                    print("EXCEPTION:%s" % e)
                     continue
             print("{} Testing Accuracy = {:.4f}".format(datetime.now(),
                                                         1))
 
-            #sess.close()
+            # sess.close()
             results = zip(gt_arr, predict_arr)
             np.savetxt(results_csv, results, fmt="%s", delimiter=" ")
-            np_predict=np.array(predict_arr)
-            np_gt=np.array(gt_arr)
-            
+            np_predict = np.array(predict_arr)
+            np_gt = np.array(gt_arr)
 
     def restore_weights(self,
                         target="",
-                        config=tf.ConfigProto(allow_soft_placement=True,log_device_placement=True),
+                        config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=True),
                         meta_file="a/b/c.ckpt.meta",
                         checkpoint_file="a/b/c.ckpt"):
 
-        sess=tf.Session(target=target,config=config)
+        sess = tf.Session(target=target, config=config)
         #saver = tf.train.Saver()
-        saver=tf.train.import_meta_graph(meta_file)
-        #sess.run(tf.initialize_all_variables())
+        saver = tf.train.import_meta_graph(meta_file)
+        # sess.run(tf.initialize_all_variables())
         sess.run(tf.global_variables_initializer())
-        saver.restore(sess,checkpoint_file)
+        saver.restore(sess, checkpoint_file)
         return sess
-
