@@ -1,6 +1,6 @@
-# README file for Test nonText area segment
+# README file for Text/non-Text region segmentation
 
-Filename : ocrd-anybaseocr-tiseg.py
+Filename : ocrd_anybaseocr_tiseg.py
 
 Author: Syed Saqib Bukhari, Mohammad Mohsin Reza
 Responsible: Syed Saqib Bukhari, Mohammad Mohsin Reza
@@ -14,18 +14,16 @@ Link: http://gepris.dfg.de/gepris/projekt/394346204?language=en
 5. Sample files are available at [OCR-D/assets](https://github.com/OCR-D/ocrd-assets/tree/master/data/dfki-testdata)
 
 # Method Behaviour 
-This function takes a document image as input and do the skew correction of that document.
+This function takes a document image as an input and separates the text and non-text part from the input document image.
 
 # Usage:
 ```sh
-python ocrd-anybaseocr-tiseg.py -m (path to met input file) -I (Input group name) -O (Output group name) -w (Working directory)
-	[-p (path to parameter file) -o (METs output filename)]
+ocrd-anybaseocr-tiseg -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
 ```
 # Example:
 ```sh
-python ocrd-anybaseocr-tiseg.py \
-	-m work_dir/mets.xml \
+ocrd-anybaseocr-tiseg \
+	-m mets.xml \
 	-I OCR-D-IMG-CROP \
-	-O OCR-D-IMG-TISEG \
-	-w work_dir
+	-O OCR-D-IMG-TISEG
 ```
