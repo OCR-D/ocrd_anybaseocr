@@ -1,6 +1,6 @@
-# README file for Test nonText area segment
+# README file for Textline segmentation
 
-Filename : ocrd-anybaseocr-tiseg.py
+Filename : ocrd_anybaseocr_textline.py
 
 Author: Syed Saqib Bukhari, Mohammad Mohsin Reza
 Responsible: Syed Saqib Bukhari, Mohammad Mohsin Reza
@@ -14,18 +14,16 @@ Link: http://gepris.dfg.de/gepris/projekt/394346204?language=en
 5. Sample files are available at [OCR-D/assets](https://github.com/OCR-D/ocrd-assets/tree/master/data/dfki-testdata)
 
 # Method Behaviour 
-This function takes a document image as input and do the skew correction of that document.
+This function takes a cropped document image as an input and segment the image into textline images.
 
 # Usage:
 ```sh
-python ocrd-anybaseocr-textline.py -m (path to met input file) -I (Input group name) -O (Output group name) -w (Working directory)
-	[-p (path to parameter file) -o (METs output filename)]
+ocrd-anybaseocr-textline -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
 ```
 # Example:
 ```sh
-python ocrd-anybaseocr-textline.py \
-	-m work_dir/mets.xml \
+ocrd-anybaseocr-textline \
+	-m mets.xml \
 	-I OCR-D-IMG-TISEG \
-	-O OCR-D-IMG-TL \
-	-w work_dir
+	-O OCR-D-IMG-TL
 ```
