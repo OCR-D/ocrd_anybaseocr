@@ -1,6 +1,5 @@
 # docanalysis
 
-[![CircleCI](https://circleci.com/gh/syedsaqibbukhari/docanalysis.svg?style=svg)](https://circleci.com/gh/syedsaqibbukhari/docanalysis)
 
 > Tools for preprocessing scanned images for OCR
 
