@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='layout-analysis',
+    name='ocrd-anybaseocr',
     version='v0.0.1',
     author="DFKI",
     author_email="Saqib.Bukhari@dfki.de, Mohammad_mohsin.reza@dfki.de",
@@ -18,10 +18,10 @@ setup(
     entry_points={
         'console_scripts': [
             'ocrd-anybaseocr-binarize = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_binarize',
-            'ocrd-anybaseocr-crop     = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_cropping',
             'ocrd-anybaseocr-deskew   = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_deskew',
+            'ocrd-anybaseocr-crop     = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_cropping',        
             'ocrd-anybaseocr-dewarp   = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_dewarp',
-            'ocrd-anybaseocr-tiseg = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_tiseg',
+            'ocrd-anybaseocr-tiseg    = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_tiseg',
             'ocrd-anybaseocr-textline = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_textline'
         ]
     },
