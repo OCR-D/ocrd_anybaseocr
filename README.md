@@ -1,5 +1,6 @@
-# docanalysis
+# Document Preprocessing and Segmentation
 
+[![CircleCI](https://circleci.com/gh/mjenckel/OCR-D-LAYoutERkennung.svg?style=svg)](https://circleci.com/gh/mjenckel/OCR-D-LAYoutERkennung)
 
 > Tools for preprocessing scanned images for OCR
 
