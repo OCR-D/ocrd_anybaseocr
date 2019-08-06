@@ -4,7 +4,37 @@
     <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
       <mets:name>DFG-Koordinierungsprojekt zur Weiterentwicklung von Verfahren der Optical Character Recognition (OCR-D)</mets:name>
       <mets:note>OCR-D</mets:note>
-    </mets:agent>    
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
+      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
+      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
+      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
+      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/deskewing">
+      <mets:name>ocrd-anybaseocr-deskew v0.0.1</mets:name>
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/cropping">
+      <mets:name>ocrd-anybaseocr-crop v0.0.1</mets:name>
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
+      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/deskewing">
+      <mets:name>ocrd-anybaseocr-deskew v0.0.1</mets:name>
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
+      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
+    </mets:agent>
+    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/deskewing">
+      <mets:name>ocrd-anybaseocr-deskew v0.0.1</mets:name>
+    </mets:agent>
   </mets:metsHdr>
   <mets:dmdSec ID="DMDLOG_0001">
     <mets:mdWrap MDTYPE="MODS">
@@ -20,6 +50,16 @@
       <mets:file GROUPID="P_becker_quaestio_1586_00013" ID="becker_quaestio_1586_00013" MIMETYPE="image/tiff">
         <mets:FLocat LOCTYPE="URL" xlink:href="OCR-D-IMG/becker_quaestio_1586_00013.tif"/>
       </mets:file>
-    </mets:fileGrp>    
+    </mets:fileGrp>
+    <mets:fileGrp USE="OCR-D-IMG-BIN">
+      <mets:file MIMETYPE="image/png" ID="OCR-D-IMG-BIN_0001">
+        <mets:FLocat xlink:href="/home/rakshith/hiwi/LAYoutERkennung/ocrd_anybaseocr/OCR-D-IMG/becker_quaestio_1586_00013.bin.png"/>
+      </mets:file>
+    </mets:fileGrp>
+    <mets:fileGrp USE="OCR-D-IMG-DESKEW">
+      <mets:file MIMETYPE="image/png" ID="OCR-D-IMG-DESKEW_0001">
+        <mets:FLocat xlink:href="/home/rakshith/hiwi/LAYoutERkennung/ocrd_anybaseocr/OCR-D-IMG/becker_quaestio_1586_00013.ds.png"/>
+      </mets:file>
+    </mets:fileGrp>
   </mets:fileSec>
 </mets:mets>

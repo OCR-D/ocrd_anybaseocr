@@ -41,7 +41,7 @@
 # ======================================================================
 #!/usr/bin/env python
 
-
+import os
 import numpy as np
 from pylab import amin, amax, linspace, mean, var, plot, ginput, ones, clip, imshow
 from scipy.ndimage import filters, interpolation, morphology
@@ -159,13 +159,17 @@ class OcrdAnybaseocrDeskewer(Processor):
             orientation = 180 - (180 - orientation) % 360
             pcgts.get_Page().set_orientation(orientation)
 
-            ID = concat_padded(self.output_file_grp, n)
+            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
+            if file_id == input_file.ID:
+                file_id = concat_padded(self.output_file_grp, n)
+            
             self.workspace.add_file(
-                ID=ID,
+                ID=file_id,
                 file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
                 mimetype="image/png",
                 url=base + ".ds.png",
-                local_filename='%s/%s' % (self.output_file_grp, ID),
+                local_filename=os.path.join(self.output_file_grp,
+                                            file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
