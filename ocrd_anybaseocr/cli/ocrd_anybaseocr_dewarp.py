@@ -31,7 +31,7 @@ class OcrdAnybaseocrDewarper(Processor):
         return cropped
 
     def process(self):
-        print(Path(self.parameter['pix2pixHD']).absolute())
+        print(Path(self.parameter['pix2pixHD']).absolute())        
         if not torch.cuda.is_available():
             print("Your system has no CUDA installed. No GPU detected.")
             sys.exit(1)
@@ -70,10 +70,12 @@ class OcrdAnybaseocrDewarper(Processor):
 
             base, _ = ocrolib.allsplitext(fname)
             filename = base.split("/")[-1] + ".png"
-            cropped_img.save(img_tmp_dir + "/" + filename)
+            cropped_img.save(img_tmp_dir + "/" + filename)            
+
             #os.system("cp %s %s" % (str(fname), os.path.join(img_tmp_dir, os.path.basename(str(fname)))))
             #os.system("mkdir -p %s" % img_tmp_dir)
             #os.system("cp %s %s" % (str(fname), os.path.join(img_tmp_dir, os.path.basename(str(fname)))))
+            '''
             os.system("python " + str(path) + "/test.py --dataroot %s --checkpoints_dir ./ --name models --results_dir %s --label_nc 0 --no_instance --no_flip --resize_or_crop none --n_blocks_global 10 --n_local_enhancers 2 --gpu_ids %s --loadSize %d --fineSize %d --resize_or_crop %s" %
                       (os.path.dirname(img_tmp_dir), img_dir, self.parameter['gpu_id'], self.parameter['resizeHeight'], self.parameter['resizeWidth'], self.parameter['imgresize']))
             synthesized_image = filename.split(
@@ -88,4 +90,4 @@ class OcrdAnybaseocrDewarper(Processor):
                 shutil.rmtree(img_tmp_dir)
             if(Path(img_dir + "/models").is_dir()):
                 shutil.rmtree(img_dir + "/models")
-
+            '''
