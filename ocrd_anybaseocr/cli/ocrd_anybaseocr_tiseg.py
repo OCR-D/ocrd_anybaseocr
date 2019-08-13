@@ -9,7 +9,7 @@
 # URL - https://www.dfki.de/fileadmin/user_upload/import/9512_ICDAR2017_anyOCR.pdf
 
 
-from scipy import ones, zeros, array, where, shape, ndimage, sum, logical_or, logical_and
+from scipy import ones, zeros, array, where, shape, ndimage, logical_or, logical_and
 import copy
 from pylab import unique
 import ocrolib

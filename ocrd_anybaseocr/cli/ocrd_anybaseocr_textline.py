@@ -1,31 +1,22 @@
 import builtins as python
-import random as pyrandom
 import sys
 import os
 import re
 import glob
-import argparse
-import codecs
-from pylab import median, imread
 from PIL import Image
 import ocrolib
 from re import split
-import argparse
 import os.path
 import json
-from ..utils import parseXML, write_to_xml, print_info, parse_params_with_defaults, print_error
 from ..constants import OCRD_TOOL
 
 #
 import subprocess
 
-
 # limits
 # parser.add_argument('--minscale',type=float,default=8.0,
 #                    help='minimum scale permitted (%(default)s)') # default was 12.0, Ajraf, Mohsin and Saqib chnaged it into 8.0
 
-from ..utils import parseXML, write_to_xml, print_info, parse_params_with_defaults, print_error
-from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
@@ -137,51 +128,3 @@ class OcrdAnybaseocrTextline(Processor):
                 i += 1
             # return lines
 
-
-'''
-def main():
-	parser = argparse.ArgumentParser("""
-	Image Text Line Segmentation.
-
-			  
-			ocrd-anybaseocr-textline -m -m (mets input file path) -I (input-file-grp name) -O (output-file-grp name) -w (Working directory)
-
-	This is a compute-intensive text line segmentation method that works on degraded
-	and historical book pages.
-	""")
-
-	parser.add_argument('-p', '--parameter', type=str, help="Parameter file location")
-	parser.add_argument('-w', '--work', type=str, help="Working directory location", default=".")
-	parser.add_argument('-I', '--Input', default=None, help="Input directory")
-	parser.add_argument('-O', '--Output', default=None, help="output directory")
-	parser.add_argument('-m', '--mets', default=None, help="METs input file")
-	parser.add_argument('-o', '--OutputMets', default=None, help="METs output file")
-	parser.add_argument('-g', '--group', default=None, help="METs image group id")
-	args = parser.parse_args()
-
-	param = {}
-	if args.parameter:
-		with open(args.parameter, 'r') as param_file:
-			param = json.loads(param_file.read())
-	param = parse_params_with_defaults(param, OCRD_TOOL['tools']['ocrd-anybaseocr-textline']['parameters'])
-
-	if not args.mets or not args.Input or not args.Output or not args.work:
-		parser.print_help()
-		print("Example: ocrd_anyBaseOCR_tigseg -m (mets input file path) -I (input-file-grp name) -O (output-file-grp name) -w (Working directory)")
-		sys.exit(0)
-
-	if args.work:
-		if not os.path.exists(args.work):
-			os.mkdir(args.work)	
-	
-	textline = OcrdAnybaseocrTextline(param)				
-	files = parseXML(args.mets, args.Input)
-	fnames = []
-	block=[]
-	for i, fname in enumerate(files):
-		print_info("Process file: %s" % str(fname))
-		block.append(textline.textline(str(fname)))
-		fnames.append(str(fname))
-	write_to_xml(fnames, args.mets, args.Output, args.OutputMets, args.work)
-
-'''
