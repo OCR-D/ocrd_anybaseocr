@@ -65,10 +65,12 @@ class OcrdAnybaseocrCropper(Processor):
     def remove_rular(self, arg):
         #base = arg.split(".")[0]
         #img = cv2.cvtColor(arg, cv2.COLOR_RGB2BGR)
-        gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)            
         contours, _ = cv2.findContours(
             gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+
+        
         height, width, _ = arg.shape
         imgArea = height*width
 
@@ -106,6 +108,7 @@ class OcrdAnybaseocrCropper(Processor):
             x, y, w, h, _ = predictRular[0]
             cv2.rectangle(arg, (x-15, y-15), (x+w+20, y+h+20),
                           (255, 255, 255), cv2.FILLED)
+        
         return arg
 
     def BorderLine(self, MaxBoundary, lines, index, flag, lineDetectH, lineDetectV):
@@ -401,19 +404,25 @@ class OcrdAnybaseocrCropper(Processor):
     def process(self):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            fname = pcgts.get_Page().imageFilename
-            img = self.workspace.resolve_image_as_pil(fname)
+            fname = pcgts.get_Page().imageFilename            
+            img = self.workspace.resolve_image_as_pil(fname)            
             #fname = str(fname)
             print("Process file: ", fname)
             base, _ = ocrolib.allsplitext(fname)
 
             img_array = ocrolib.pil2array(img)
+
+            #Check if image is RGB or not
+            if len(img_array.shape)==2:
+                img_array = np.stack((img_array,)*3, axis=-1)
             img_array_bin = np.array(
                 img_array > ocrolib.midrange(img_array), 'i')
 
             lineDetectH = []
             lineDetectV = []
             img_array_rr = self.remove_rular(img_array)
+
+            
 
             textarea, img_array_rr_ta, height, width = self.detect_textarea(
                 img_array_rr)
@@ -460,3 +469,4 @@ class OcrdAnybaseocrCropper(Processor):
                                             file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
+

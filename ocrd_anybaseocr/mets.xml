@@ -4,13 +4,7 @@
     <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
       <mets:name>DFG-Koordinierungsprojekt zur Weiterentwicklung von Verfahren der Optical Character Recognition (OCR-D)</mets:name>
       <mets:note>OCR-D</mets:note>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
-      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/deskewing">
-      <mets:name>ocrd-anybaseocr-deskew v0.0.1</mets:name>
-    </mets:agent>
+    </mets:agent>    
   </mets:metsHdr>
   <mets:dmdSec ID="DMDLOG_0001">
     <mets:mdWrap MDTYPE="MODS">
@@ -29,22 +23,6 @@
       <mets:file GROUPID="P_00000001" ID="00000001" MIMETYPE="image/jpg">
         <mets:FLocat LOCTYPE="URL" xlink:href="https://digital.slub-dresden.de/data/kitodo/GottDie_453779263/GottDie_453779263_tif/jpegs/00000001.tif.original.jpg"/>
       </mets:file>
-    </mets:fileGrp>
-    <mets:fileGrp USE="OCR-D-IMG-BIN">
-      <mets:file MIMETYPE="image/png" ID="OCR-D-IMG-BIN_0001">
-        <mets:FLocat xlink:href="/home/rakshith/hiwi/LAYoutERkennung/ocrd_anybaseocr/OCR-D-IMG/becker_quaestio_1586_00013.bin.png"/>
-      </mets:file>
-      <mets:file MIMETYPE="image/png" ID="OCR-D-IMG-BIN_0002">
-        <mets:FLocat xlink:href="/home/rakshith/hiwi/LAYoutERkennung/ocrd_anybaseocr/OCR-D-IMG/00000001.bin.png"/>
-      </mets:file>
-    </mets:fileGrp>
-    <mets:fileGrp USE="OCR-D-IMG-DESKEW">
-      <mets:file MIMETYPE="image/png" ID="OCR-D-IMG-DESKEW_0001">
-        <mets:FLocat xlink:href="/home/rakshith/hiwi/LAYoutERkennung/ocrd_anybaseocr/OCR-D-IMG/becker_quaestio_1586_00013.tif"/>
-      </mets:file>
-      <mets:file MIMETYPE="image/png" ID="OCR-D-IMG-DESKEW_0002">
-        <mets:FLocat xlink:href="/home/rakshith/hiwi/LAYoutERkennung/ocrd_anybaseocr/OCR-D-IMG/00000001.jpg"/>
-      </mets:file>
-    </mets:fileGrp>
+    </mets:fileGrp>    
   </mets:fileSec>
 </mets:mets>
