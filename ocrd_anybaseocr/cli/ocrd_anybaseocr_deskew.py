@@ -153,7 +153,7 @@ class OcrdAnybaseocrDeskewer(Processor):
                        (pcgts.get_Page().imageFilename, lo, hi, angle))
             if param['parallel'] < 2:
                 print_info("writing")
-            ocrolib.write_image_binary(base+".ds.png", deskewed)
+            #ocrolib.write_image_binary(base+".ds.png", deskewed)
 
             orientation = -angle
             orientation = 180 - (180 - orientation) % 360
@@ -167,8 +167,7 @@ class OcrdAnybaseocrDeskewer(Processor):
                 ID=file_id,
                 file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
-                mimetype="image/png",
-                url=base + ".ds.png",
+                mimetype=MIMETYPE_PAGE,                
                 local_filename=os.path.join(self.output_file_grp,
                                             file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')

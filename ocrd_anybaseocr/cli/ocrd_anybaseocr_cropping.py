@@ -61,6 +61,10 @@ class OcrdAnybaseocrCropper(Processor):
         x1, y1, x2, y2 = coordinate
         with open(base + '-frame-pf.dat', 'w') as fp:
             fp.write(str(x1)+"\t"+str(y1)+"\t"+str(x2-x1)+"\t"+str(y2-y1))
+    
+    def rotate_image(self, orientation, image):
+        print(orientation)
+        return image.rotate(orientation)
 
     def remove_rular(self, arg):
         #base = arg.split(".")[0]
@@ -406,15 +410,21 @@ class OcrdAnybaseocrCropper(Processor):
             pcgts = page_from_file(self.workspace.download_file(input_file))
             fname = pcgts.get_Page().imageFilename            
             img = self.workspace.resolve_image_as_pil(fname)            
-            #fname = str(fname)
+            # Get image orientation
+            orientation = pcgts.get_Page().get_orientation()            
+            rotated_image = self.rotate_image(orientation, img)
+            
+
+            # fname = str(fname)
             print("Process file: ", fname)
             base, _ = ocrolib.allsplitext(fname)
 
-            img_array = ocrolib.pil2array(img)
+            img_array = ocrolib.pil2array(rotated_image)
 
             #Check if image is RGB or not
             if len(img_array.shape)==2:
                 img_array = np.stack((img_array,)*3, axis=-1)
+
             img_array_bin = np.array(
                 img_array > ocrolib.midrange(img_array), 'i')
 
