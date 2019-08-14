@@ -14,13 +14,14 @@ import copy
 from pylab import unique
 import ocrolib
 import json
+from PIL import Image
 
 
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_models.ocrd_page import to_xml
+from ocrd_models.ocrd_page import to_xml, parse
 from ocrd_utils import concat_padded
 
 
@@ -31,13 +32,26 @@ class OcrdAnybaseocrTiseg(Processor):
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrTiseg, self).__init__(*args, **kwargs)
 
+    def crop_image(self, image_path, crop_region):
+        img = Image.open(image_path)
+        cropped = img.crop(crop_region)
+        return cropped
+
     def process(self):
         for (n, input_file) in enumerate(self.input_files):
-            pcgts = page_from_file(self.workspace.download_file(input_file))
-            binImg = self.workspace.resolve_image_as_pil(pcgts.get_Page().imageFilename)
-            # I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png
+            local_input_file = self.workspace.download_file(input_file)
+            pcgts = parse(local_input_file.url, silence=True)
+            image_coords = pcgts.get_Page().get_Border().get_Coords().points.split()
             fname = pcgts.get_Page().imageFilename
-            I = ocrolib.read_image_binary(fname)
+
+            # I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png                        
+            min_x, min_y = image_coords[0].split(",")
+            max_x, max_y = image_coords[2].split(",")
+            crop_region = int(min_x), int(
+                min_y), int(max_x), int(max_y)
+            cropped_img = self.crop_image(fname, crop_region)
+
+            I = ocrolib.pil2array(cropped_img)
             I = 1-I/I.max()
             rows, cols = I.shape
 

@@ -62,8 +62,7 @@ class OcrdAnybaseocrCropper(Processor):
         with open(base + '-frame-pf.dat', 'w') as fp:
             fp.write(str(x1)+"\t"+str(y1)+"\t"+str(x2-x1)+"\t"+str(y2-y1))
     
-    def rotate_image(self, orientation, image):
-        print(orientation)
+    def rotate_image(self, orientation, image):        
         return image.rotate(orientation)
 
     def remove_rular(self, arg):
@@ -408,8 +407,9 @@ class OcrdAnybaseocrCropper(Processor):
     def process(self):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            fname = pcgts.get_Page().imageFilename            
-            img = self.workspace.resolve_image_as_pil(fname)            
+            fname = pcgts.get_Page().imageFilename
+            img = self.workspace.resolve_image_as_pil(fname)   
+            
             # Get image orientation
             orientation = pcgts.get_Page().get_orientation()            
             rotated_image = self.rotate_image(orientation, img)
@@ -480,3 +480,4 @@ class OcrdAnybaseocrCropper(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
+            
