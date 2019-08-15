@@ -408,7 +408,7 @@ class OcrdAnybaseocrCropper(Processor):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
             fname = pcgts.get_Page().imageFilename
-            img = self.workspace.resolve_image_as_pil(fname)   
+            img = self.workspace.resolve_image_as_pil(fname) 
             
             # Get image orientation
             orientation = pcgts.get_Page().get_orientation()            

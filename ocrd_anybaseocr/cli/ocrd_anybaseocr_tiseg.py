@@ -15,6 +15,7 @@ from pylab import unique
 import ocrolib
 import json
 from PIL import Image
+import os
 
 
 from ..constants import OCRD_TOOL
@@ -80,14 +81,17 @@ class OcrdAnybaseocrTiseg(Processor):
             #imf_image = imf[0:-3] + "nts.png"
             ocrolib.write_image_binary(base + ".nts.png", image_part)
             # return [base + ".ts.png", base + ".nts.png"]
-            ID = concat_padded(self.output_file_grp, n)
+            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
+            if file_id == input_file.ID:
+                file_id = concat_padded(self.output_file_grp, n)
             self.workspace.add_file(
-                ID=ID,
+                ID=file_id,
                 file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
                 mimetype="image/png",
                 url=base + ".ts.png",
-                local_filename='%s/%s' % (self.output_file_grp, ID),
+                local_filename=os.path.join(self.output_file_grp,
+                                            file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
 
