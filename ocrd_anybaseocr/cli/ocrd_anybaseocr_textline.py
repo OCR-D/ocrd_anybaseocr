@@ -1,4 +1,3 @@
-import builtins as python
 import sys
 import os
 import re
@@ -9,6 +8,7 @@ from re import split
 import os.path
 import json
 from ..constants import OCRD_TOOL
+
 
 #
 import subprocess
@@ -53,8 +53,7 @@ class OcrdAnybaseocrTextline(Processor):
             H = height
             W = width
             base, _ = ocrolib.allsplitext(fname)
-            base2 = os.path.splitext(fname)[0]
-
+            base2 = os.path.splitext(fname)[0]            
             if not os.path.exists("%s/lines" % base):
                 os.system("mkdir -p %s/lines" % base)
                 # if os.path.exists(base2 + ".ts.png") :
@@ -102,7 +101,7 @@ class OcrdAnybaseocrTextline(Processor):
                 offset = (offX, offY)
                 background.paste(img, offset)
                 background.save("%s/temp.png" % base)
-                command = "python "+self.parameter['libpath']+"/cli/anyBaseOCR-gpageseg.py %s/temp.png -n --minscale %f --maxlines %f --scale %f --hscale %f --vscale %f --threshold %f --noise %d --maxseps %d --sepwiden %d --maxcolseps %d --csminaspect %f --csminheight %f -p %d -e %d -Q %d" % (
+                command = "python "+self.parameter['libpath']+"./ocrd_anybaseocr/anyBaseOCR-gpageseg.py %s/temp.png -n --minscale %f --maxlines %f --scale %f --hscale %f --vscale %f --threshold %f --noise %d --maxseps %d --sepwiden %d --maxcolseps %d --csminaspect %f --csminheight %f -p %d -e %d -Q %d" % (
                     base, self.parameter['minscale'], self.parameter['maxlines'], self.parameter['scale'], self.parameter['hscale'], self.parameter['vscale'], self.parameter['threshold'], self.parameter['noise'], self.parameter['maxseps'], self.parameter['sepwiden'], self.parameter['maxcolseps'], self.parameter['csminaspect'], self.parameter['csminheight'], self.parameter['pad'], self.parameter['expand'], self.parameter['parallel'])
                 if(self.parameter['blackseps']):
                     command = command + " -b"

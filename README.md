@@ -92,9 +92,10 @@ ocrd-anybaseocr-cropping \
 ocrd-anybaseocr-dewarp -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
 ```
 
+
 #### Example: 
 ```sh
-ocrd-anybaseocr-dewarp \
+CUDA_VISIBLE_DEVICES=0 ocrd-anybaseocr-dewarp \
    -m mets.xml \
    -I OCR-D-IMG-CROP \
    -O OCR-D-IMG-DEWARP
