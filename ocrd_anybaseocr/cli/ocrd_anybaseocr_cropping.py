@@ -62,7 +62,7 @@ class OcrdAnybaseocrCropper(Processor):
         with open(base + '-frame-pf.dat', 'w') as fp:
             fp.write(str(x1)+"\t"+str(y1)+"\t"+str(x2-x1)+"\t"+str(y2-y1))
     
-    def rotate_image(self, orientation, image):        
+    def rotate_image(self, orientation, image):  
         return image.rotate(orientation)
 
     def remove_rular(self, arg):
@@ -430,9 +430,7 @@ class OcrdAnybaseocrCropper(Processor):
 
             lineDetectH = []
             lineDetectV = []
-            img_array_rr = self.remove_rular(img_array)
-
-            
+            img_array_rr = self.remove_rular(img_array)        
 
             textarea, img_array_rr_ta, height, width = self.detect_textarea(
                 img_array_rr)
@@ -447,7 +445,7 @@ class OcrdAnybaseocrCropper(Processor):
                     min_x, min_y, max_x, max_y = self.select_borderLine(
                         img_array_rr, lineDetectH, lineDetectV)
                 else:
-                    min_x, min_y, max_x, max_y = textarea[0]
+                    min_x, min_y, max_x, max_y = textarea[0]                    
             elif len(textarea) == 1 and (height*width*0.5 < (abs(textarea[0][2]-textarea[0][0]) * abs(textarea[0][3]-textarea[0][1]))):
                 x1, y1, x2, y2 = textarea[0]
                 x1 = x1-20 if x1 > 20 else 0
@@ -455,12 +453,12 @@ class OcrdAnybaseocrCropper(Processor):
                 y1 = y1-40 if y1 > 40 else 0
                 y2 = y2+40 if y2 < height-40 else height
 
-                #self.save_pf(base, [x1, y1, x2, y2])
+                #self.save_pf(base, [x1, y1, x2, y2])                
                 min_x, min_y, max_x, max_y = textarea[0]
             else:
                 min_x, min_y, max_x, max_y = self.select_borderLine(
-                    img_array_rr, lineDetectH, lineDetectV)
-
+                    img_array_rr, lineDetectH, lineDetectV)                
+                        
             brd = BorderType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (
                 min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
             pcgts.get_Page().set_Border(brd)
@@ -479,5 +477,6 @@ class OcrdAnybaseocrCropper(Processor):
                                             file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
+            
 
             

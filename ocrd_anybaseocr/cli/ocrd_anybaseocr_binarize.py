@@ -90,8 +90,10 @@ class OcrdAnybaseocrBinarizer(Processor):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
             fname = pcgts.get_Page().imageFilename
+            print(fname)
             img = self.workspace.resolve_image_as_pil(fname)
 
+            
             print_info("# %s" % (fname))
             raw = ocrolib.read_image_gray(img.filename)
 
@@ -205,3 +207,4 @@ class OcrdAnybaseocrBinarizer(Processor):
                                             file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
+            

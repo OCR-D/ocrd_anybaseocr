@@ -457,7 +457,7 @@ def process1(job):
     fname, i = job
     global base
     base, _ = ocrolib.allsplitext(fname)
-    outputdir = base
+    outputdir = base    
 
     try:
         binary = ocrolib.read_image_binary(base+".bin.png")

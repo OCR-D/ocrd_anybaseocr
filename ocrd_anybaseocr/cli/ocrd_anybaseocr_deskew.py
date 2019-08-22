@@ -155,9 +155,11 @@ class OcrdAnybaseocrDeskewer(Processor):
                 print_info("writing")
             #ocrolib.write_image_binary(base+".ds.png", deskewed)
 
-            orientation = -angle
-            orientation = 180 - (180 - orientation) % 360
-            pcgts.get_Page().set_orientation(orientation)
+            #TODO: Need some clarification as the results effect the following pre-processing steps.
+            #orientation = -angle
+            #orientation = 180 - ((180 - orientation) % 360)
+            pcgts.get_Page().set_orientation(angle)
+            #print(orientation, angle)
 
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
             if file_id == input_file.ID:

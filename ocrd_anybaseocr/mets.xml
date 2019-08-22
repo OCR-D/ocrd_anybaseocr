@@ -20,8 +20,11 @@
       <mets:file GROUPID="P_becker_quaestio_1586_00013" ID="becker_quaestio_1586_00013" MIMETYPE="image/tiff">
         <mets:FLocat LOCTYPE="URL" xlink:href="OCR-D-IMG/becker_quaestio_1586_00013.tif"/>
       </mets:file>
-      <mets:file ID="GottDie_453779263" MIMETYPE="image/jpg">
-        <mets:FLocat LOCTYPE="URL" xlink:href="https://digital.slub-dresden.de/data/kitodo/GottDie_453779263/GottDie_453779263_tif/jpegs/00000001.tif.original.jpg"/>
+      <mets:file GROUPID="GottDie_453779263" ID="GottDie_453779263" MIMETYPE="image/jpg">
+        <mets:FLocat LOCTYPE="URL" xlink:href="OCR-D-IMG/GottDie_453779263.jpg"/>
+      </mets:file>
+      <mets:file GROUPID="zinck_autorArcanii_1703_00007" ID="zinck_autorArcanii_1703_00007" MIMETYPE="image/tiff">
+        <mets:FLocat LOCTYPE="URL" xlink:href="OCR-D-IMG/zinck_autorArcanii_1703_00007.tif"/>
       </mets:file>
     </mets:fileGrp>    
   </mets:fileSec>

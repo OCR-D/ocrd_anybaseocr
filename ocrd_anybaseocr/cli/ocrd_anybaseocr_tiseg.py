@@ -79,7 +79,7 @@ class OcrdAnybaseocrTiseg(Processor):
             ocrolib.write_image_binary(base + ".ts.png", text_part)
 
             #imf_image = imf[0:-3] + "nts.png"
-            ocrolib.write_image_binary(base + ".nts.png", image_part)
+            #ocrolib.write_image_binary(base + ".nts.png", image_part)
             # return [base + ".ts.png", base + ".nts.png"]
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
             if file_id == input_file.ID:

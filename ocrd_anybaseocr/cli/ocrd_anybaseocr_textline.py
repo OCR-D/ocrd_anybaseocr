@@ -2,7 +2,7 @@ import sys
 import os
 import re
 import glob
-from PIL import Image
+from PIL import Image, ImageDraw
 import ocrolib
 from re import split
 import os.path
@@ -53,8 +53,8 @@ class OcrdAnybaseocrTextline(Processor):
             H = height
             W = width
             base, _ = ocrolib.allsplitext(fname)
-            base2 = os.path.splitext(fname)[0]            
-            if not os.path.exists("%s/lines" % base):
+            
+            if not os.path.exists("%s/lines" % base):                
                 os.system("mkdir -p %s/lines" % base)
                 # if os.path.exists(base2 + ".ts.png") :
                 #    f = ocrolib.read_image_binary(base2 + ".ts.png")
@@ -95,6 +95,7 @@ class OcrdAnybaseocrTextline(Processor):
                 img = Image.open("%s.ts.png" % base, 'r')
                 img_w, img_h = img.size
                 background = Image.new('RGBA', (W, H), (255, 255, 255, 255))
+                draw = ImageDraw.Draw(img)
                 bg_w, bg_h = background.size
                 offX = (bg_w - img_w) // 2
                 offY = (bg_h - img_h) // 2
@@ -111,19 +112,23 @@ class OcrdAnybaseocrTextline(Processor):
                 pseg = ocrolib.read_page_segmentation("%s/temp.pseg.png" % base)
                 regions = ocrolib.RegionExtractor()
                 regions.setPageLines(pseg)
-                file = open('%s/sorted_lines.dat' % base, 'w')
+                file = open('%s/sorted_lines.dat' % base, 'w')                
                 for h in range(1, regions.length()):
                     id = regions.id(h)
                     y0, x0, y1, x1 = regions.bbox(h)
                     l = str(int(x0 - offX)) + " " + str(int(img_h - (y1 - offY))) + " " + str(int(x1 - offX)) + " " + str(int(img_h - (y0 - offY))) + " 0 0 0 0\n"
+                    rect = list(map(int,l.split(" ")[:4]))
+                    draw.rectangle(rect, fill = None, outline="#0000ff", width = 5)
                     file.write(l)
                 filelist = glob.glob("%s/temp/*" % base)
                 for infile in sorted(filelist):
                     os.system("convert %s %s/lines/01%02x%02x.bin.png" % (infile, base, i + 1, j + 1))
                     lines.append("%s/lines/01%02x%02x.bin.png" % (base, i + 1, j + 1))
                     j += 1
+                img.save("%s.tl.png" % base)                
                 os.system("rm -r %s/temp/" % base)
                 os.system("rm %s/temp.png %s/temp.pseg.png" % (base, base))
                 i += 1
+
             # return lines
 
