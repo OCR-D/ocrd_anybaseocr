@@ -31,7 +31,7 @@ class OcrdAnybaseocrDewarper(Processor):
         return cropped
 
     def process(self):
-        print(Path(self.parameter['pix2pixHD']).absolute())        
+        print(Path(self.parameter['pix2pixHD']).absolute())
         if not torch.cuda.is_available():
             print("Your system has no CUDA installed. No GPU detected.")
             sys.exit(1)
@@ -40,8 +40,8 @@ class OcrdAnybaseocrDewarper(Processor):
 
         if not Path(path).is_dir():
             print("""\
-                NVIDIA's pix2pixHD was not found at '%s'. Make sure the `pix2pixHD` parameter
-                points to the local path to the cloned pix2pixHD repository.
+                NVIDIA's pix2pixHD was not found at '%s'. Make sure the `pix2pixHD` parameter 
+                in params.json points to the local path to the cloned pix2pixHD repository.
 
                 pix2pixHD can be downloaded from https://github.com/NVIDIA/pix2pixHD
                 """ % path)

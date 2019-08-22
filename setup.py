@@ -17,12 +17,13 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'ocrd-anybaseocr-binarize = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_binarize',
-            'ocrd-anybaseocr-deskew   = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_deskew',
-            'ocrd-anybaseocr-crop     = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_cropping',        
-            'ocrd-anybaseocr-dewarp   = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_dewarp',
-            'ocrd-anybaseocr-tiseg    = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_tiseg',
-            'ocrd-anybaseocr-textline = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_textline'
+            'ocrd-anybaseocr-binarize        = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_binarize',
+            'ocrd-anybaseocr-deskew          = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_deskew',
+            'ocrd-anybaseocr-crop            = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_cropping',        
+            'ocrd-anybaseocr-dewarp          = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_dewarp',
+            'ocrd-anybaseocr-tiseg           = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_tiseg',
+            'ocrd-anybaseocr-textline        = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_textline',
+            'ocrd-anybaseocr-layout-analysis = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_layout_analysis'
         ]
     },
 )

@@ -116,6 +116,18 @@
         "parallel":    {"type": "number", "format": "integer", "default": 0, "description": "number of CPUs to use"},
         "libpath":     {"type": "string", "default": ".", "description": "Library Path for C Executables"}
       }
-    }
+    },
+    "ocrd-anybaseocr-layout-analysis": {
+      "executable": "ocrd-anybaseocr-layout-analysis",
+      "input_file_grp": ["OCR-D-IMG-CROP"],
+      "output_file_grp": ["OCR-D-SEG-LAYOUT"],
+      "categories": ["Layout analysis"],
+      "steps": ["layout/segmentation/text-image"],
+      "description": "Analysis of the input document",
+      "parameters": {
+        "batch_size":    {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
+        "model_path":    { "type": "string",                     "required": true, "description": "Path to Layout Structure Classification Model"}
+      }
+    }    
   }
 }
