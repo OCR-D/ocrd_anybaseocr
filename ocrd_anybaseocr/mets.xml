@@ -4,7 +4,7 @@
     <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
       <mets:name>DFG-Koordinierungsprojekt zur Weiterentwicklung von Verfahren der Optical Character Recognition (OCR-D)</mets:name>
       <mets:note>OCR-D</mets:note>
-    </mets:agent>    
+    </mets:agent>        
   </mets:metsHdr>
   <mets:dmdSec ID="DMDLOG_0001">
     <mets:mdWrap MDTYPE="MODS">
@@ -20,11 +20,44 @@
       <mets:file GROUPID="P_becker_quaestio_1586_00013" ID="becker_quaestio_1586_00013" MIMETYPE="image/tiff">
         <mets:FLocat LOCTYPE="URL" xlink:href="OCR-D-IMG/becker_quaestio_1586_00013.tif"/>
       </mets:file>
-      <mets:file GROUPID="GottDie_453779263" ID="GottDie_453779263" MIMETYPE="image/jpg">
+      <mets:file GROUPID="P_GottDie_453779263" ID="GottDie_453779263" MIMETYPE="image/jpg">
         <mets:FLocat LOCTYPE="URL" xlink:href="OCR-D-IMG/GottDie_453779263.jpg"/>
       </mets:file>
-      <mets:file GROUPID="zinck_autorArcanii_1703_00007" ID="zinck_autorArcanii_1703_00007" MIMETYPE="image/tiff">
+      <mets:file GROUPID="P_zinck_autorArcanii_1703_00007" ID="zinck_autorArcanii_1703_00007" MIMETYPE="image/tiff">
         <mets:FLocat LOCTYPE="URL" xlink:href="OCR-D-IMG/zinck_autorArcanii_1703_00007.tif"/>
+      </mets:file>
+    </mets:fileGrp>
+    <mets:fileGrp USE="OCR-D-IMG-BIN">
+      <mets:file MIMETYPE="image/png" ID="OCR-D-IMG-BIN_0001">
+        <mets:FLocat xlink:href="/netscratch/bymana/ocrd_demo/OCR-D-LAYoutERkennung/ocrd_anybaseocr/OCR-D-IMG/becker_quaestio_1586_00013.bin.png"/>
+      </mets:file>
+      <mets:file MIMETYPE="image/png" ID="OCR-D-IMG-BIN_0002">
+        <mets:FLocat xlink:href="/netscratch/bymana/ocrd_demo/OCR-D-LAYoutERkennung/ocrd_anybaseocr/OCR-D-IMG/GottDie_453779263.bin.png"/>
+      </mets:file>
+      <mets:file MIMETYPE="image/png" ID="OCR-D-IMG-BIN_0003">
+        <mets:FLocat xlink:href="/netscratch/bymana/ocrd_demo/OCR-D-LAYoutERkennung/ocrd_anybaseocr/OCR-D-IMG/zinck_autorArcanii_1703_00007.bin.png"/>
+      </mets:file>
+    </mets:fileGrp>
+    <mets:fileGrp USE="OCR-D-IMG-DESKEW">
+      <mets:file MIMETYPE="application/vnd.prima.page+xml" ID="OCR-D-IMG-DESKEW_0001">
+        <mets:FLocat xlink:href="OCR-D-IMG-DESKEW/OCR-D-IMG-DESKEW_0001.xml"/>
+      </mets:file>
+      <mets:file MIMETYPE="application/vnd.prima.page+xml" ID="OCR-D-IMG-DESKEW_0002">
+        <mets:FLocat xlink:href="OCR-D-IMG-DESKEW/OCR-D-IMG-DESKEW_0002.xml"/>
+      </mets:file>
+      <mets:file MIMETYPE="application/vnd.prima.page+xml" ID="OCR-D-IMG-DESKEW_0003">
+        <mets:FLocat xlink:href="OCR-D-IMG-DESKEW/OCR-D-IMG-DESKEW_0003.xml"/>
+      </mets:file>
+    </mets:fileGrp>
+    <mets:fileGrp USE="OCR-D-IMG-CROP">
+      <mets:file MIMETYPE="application/vnd.prima.page+xml" ID="OCR-D-IMG-CROP_0001">
+        <mets:FLocat xlink:href="OCR-D-IMG-CROP/OCR-D-IMG-CROP_0001.xml"/>
+      </mets:file>
+      <mets:file MIMETYPE="application/vnd.prima.page+xml" ID="OCR-D-IMG-CROP_0002">
+        <mets:FLocat xlink:href="OCR-D-IMG-CROP/OCR-D-IMG-CROP_0002.xml"/>
+      </mets:file>
+      <mets:file MIMETYPE="application/vnd.prima.page+xml" ID="OCR-D-IMG-CROP_0003">
+        <mets:FLocat xlink:href="OCR-D-IMG-CROP/OCR-D-IMG-CROP_0003.xml"/>
       </mets:file>
     </mets:fileGrp>    
   </mets:fileSec>

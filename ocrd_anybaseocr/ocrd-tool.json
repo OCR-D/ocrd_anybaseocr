@@ -125,9 +125,22 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Analysis of the input document",
       "parameters": {
-        "batch_size":    {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
-        "model_path":    { "type": "string",                     "required": true, "description": "Path to Layout Structure Classification Model"}
+        "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
+        "model_path":         { "type": "string",                     "required": true, "description": "Path to Layout Structure Classification Model"},
+        "class_mapping_path": { "type": "string",                     "required": true, "description": "Path to Layout Structure Classes"}
       }
-    }    
+    },
+    "ocrd-anybaseocr-block-segmentation": {
+      "executable": "ocrd-anybaseocr-block-segmentation",
+      "input_file_grp": ["OCR-D-IMG"],
+      "output_file_grp": ["OCR-D-BLOCK-SEGMENT"],
+      "categories": ["Layout analysis"],
+      "steps": ["layout/segmentation/text-image"],
+      "description": "Analysis of the input document",
+      "parameters": {        
+        "block_segmentation_model":   { "type": "string",                     "required": true, "description": "Path to Layout Structure Classification Model"},
+        "block_segmentation_weights": { "type": "string",                     "required": true, "description": "Path to Layout Structure Classes"}
+      }
+    }       
   }
 }

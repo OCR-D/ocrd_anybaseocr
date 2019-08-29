@@ -102,7 +102,7 @@ class OcrdAnybaseocrTextline(Processor):
                 offset = (offX, offY)
                 background.paste(img, offset)
                 background.save("%s/temp.png" % base)
-                command = "python "+self.parameter['libpath']+"./ocrd_anybaseocr/anyBaseOCR-gpageseg.py %s/temp.png -n --minscale %f --maxlines %f --scale %f --hscale %f --vscale %f --threshold %f --noise %d --maxseps %d --sepwiden %d --maxcolseps %d --csminaspect %f --csminheight %f -p %d -e %d -Q %d" % (
+                command = "python "+"/b_test/bymana/ocrd_demo/OCR-D-LAYoutERkennung/ocrd_anybaseocr/anyBaseOCR-gpageseg.py %s/temp.png -n --minscale %f --maxlines %f --scale %f --hscale %f --vscale %f --threshold %f --noise %d --maxseps %d --sepwiden %d --maxcolseps %d --csminaspect %f --csminheight %f -p %d -e %d -Q %d" % (
                     base, self.parameter['minscale'], self.parameter['maxlines'], self.parameter['scale'], self.parameter['hscale'], self.parameter['vscale'], self.parameter['threshold'], self.parameter['noise'], self.parameter['maxseps'], self.parameter['sepwiden'], self.parameter['maxcolseps'], self.parameter['csminaspect'], self.parameter['csminheight'], self.parameter['pad'], self.parameter['expand'], self.parameter['parallel'])
                 if(self.parameter['blackseps']):
                     command = command + " -b"
