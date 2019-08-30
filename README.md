@@ -150,7 +150,6 @@ Run `make test` to run all tests.
 
 ## License
 
-> Except for text/non-text segmentation script (ocrd_anybaseocr_tiseg.py) rest of the scripts are licensed under Apache License.
 
 ```
  Licensed under the Apache License, Version 2.0 (the "License");
