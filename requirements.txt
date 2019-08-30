@@ -1,3 +1,11 @@
+numpy >= 1.15.4
+opencv-python >= 3.4
 ocrd-fork-ocropy >= 1.4.0a3
+ocrd-fork-pylsd >= 0.0.3
 click
-ocrd>=1.0.0b11
+ocrd>=1.0.0b15
+torch>=1.1.0
+torchvision
+dominate>=2.3.5
+pandas
+keras

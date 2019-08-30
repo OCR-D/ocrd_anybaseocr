@@ -1,0 +1,7 @@
+{
+   "pix2pixHD": "/home/rakshith/git/pix2pixHD",
+   "model_path": "/b_test/bymana/ocrd_demo/classification/saved_model/document_classification_resnet50.hdf5",
+   "class_mapping_path": "/b_test/bymana/ocrd_demo/classification/saved_model/mapping_document_classification_resnet50.pickle",
+   "block_segmentation_model": "/b_test/bymana/ocrd_demo/block_segmentation",
+   "block_segmentation_weights": "/b_test/bymana/ocrd_demo/block_segmentation/mask_rcnn_block_0099.h5"
+}

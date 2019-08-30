@@ -41,7 +41,7 @@ def write_to_xml(fpath, mets, Output, OutputMets, work):
     for f in fpath:
         basefile = ocrolib.allsplitext(os.path.basename(f))[0]
         child = xmldoc.createElement('mets:file')
-        child.setAttribute('ID', 'CROP_'+basefile)
+        child.setAttribute('ID', 'CROP_' + basefile)
         child.setAttribute('GROUPID', 'P_' + basefile)
         child.setAttribute('MIMETYPE', "image/png")
         subChild = xmldoc.createElement('mets:FLocat')
@@ -54,8 +54,12 @@ def write_to_xml(fpath, mets, Output, OutputMets, work):
         metsFileSave = open(os.path.join(
             work, os.path.basename(mets)), "w")
     else:
-        metsFileSave = open(os.path.join(work, OutputMets if OutputMets.endswith(
-            ".xml") else OutputMets+'.xml'), "w")
+        metsFileSave = open(
+            os.path.join(
+                work,
+                OutputMets if OutputMets.endswith(".xml") else OutputMets +
+                '.xml'),
+            "w")
     metsFileSave.write(xmldoc.toxml())
 
 
