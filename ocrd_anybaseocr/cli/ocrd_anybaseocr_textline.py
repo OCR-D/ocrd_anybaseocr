@@ -21,13 +21,16 @@ import subprocess
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import to_xml
-from ocrd_utils import concat_padded
+from ocrd_utils import concat_padded, getLogger
+
+TOOL = 'ocrd-anybaseocr-textline'
+LOG = getLogger('OcrdAnybaseocrTextline')
 
 
 class OcrdAnybaseocrTextline(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-textline']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrTextline, self).__init__(*args, **kwargs)
 
@@ -48,6 +51,7 @@ class OcrdAnybaseocrTextline(Processor):
             binImg = self.workspace.resolve_image_as_pil(pcgts.get_Page().imageFilename)
             # I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png
             fname = pcgts.get_Page().imageFilename
+            LOG.info("INPUT FILE %s", fname)
             image = ocrolib.read_image_binary(fname)
             height, width = image.shape
             H = height

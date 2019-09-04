@@ -22,13 +22,15 @@ from ..constants import OCRD_TOOL
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import to_xml, parse
-from ocrd_utils import concat_padded
+from ocrd_utils import concat_padded, getLogger
 
+TOOL = 'ocrd-anybaseocr-tiseg'
+LOG = getLogger('OcrdAnybaseocrTiseg')
 
 class OcrdAnybaseocrTiseg(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-tiseg']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrTiseg, self).__init__(*args, **kwargs)
 
@@ -43,6 +45,7 @@ class OcrdAnybaseocrTiseg(Processor):
             pcgts = parse(local_input_file.url, silence=True)
             image_coords = pcgts.get_Page().get_Border().get_Coords().points.split()
             fname = pcgts.get_Page().imageFilename
+            LOG.info("INPUT FILE %s", fname)
 
             # I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png                        
             min_x, min_y = image_coords[0].split(",")

@@ -49,11 +49,13 @@ from ocrd_models.ocrd_page import (
 )
 from ocrd_models.ocrd_page_generateds import BorderType
 
+TOOL = 'ocrd-anybaseocr-crop'
+LOG = getLogger('OcrdAnybaseocrCropper')
 
 class OcrdAnybaseocrCropper(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-crop']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrCropper, self).__init__(*args, **kwargs)
 
@@ -71,8 +73,6 @@ class OcrdAnybaseocrCropper(Processor):
         gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)            
         contours, _ = cv2.findContours(
             gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-
         
         height, width, _ = arg.shape
         imgArea = height*width
@@ -328,8 +328,7 @@ class OcrdAnybaseocrCropper(Processor):
     def marge_columns(self, textarea):
         tmp = []
         marge = []
-        #  height, _ = binImg.shape
-        # print binImg.shape
+        #  height, _ = binImg.shape        
         textarea.sort(key=lambda x: (x[0]))
         # print self.parameter['colSeparator']
         for i in range(len(textarea)-1):
@@ -416,7 +415,7 @@ class OcrdAnybaseocrCropper(Processor):
             
 
             # fname = str(fname)
-            print("Process file: ", fname)
+            LOG.info("INPUT FILE %s", fname)
             base, _ = ocrolib.allsplitext(fname)
 
             img_array = ocrolib.pil2array(rotated_image)

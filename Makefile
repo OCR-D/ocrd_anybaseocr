@@ -67,7 +67,10 @@ install:
 #
 
 # Run all tests
-test: test-tiseg test-textline test-block-segmentation test-layout-analysis
+#test: test-binarize test-deskew test-crop test-tiseg test-textline test-block-segmentation test-layout-analysis
+
+# Run minimum sample
+test: test-binarize
 
 # Test binarization
 test-binarize: 

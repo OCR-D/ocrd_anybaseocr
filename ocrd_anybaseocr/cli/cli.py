@@ -47,7 +47,9 @@ def ocrd_anybaseocr_textline(*args, **kwargs):
 def ocrd_anybaseocr_layout_analysis(*args, **kwargs):
     return ocrd_cli_wrap_processor(OcrdAnybaseocrLayoutAnalyser, *args, **kwargs)
 
+
 @click.command()
 @ocrd_cli_options
 def ocrd_anybaseocr_block_segmentation(*args, **kwargs):
-    return ocrd_cli_wrap_processor(OcrdAnybaseocrBlockSegmenter, *args, **kwargs)    
+    return ocrd_cli_wrap_processor(OcrdAnybaseocrBlockSegmenter, *args, **kwargs)
+

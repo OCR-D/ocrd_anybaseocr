@@ -56,11 +56,13 @@ from ocrd_models.ocrd_page import to_xml,  TextRegionType
 from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
 from ocrd_models.ocrd_page_generateds import RegionType
 
+TOOL = 'ocrd-anybaseocr-deskew'
+LOG = getLogger('OcrdAnybaseocrDeskewer')
 
 class OcrdAnybaseocrDeskewer(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-deskew']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrDeskewer, self).__init__(*args, **kwargs)
 
@@ -83,13 +85,14 @@ class OcrdAnybaseocrDeskewer(Processor):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
             fname = pcgts.get_Page().imageFilename
+            LOG.info("INPUT FILE %s", fname)
             img = self.workspace.resolve_image_as_pil(fname)
             param = self.parameter
             base, _ = ocrolib.allsplitext(fname)
             #basefile = ocrolib.allsplitext(os.path.basename(fpath))[0]
 
             if param['parallel'] < 2:
-                print_info("=== %s " % (fname))
+                LOG.info("=== %s " % (fname))
             raw = ocrolib.read_image_gray(img.filename)
 
             flat = raw
@@ -97,7 +100,7 @@ class OcrdAnybaseocrDeskewer(Processor):
             # estimate skew angle and rotate
             if param['maxskew'] > 0:
                 if param['parallel'] < 2:
-                    print_info("estimating skew angle")
+                    LOG.info("Estimating Skew Angle")
                 d0, d1 = flat.shape
                 o0, o1 = int(param['bignore']*d0), int(param['bignore']*d1)
                 flat = amax(flat)-flat
@@ -115,7 +118,7 @@ class OcrdAnybaseocrDeskewer(Processor):
             # self.write_angles_to_pageXML(base,angle)
             # estimate low and high thresholds
             if param['parallel'] < 2:
-                print_info("estimating thresholds")
+                LOG.info("Estimating Thresholds")
             d0, d1 = flat.shape
             o0, o1 = int(param['bignore']*d0), int(param['bignore']*d1)
             est = flat[o0:d0-o0, o1:d1-o1]
@@ -139,7 +142,7 @@ class OcrdAnybaseocrDeskewer(Processor):
             hi = stats.scoreatpercentile(est.ravel(), param['hi'])
             # rescale the image to get the gray scale image
             if param['parallel'] < 2:
-                print_info("rescaling")
+                LOG.info("Rescaling")
             flat -= lo
             flat /= (hi-lo)
             flat = clip(flat, 0, 1)
@@ -149,10 +152,10 @@ class OcrdAnybaseocrDeskewer(Processor):
             deskewed = 1*(flat > param['threshold'])
 
             # output the normalized grayscale and the thresholded images
-            print_info("%s lo-hi (%.2f %.2f) angle %4.1f" %
+            LOG.info("%s lo-hi (%.2f %.2f) angle %4.1f" %
                        (pcgts.get_Page().imageFilename, lo, hi, angle))
             if param['parallel'] < 2:
-                print_info("writing")
+                LOG.info("Writing")
             #ocrolib.write_image_binary(base+".ds.png", deskewed)
 
             #TODO: Need some clarification as the results effect the following pre-processing steps.

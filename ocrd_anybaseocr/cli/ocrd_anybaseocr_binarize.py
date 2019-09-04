@@ -51,14 +51,20 @@ from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_models.ocrd_page import to_xml
+from ocrd_models.ocrd_page import to_xml, AlternativeImageType
 from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
 
+# Ignore zoom warning from interpolation
+import warnings
+warnings.filterwarnings('ignore', '.*output shape of zoom.*')
+
+TOOL = 'ocrd-anybaseocr-binarize'
+LOG = getLogger('OcrdAnybaseocrBinarizer')
 
 class OcrdAnybaseocrBinarizer(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-binarize']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrBinarizer, self).__init__(*args, **kwargs)
 
@@ -90,26 +96,24 @@ class OcrdAnybaseocrBinarizer(Processor):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
             fname = pcgts.get_Page().imageFilename
-            print(fname)
+            LOG.info("INPUT FILE %s", fname)
             img = self.workspace.resolve_image_as_pil(fname)
+            page = pcgts.get_Page()
 
-            
-            print_info("# %s" % (fname))
             raw = ocrolib.read_image_gray(img.filename)
-
             self.dshow(raw, "input")
 
             # perform image normalization
             image = raw-amin(raw)
             if amax(image) == amin(image):
-                print_info("# image is empty: %s" % (fname))
+                LOG.info("# image is empty: %s" % (fname))
                 return
             image /= amax(image)
 
             if not self.parameter['nocheck']:
                 check = self.check_page(amax(image)-image)
                 if check is not None:
-                    print_error(fname+" SKIPPED. "+check +
+                    LOG.error(fname+" SKIPPED. "+check +
                                 " (use -n to disable this check)")
                     return
 
@@ -125,7 +129,7 @@ class OcrdAnybaseocrBinarizer(Processor):
             else:
                 comment = ""
                 # if not, we need to flatten it by estimating the local whitelevel
-                print_info("flattening")
+                LOG.info("Flattening")
                 m = interpolation.zoom(image, self.parameter['zoom'])
                 m = filters.percentile_filter(
                     m, self.parameter['perc'], size=(self.parameter['range'], 2))
@@ -144,7 +148,7 @@ class OcrdAnybaseocrBinarizer(Processor):
                     ginput(1, self.parameter['debug'])
 
             # estimate low and high thresholds
-            print_info("estimating thresholds")
+            LOG.info("Estimating Thresholds")
             d0, d1 = flat.shape
             o0, o1 = int(self.parameter['bignore']
                          * d0), int(self.parameter['bignore']*d1)
@@ -168,7 +172,7 @@ class OcrdAnybaseocrBinarizer(Processor):
             lo = stats.scoreatpercentile(est.ravel(), self.parameter['lo'])
             hi = stats.scoreatpercentile(est.ravel(), self.parameter['hi'])
             # rescale the image to get the gray scale image
-            print_info("rescaling")
+            LOG.info("Rescaling")
             flat -= lo
             flat /= (hi-lo)
             flat = clip(flat, 0, 1)
@@ -179,8 +183,8 @@ class OcrdAnybaseocrBinarizer(Processor):
 
             # output the normalized grayscale and the thresholded images
             # print_info("%s lo-hi (%.2f %.2f) angle %4.1f %s" % (fname, lo, hi, angle, comment))
-            print_info("%s lo-hi (%.2f %.2f) %s" % (fname, lo, hi, comment))
-            print_info("writing")
+            LOG.info("%s lo-hi (%.2f %.2f) %s" % (fname, lo, hi, comment))
+            LOG.info("writing")
             if self.parameter['debug'] > 0 or self.parameter['show']:
                 clf()
                 gray()
@@ -196,6 +200,8 @@ class OcrdAnybaseocrBinarizer(Processor):
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.output_file_grp, n)
+
+            #page.add_AlternativeImage(AlternativeImageType(filename="", comment="binarized"))
 
             self.workspace.add_file(
                 ID=file_id,
