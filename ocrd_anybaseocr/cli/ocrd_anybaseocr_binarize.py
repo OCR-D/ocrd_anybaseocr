@@ -200,6 +200,14 @@ class OcrdAnybaseocrBinarizer(Processor):
 
             # bin_array = array(255*(binarized>ocrolib.midrange(binarized)),'B')
             # bin_image = ocrolib.array2pil(bin_array)
+
+            '''
+            file_path = self.workspace.save_image_file(bin_image,
+                                       file_id + ".bin",
+                                       page_id=page_id,
+                                       file_grp=self.output_file_grp
+                )            
+            '''
             
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
             if file_id == input_file.ID:
