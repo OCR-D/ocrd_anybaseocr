@@ -52,7 +52,7 @@ from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_models.ocrd_page import to_xml,  TextRegionType
+from ocrd_models.ocrd_page import to_xml,  TextRegionType, AlternativeImageType
 from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
 from ocrd_models.ocrd_page_generateds import RegionType
 
@@ -65,7 +65,7 @@ class OcrdAnybaseocrDeskewer(Processor):
         super(OcrdAnybaseocrDeskewer, self).__init__(*args, **kwargs)
 
     def estimate_skew_angle(self, image, angles):
-        param = self.parameter
+        self.parameter = self.parameter
         estimates = []
 
         for a in angles:
@@ -73,104 +73,114 @@ class OcrdAnybaseocrDeskewer(Processor):
                 image, a, order=0, mode='constant'), axis=1)
             v = var(v)
             estimates.append((v, a))
-        if param['debug'] > 0:
+        if self.parameter['debug'] > 0:
             plot([y for x, y in estimates], [x for x, y in estimates])
-            ginput(1, param['debug'])
+            ginput(1, self.parameter['debug'])
         _, a = max(estimates)
         return a
 
     def process(self):
-        for (n, input_file) in enumerate(self.input_files):
+        for (n, input_file) in enumerate(self.input_files):            
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            fname = pcgts.get_Page().imageFilename
-            img = self.workspace.resolve_image_as_pil(fname)
-            param = self.parameter
-            base, _ = ocrolib.allsplitext(fname)
-            #basefile = ocrolib.allsplitext(os.path.basename(fpath))[0]
+            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID            
+            page = pcgts.get_Page()
 
-            if param['parallel'] < 2:
-                print_info("=== %s " % (fname))
-            raw = ocrolib.read_image_gray(img.filename)
-
-            flat = raw
-            #flat = np.array(binImg)
-            # estimate skew angle and rotate
-            if param['maxskew'] > 0:
-                if param['parallel'] < 2:
-                    print_info("estimating skew angle")
-                d0, d1 = flat.shape
-                o0, o1 = int(param['bignore']*d0), int(param['bignore']*d1)
-                flat = amax(flat)-flat
-                flat -= amin(flat)
-                est = flat[o0:d0-o0, o1:d1-o1]
-                ma = param['maxskew']
-                ms = int(2*param['maxskew']*param['skewsteps'])
-                angle = self.estimate_skew_angle(est, linspace(-ma, ma, ms+1))
-                flat = interpolation.rotate(
-                    flat, angle, mode='constant', reshape=0)
-                flat = amax(flat)-flat
-            else:
-                angle = 0
-
-            # self.write_angles_to_pageXML(base,angle)
-            # estimate low and high thresholds
-            if param['parallel'] < 2:
-                print_info("estimating thresholds")
-            d0, d1 = flat.shape
-            o0, o1 = int(param['bignore']*d0), int(param['bignore']*d1)
-            est = flat[o0:d0-o0, o1:d1-o1]
-            if param['escale'] > 0:
-                # by default, we use only regions that contain
-                # significant variance; this makes the percentile
-                # based low and high estimates more reliable
-                e = param['escale']
-                v = est-filters.gaussian_filter(est, e*20.0)
-                v = filters.gaussian_filter(v**2, e*20.0)**0.5
-                v = (v > 0.3*amax(v))
-                v = morphology.binary_dilation(
-                    v, structure=ones((int(e*50), 1)))
-                v = morphology.binary_dilation(
-                    v, structure=ones((1, int(e*50))))
-                if param['debug'] > 0:
-                    imshow(v)
-                    ginput(1, param['debug'])
-                est = est[v]
-            lo = stats.scoreatpercentile(est.ravel(), param['lo'])
-            hi = stats.scoreatpercentile(est.ravel(), param['hi'])
-            # rescale the image to get the gray scale image
-            if param['parallel'] < 2:
-                print_info("rescaling")
-            flat -= lo
-            flat /= (hi-lo)
-            flat = clip(flat, 0, 1)
-            if param['debug'] > 0:
-                imshow(flat, vmin=0, vmax=1)
-                ginput(1, param['debug'])
-            deskewed = 1*(flat > param['threshold'])
-
-            # output the normalized grayscale and the thresholded images
-            print_info("%s lo-hi (%.2f %.2f) angle %4.1f" %
-                       (pcgts.get_Page().imageFilename, lo, hi, angle))
-            if param['parallel'] < 2:
-                print_info("writing")
-            #ocrolib.write_image_binary(base+".ds.png", deskewed)
-
-            #TODO: Need some clarification as the results effect the following pre-processing steps.
-            #orientation = -angle
-            #orientation = 180 - ((180 - orientation) % 360)
-            pcgts.get_Page().set_orientation(angle)
-            #print(orientation, angle)
-
-            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
-            if file_id == input_file.ID:
-                file_id = concat_padded(self.output_file_grp, n)
+            # why does it save the image ??
+            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
             
-            self.workspace.add_file(
-                ID=file_id,
-                file_grp=self.output_file_grp,
-                pageId=input_file.pageId,
-                mimetype=MIMETYPE_PAGE,                
-                local_filename=os.path.join(self.output_file_grp,
-                                            file_id + '.xml'),
-                content=to_xml(pcgts).encode('utf-8')
-            )
+            '''
+            alternative_image = page.get_AlternativeImage()
+            if alternative_image:
+                filename = alternative_image[-1].get_filename()
+                if self.parameter['parallel'] < 2:
+                    LOG.info("INPUT FILE %s ", input_file.pageId or input_file.ID)                                                                        
+            
+                raw = ocrolib.read_image_gray(filename)
+
+                flat = raw
+                #flat = np.array(binImg)
+                # estimate skew angle and rotate
+                if self.parameter['maxskew'] > 0:
+                    if self.parameter['parallel'] < 2:
+                        LOG.info("Estimating Skew Angle")
+                    d0, d1 = flat.shape
+                    o0, o1 = int(self.parameter['bignore']*d0), int(self.parameter['bignore']*d1)
+                    flat = amax(flat)-flat
+                    flat -= amin(flat)
+                    est = flat[o0:d0-o0, o1:d1-o1]
+                    ma = self.parameter['maxskew']
+                    ms = int(2*self.parameter['maxskew']*self.parameter['skewsteps'])
+                    angle = self.estimate_skew_angle(est, linspace(-ma, ma, ms+1))
+                    flat = interpolation.rotate(
+                        flat, angle, mode='constant', reshape=0)
+                    flat = amax(flat)-flat
+                else:
+                    angle = 0
+
+                # self.write_angles_to_pageXML(base,angle)
+                # estimate low and high thresholds
+                if self.parameter['parallel'] < 2:
+                    LOG.info("Estimating Thresholds")
+                    
+                d0, d1 = flat.shape
+                o0, o1 = int(self.parameter['bignore']*d0), int(self.parameter['bignore']*d1)
+                est = flat[o0:d0-o0, o1:d1-o1]
+                if self.parameter['escale'] > 0:
+                    # by default, we use only regions that contain
+                    # significant variance; this makes the percentile
+                    # based low and high estimates more reliable
+                    e = self.parameter['escale']
+                    v = est-filters.gaussian_filter(est, e*20.0)
+                    v = filters.gaussian_filter(v**2, e*20.0)**0.5
+                    v = (v > 0.3*amax(v))
+                    v = morphology.binary_dilation(
+                        v, structure=ones((int(e*50), 1)))
+                    v = morphology.binary_dilation(
+                        v, structure=ones((1, int(e*50))))
+                    if self.parameter['debug'] > 0:
+                        imshow(v)
+                        ginput(1, self.parameter['debug'])
+                    est = est[v]
+                lo = stats.scoreatpercentile(est.ravel(), self.parameter['lo'])
+                hi = stats.scoreatpercentile(est.ravel(), self.parameter['hi'])
+                # rescale the image to get the gray scale image
+                if self.parameter['parallel'] < 2:
+                    LOG.info("Rescaling")
+                flat -= lo
+                flat /= (hi-lo)
+                flat = clip(flat, 0, 1)
+                if self.parameter['debug'] > 0:
+                    imshow(flat, vmin=0, vmax=1)
+                    ginput(1, self.parameter['debug'])
+                deskewed = 1*(flat > self.parameter['threshold'])
+
+                # output the normalized grayscale and the thresholded images
+                LOG.info("%s lo-hi (%.2f %.2f) angle %4.1f" %
+                           (pcgts.get_Page().imageFilename, lo, hi, angle))
+                if self.parameter['parallel'] < 2:
+                    LOG.info("Writing")
+                #ocrolib.write_image_binary(base+".ds.png", deskewed)
+
+                #TODO: Need some clarification as the results effect the following pre-processing steps.
+                #orientation = -angle
+                #orientation = 180 - ((180 - orientation) % 360)
+                pcgts.get_Page().set_orientation(angle)
+                #print(orientation, angle)
+
+                file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
+                if file_id == input_file.ID:
+                    file_id = concat_padded(self.output_file_grp, n)
+                
+                self.workspace.add_file(
+                    ID=file_id,
+                    file_grp=self.output_file_grp,
+                    pageId=input_file.pageId,
+                    mimetype=MIMETYPE_PAGE,                
+                    local_filename=os.path.join(self.output_file_grp,
+                                                file_id + '.xml'),
+                    content=to_xml(pcgts).encode('utf-8')
+                )
+            else:
+                LOG.error("Deskewing requires a binarized image.")
+            '''  
+

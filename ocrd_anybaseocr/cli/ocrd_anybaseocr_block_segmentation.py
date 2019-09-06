@@ -16,6 +16,8 @@ from ocrd_models.ocrd_page import to_xml, parse, TextRegionType
 from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
 from ocrd_models.ocrd_page_generateds import RegionType
 
+import warnings
+warnings.filterwarnings('ignore',category=FutureWarning) 
 import tensorflow as tf
 import logging
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'

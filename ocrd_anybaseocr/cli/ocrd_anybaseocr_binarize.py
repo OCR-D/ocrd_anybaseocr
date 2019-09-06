@@ -53,6 +53,7 @@ from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import to_xml
 from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
+from PIL import Image
 
 
 class OcrdAnybaseocrBinarizer(Processor):
@@ -86,17 +87,16 @@ class OcrdAnybaseocrBinarizer(Processor):
         imshow(image)
         ginput(1, self.parameter['debug'])
 
-    def process(self):
-        for (n, input_file) in enumerate(self.input_files):
+    def process(self):                
+        for (n, input_file) in enumerate(self.input_files):            
             pcgts = page_from_file(self.workspace.download_file(input_file))
+            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID
+            page = pcgts.get_Page()
             fname = pcgts.get_Page().imageFilename
-            print(fname)
-            img = self.workspace.resolve_image_as_pil(fname)
-
+            LOG.info("INPUT FILE %s", fname)          
+            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)            
             
-            print_info("# %s" % (fname))
-            raw = ocrolib.read_image_gray(img.filename)
-
+            raw = ocrolib.read_image_gray(page_image.filename)
             self.dshow(raw, "input")
 
             # perform image normalization
@@ -186,25 +186,38 @@ class OcrdAnybaseocrBinarizer(Processor):
                 gray()
                 imshow(binarized)
                 ginput(1, max(0.1, self.parameter['debug']))
-            base, _ = ocrolib.allsplitext(img.filename)
+            base, _ = ocrolib.allsplitext(page_image.filename)
             ocrolib.write_image_binary(base + ".bin.png", binarized)
             # ocrolib.write_image_gray(base +".nrm.png", flat)
             # print("########### File path : ", base+".nrm.png")
             # write_to_xml(base+".bin.png")
             # return base+".bin.png"
-            
+
+            # bin_array = array(255*(binarized>ocrolib.midrange(binarized)),'B')
+            # bin_image = ocrolib.array2pil(bin_array)
+                                    
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.output_file_grp, n)
+
+
+            
+            '''
+            file_path = self.workspace.save_image_file(bin_image,
+                                       file_id + ".bin",
+                                       page_id=page_id,
+                                       file_grp=self.output_file_grp
+                )            
+            '''
+            page.add_AlternativeImage(AlternativeImageType(filename=base + ".bin.png", comment="binarized"))
 
             self.workspace.add_file(
                 ID=file_id,
                 file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
-                mimetype="image/png",
-                url=base + ".bin.png",
+                mimetype = MIMETYPE_PAGE,                
                 local_filename=os.path.join(self.output_file_grp,
                                             file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
-            )
+            )            
             
