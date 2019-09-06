@@ -7,6 +7,8 @@ from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_utils import getLogger
 
+import warnings
+warnings.filterwarnings('ignore',category=FutureWarning) 
 import tensorflow as tf
 from pathlib import Path
 import numpy as np

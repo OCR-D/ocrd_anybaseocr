@@ -4,31 +4,7 @@
     <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
       <mets:name>DFG-Koordinierungsprojekt zur Weiterentwicklung von Verfahren der Optical Character Recognition (OCR-D)</mets:name>
       <mets:note>OCR-D</mets:note>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
-      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
-      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
-      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
-      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
-      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
-      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
-      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
-    </mets:agent>
-    <mets:agent TYPE="OTHER" OTHERTYPE="SOFTWARE" ROLE="OTHER" OTHERROLE="preprocessing/optimization/binarization">
-      <mets:name>ocrd-anybaseocr-binarize v0.0.1</mets:name>
-    </mets:agent>
+    </mets:agent>    
   </mets:metsHdr>
   <mets:dmdSec ID="DMDLOG_0001">
     <mets:mdWrap MDTYPE="MODS">

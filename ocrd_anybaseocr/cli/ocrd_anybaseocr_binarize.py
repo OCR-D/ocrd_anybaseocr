@@ -95,25 +95,26 @@ class OcrdAnybaseocrBinarizer(Processor):
     def process(self):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            fname = pcgts.get_Page().imageFilename
-            LOG.info("INPUT FILE %s", fname)
-            img = self.workspace.resolve_image_as_pil(fname)
+            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID
             page = pcgts.get_Page()
-
-            raw = ocrolib.read_image_gray(img.filename)
+            LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
+            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
+            print("----------", type(page_image))
+                        
+            raw = ocrolib.read_image_gray(page_image.filename)
             self.dshow(raw, "input")
 
             # perform image normalization
             image = raw-amin(raw)
             if amax(image) == amin(image):
-                LOG.info("# image is empty: %s" % (fname))
+                LOG.info("# image is empty: %s" % (input_file.pageId or input_file.ID))
                 return
             image /= amax(image)
 
             if not self.parameter['nocheck']:
                 check = self.check_page(amax(image)-image)
                 if check is not None:
-                    LOG.error(fname+" SKIPPED. "+check +
+                    LOG.error(input_file.pageId or input_file.ID+" SKIPPED. "+check +
                                 " (use -n to disable this check)")
                     return
 
@@ -183,25 +184,28 @@ class OcrdAnybaseocrBinarizer(Processor):
 
             # output the normalized grayscale and the thresholded images
             # print_info("%s lo-hi (%.2f %.2f) angle %4.1f %s" % (fname, lo, hi, angle, comment))
-            LOG.info("%s lo-hi (%.2f %.2f) %s" % (fname, lo, hi, comment))
+            LOG.info("%s lo-hi (%.2f %.2f) %s" % (input_file.pageId or input_file.ID, lo, hi, comment))
             LOG.info("writing")
             if self.parameter['debug'] > 0 or self.parameter['show']:
                 clf()
                 gray()
                 imshow(binarized)
                 ginput(1, max(0.1, self.parameter['debug']))
-            base, _ = ocrolib.allsplitext(img.filename)
+            base, _ = ocrolib.allsplitext(page_image.filename)
             ocrolib.write_image_binary(base + ".bin.png", binarized)
             # ocrolib.write_image_gray(base +".nrm.png", flat)
             # print("########### File path : ", base+".nrm.png")
             # write_to_xml(base+".bin.png")
             # return base+".bin.png"
+
+            # bin_array = array(255*(binarized>ocrolib.midrange(binarized)),'B')
+            # bin_image = ocrolib.array2pil(bin_array)
             
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.output_file_grp, n)
 
-            #page.add_AlternativeImage(AlternativeImageType(filename="", comment="binarized"))
+            page.add_AlternativeImage(AlternativeImageType(filename=base + ".bin.png", comment="binarized"))
 
             self.workspace.add_file(
                 ID=file_id,

@@ -406,17 +406,16 @@ class OcrdAnybaseocrCropper(Processor):
     def process(self):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            fname = pcgts.get_Page().imageFilename
-            img = self.workspace.resolve_image_as_pil(fname) 
-            
+            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID            
+            page = pcgts.get_Page()
+            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
+            print(type(page_image), page_image.filename)
+                        
             # Get image orientation
-            orientation = pcgts.get_Page().get_orientation()            
-            rotated_image = self.rotate_image(orientation, img)
+            orientation = pcgts.get_Page().get_orientation()
+            rotated_image = self.rotate_image(orientation, page_image)
             
-
-            # fname = str(fname)
-            LOG.info("INPUT FILE %s", fname)
-            base, _ = ocrolib.allsplitext(fname)
+            LOG.info("INPUT FILE %s ", input_file.pageId or input_file.ID)
 
             img_array = ocrolib.pil2array(rotated_image)
 
