@@ -45,11 +45,11 @@ class OcrdAnybaseocrTiseg(Processor):
             page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
-            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
+            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)            
             # image_coords = pcgts.get_Page().get_Border().get_Coords().points.split()
 
             # why does it return Image type when there is data (border info from crop)
-            print("----------", type(page_image))
+            print("----------", type(page_image), page_xywh)
 
             # I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png
             '''

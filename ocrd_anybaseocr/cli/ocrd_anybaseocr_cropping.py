@@ -409,7 +409,7 @@ class OcrdAnybaseocrCropper(Processor):
             page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID            
             page = pcgts.get_Page()
             page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
-            print(type(page_image), page_image.filename)
+            print("----------", type(page_image), page_xywh)
                         
             # Get image orientation
             orientation = pcgts.get_Page().get_orientation()

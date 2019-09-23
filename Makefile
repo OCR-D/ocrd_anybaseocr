@@ -1,5 +1,5 @@
 exec_name_prefix = ocrd-anybaseocr
-testdir = ""
+testdir = tests
 
 export
 
@@ -42,6 +42,7 @@ install:
 # Assets
 #
 
+#Add other models here
 # Download sample model
 #model: ocrd_anybaseocr/models/latest_net_G.pth
 
@@ -49,18 +50,18 @@ install:
 #	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download"
 
 # Clone OCR-D/assets to ./repo/assets
-#repo/assets:
-#	mkdir -p $(dir $@)
-#	git clone https://github.com/OCR-D/assets "$@"
+repo/assets:
+	mkdir -p $(dir $@)
+	git clone https://github.com/OCR-D/assets "$@"
 
 # Remove assets
-#assets-clean:
-#	rm -rf $(testdir)/assets
+assets-clean:
+	rm -rf $(testdir)/assets
 
 # Setup test assets
-#assets: repo/assets
-#	mkdir -p $(testdir)/assets
-#	cp -r -t $(testdir)/assets repo/assets/data/*
+assets: repo/assets
+	mkdir -p $(testdir)/assets
+	cp -r -t $(testdir)/assets repo/assets/data/*
 
 #
 # Tests
@@ -73,24 +74,25 @@ install:
 test: test-binarize
 
 # Test binarization
-test-binarize: 
-	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-binarize -m mets.xml -I OCR-D-IMG -O OCR-D-IMG-BIN
+test-binarize: assets-clean assets
+	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-binarize -m mets.xml -I OCR-D-IMG -O OCR-D-IMG-BIN-TEST
 
 # Test deskewing
-test-deskew: 
-	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-deskew -m mets.xml -I OCR-D-IMG-BIN -O OCR-D-IMG-DESKEW
+test-deskew: assets-clean assets
+	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-deskew -m mets.xml -I OCR-D-IMG-BIN-TEST -O OCR-D-IMG-DESKEW-TEST
 
 # Test cropping
-test-crop: 
-	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-crop -m mets.xml -I OCR-D-IMG-DESKEW -O OCR-D-IMG-CROP
+test-crop: assets-clean assets
+	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-crop -m mets.xml -I OCR-D-IMG-DESKEW-TEST -O OCR-D-IMG-CROP-TEST
 
 # Test text/non-text segmentation
-test-tiseg: 
-	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-tiseg -m mets.xml -I OCR-D-IMG-CROP -O OCR-D-IMG-TISEG
+test-tiseg: assets-clean assets
+	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-tiseg -m mets.xml -I OCR-D-IMG-CROP-TEST -O OCR-D-IMG-TISEG-TEST
 
 # Test textline extraction
-test-textline: 
-	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-textline -m mets.xml -I OCR-D-IMG-TISEG -O OCR-D-IMG-TL
+test-textline: assets-clean assets
+	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-textline -m mets.xml -I OCR-D-IMG-TISEG-TEST -O OCR-D-IMG-TL-TEST
+
 
 # Test block segmentation
 test-block-segmentation: 

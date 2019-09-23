@@ -4,7 +4,7 @@
     <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
       <mets:name>DFG-Koordinierungsprojekt zur Weiterentwicklung von Verfahren der Optical Character Recognition (OCR-D)</mets:name>
       <mets:note>OCR-D</mets:note>
-    </mets:agent>    
+    </mets:agent>        
   </mets:metsHdr>
   <mets:dmdSec ID="DMDLOG_0001">
     <mets:mdWrap MDTYPE="MODS">
@@ -21,5 +21,5 @@
         <mets:FLocat LOCTYPE="URL" xlink:href="OCR-D-IMG/becker_quaestio_1586_00013.tif"/>
       </mets:file>
     </mets:fileGrp>    
-  </mets:fileSec>
+  </mets:fileSec>  
 </mets:mets>
