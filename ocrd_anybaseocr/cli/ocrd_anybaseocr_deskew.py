@@ -90,7 +90,6 @@ class OcrdAnybaseocrDeskewer(Processor):
             # why does it save the image ??
             page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
             print("----------", type(page_image), page_xywh)
-
             
             if self.parameter['parallel'] < 2:
                 LOG.info("INPUT FILE %s ", input_file.pageId or input_file.ID)

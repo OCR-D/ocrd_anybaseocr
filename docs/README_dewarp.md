@@ -17,7 +17,7 @@ Link: http://gepris.dfg.de/gepris/projekt/394343055?language=en
 This function takes a document image as input and make the text line straight if its curved.
 
 # LICENSE
-Copyright 2018 Syed Saqib Bukhari, Mohammad Mohsin Reza, Md. Ajraf Rakib
+Copyright 2018 Syed Saqib Bukhari, Mohammad Mohsin Reza
 Apache License 2.0
 
 pix2pixHD: Copyright (C) 2017 NVIDIA Corporation. Ting-Chun Wang, Ming-Yu Liu, Jun-Yan Zhu. 
