@@ -45,12 +45,15 @@ from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import (
     CoordsType,
-    to_xml
+    to_xml,
+    MetadataItemType,
+    LabelsType, LabelType
 )
 from ocrd_models.ocrd_page_generateds import BorderType
 
 TOOL = 'ocrd-anybaseocr-crop'
 LOG = getLogger('OcrdAnybaseocrCropper')
+FALLBACK_IMAGE_GRP = 'OCR-D-IMG-CROP'
 
 class OcrdAnybaseocrCropper(Processor):
 
@@ -404,15 +407,35 @@ class OcrdAnybaseocrCropper(Processor):
         return textarea
 
     def process(self):
+        try:
+            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+        except ValueError:
+            self.page_grp = self.output_file_grp
+            self.image_grp = FALLBACK_IMAGE_GRP
+            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
+        oplevel = self.parameter['operation_level']
+
         for (n, input_file) in enumerate(self.input_files):
+            file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+            page_id = input_file.pageId or input_file.ID
+            LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID            
+            metadata = pcgts.get_Metadata()
+            metadata.add_MetadataItem(
+                    MetadataItemType(type_="processingStep",
+                                     name=self.ocrd_tool['steps'][0],
+                                     value=TOOL,                                     
+                                     Labels=[LabelsType(#externalRef="parameters",
+                                                        Label=[LabelType(type_=name,
+                                                                         value=self.parameter[name])
+                                                               for name in self.parameter.keys()])]))
             page = pcgts.get_Page()
-            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
-            print("----------", type(page_image), page_xywh)
+            print(page.imageFilename)
+            #page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id)
                         
+            '''            
             # Get image orientation
-            orientation = pcgts.get_Page().get_orientation()
+            orientation = page.get_orientation()
             rotated_image = self.rotate_image(orientation, page_image)
             
             LOG.info("INPUT FILE %s ", input_file.pageId or input_file.ID)
@@ -475,6 +498,9 @@ class OcrdAnybaseocrCropper(Processor):
                                             file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
+            '''
+
+
             
 
             

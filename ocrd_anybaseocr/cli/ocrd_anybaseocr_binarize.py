@@ -104,12 +104,12 @@ class OcrdAnybaseocrBinarizer(Processor):
         except ValueError:
             self.page_grp = self.output_file_grp
             self.image_grp = FALLBACK_IMAGE_GRP
-            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)            
+            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
 
         for (n, input_file) in enumerate(self.input_files):
-            file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)            
-            page_id = input_file.pageId or input_file.ID            
+            file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+            page_id = input_file.pageId or input_file.ID
             LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
             metadata = pcgts.get_Metadata()
@@ -122,19 +122,19 @@ class OcrdAnybaseocrBinarizer(Processor):
                                                                          value=self.parameter[name])
                                                                for name in self.parameter.keys()])]))
 
-            page = pcgts.get_Page()            
+            page = pcgts.get_Page()
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id)
             LOG.info("Binarizing on '%s' level in page '%s'", oplevel, page_id)                    
             
             if oplevel=="page":
-                self._process_segment(page, page_image.filename, page_id, file_id)
+                self._process_segment(page, page_image.filename, page_id, file_id + ".bin")
             else:
                 regions = page.get_TextRegion() + page.get_TableRegion()
                 if not regions:
                     LOG.warning("Page '%s' contains no text regions", page_id)
                 for region in regions:
                     region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
-                    # strange TODO
+                    # strange TODO at the moment
                     #self._process_segment(region.filename, region.id)
 
             # To retain the basenames of files and their respective dir:
@@ -258,6 +258,6 @@ class OcrdAnybaseocrBinarizer(Processor):
                                    file_id,
                                    page_id=page_id,
                                    file_grp=self.image_grp
-            )        
+            )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comment="binarized"))        
             

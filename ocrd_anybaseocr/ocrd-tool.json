@@ -42,7 +42,8 @@
         "debug":     {"type": "number", "format": "integer", "default": 0,   "description": "display intermediate results"},
         "parallel":  {"type": "number", "format": "integer", "default": 0,   "description": "???"},
         "lo":        {"type": "number", "format": "integer", "default": 5,   "description": "percentile for black estimation"},
-        "hi":        {"type": "number", "format": "integer", "default": 90,   "description": "percentile for white estimation"}
+        "hi":        {"type": "number", "format": "integer", "default": 90,   "description": "percentile for white estimation"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
     "ocrd-anybaseocr-crop": {
@@ -62,7 +63,8 @@
         "positionRight": {"type": "number", "format": "float", "default": 0.6, "description": "rular position in right"},
         "rularRatioMax": {"type": "number", "format": "float", "default": 10.0, "description": "rular position in below"},
         "rularRatioMin": {"type": "number", "format": "float", "default": 3.0, "description": "rular position in below"},
-        "rularWidth":    {"type": "number", "format": "float", "default": 0.95, "description": "maximum rular width"}
+        "rularWidth":    {"type": "number", "format": "float", "default": 0.95, "description": "maximum rular width"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
     "ocrd-anybaseocr-dewarp": {
