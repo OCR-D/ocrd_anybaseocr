@@ -46,7 +46,6 @@ from scipy.ndimage import filters, interpolation, morphology
 from scipy import stats
 import numpy as np
 
-from ..utils import print_info, print_error
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
