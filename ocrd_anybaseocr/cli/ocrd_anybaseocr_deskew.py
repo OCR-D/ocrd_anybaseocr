@@ -47,7 +47,6 @@ from pylab import amin, amax, linspace, mean, var, plot, ginput, ones, clip, ims
 from scipy.ndimage import filters, interpolation, morphology
 from scipy import stats
 import ocrolib
-from ..utils import print_info
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
