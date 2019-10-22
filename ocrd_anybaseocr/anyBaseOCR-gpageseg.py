@@ -457,7 +457,7 @@ def process1(job):
     fname, i = job
     global base
     base, _ = ocrolib.allsplitext(fname)
-    outputdir = base
+    outputdir = base    
 
     try:
         binary = ocrolib.read_image_binary(base+".bin.png")
@@ -528,7 +528,7 @@ def process1(job):
 
     if not args.quiet:
         print("writing lines")
-    if not os.path.exists(outputdir):
+    if not os.path.exists(outputdir):        
         os.mkdir(outputdir)
     lines = [lines[i] for i in lsort]
     ocrolib.write_page_segmentation("%s.pseg.png" % outputdir, segmentation)

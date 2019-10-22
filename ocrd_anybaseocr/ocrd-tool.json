@@ -1,11 +1,91 @@
 {
-  "git_url": "https://github.com/syedsaqibbukhari/docanalysis",
+  "git_url": "https://github.com/mjenckel/LAYoutERkennung/",
   "version": "0.0.1",
   "tools": {
+    "ocrd-anybaseocr-binarize": {
+      "executable": "ocrd-anybaseocr-binarize",
+      "description": "Binarize images with the algorithm from ocropy",
+      "categories": ["Image preprocessing"],
+      "steps": ["preprocessing/optimization/binarization"],
+      "input_file_grp": ["OCR-D-IMG"],
+      "output_file_grp": ["OCR-D-IMG-BIN"],
+      "parameters": {
+        "nocheck":         {"type": "boolean",                     "default": false, "description": "disable error checking on inputs"},
+        "show":            {"type": "boolean",                     "default": false, "description": "display final results"},
+        "raw_copy":        {"type": "boolean",                     "default": false, "description": "also copy the raw image"},
+        "gray":            {"type": "boolean",                     "default": false, "description": "force grayscale processing even if image seems binary"},
+        "bignore":         {"type": "number", "format": "float",   "default": 0.1,   "description": "ignore this much of the border for threshold estimation"},
+        "debug":           {"type": "number", "format": "integer", "default": 0,     "description": "display intermediate results"},
+        "escale":          {"type": "number", "format": "float",   "default": 1.0,   "description": "scale for estimating a mask over the text region"},
+        "hi":              {"type": "number", "format": "float",   "default": 90,    "description": "percentile for white estimation"},
+        "lo":              {"type": "number", "format": "float",   "default": 5,     "description": "percentile for black estimation"},
+        "perc":            {"type": "number", "format": "float",   "default": 80,    "description": "percentage for filters"},
+        "range":           {"type": "number", "format": "integer", "default": 20,    "description": "range for filters"},
+        "threshold":       {"type": "number", "format": "float",   "default": 0.5,   "description": "threshold, determines lightness"},
+        "zoom":            {"type": "number", "format": "float",   "default": 0.5,   "description": "zoom for page background estimation, smaller=faster"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
+      }
+    },
+    "ocrd-anybaseocr-deskew": {
+      "executable": "ocrd-anybaseocr-deskew",
+      "description": "Deskew images with the algorithm from ocropy",
+      "categories": ["Image preprocessing"],
+      "steps": ["preprocessing/optimization/deskewing"],
+      "input_file_grp": ["OCR-D-IMG-BIN"],
+      "output_file_grp": ["OCR-D-IMG-DESKEW"],
+      "parameters": {
+        "escale":    {"type": "number", "format": "float",   "default": 1.0, "description": "scale for estimating a mask over the text region"},
+        "bignore":   {"type": "number", "format": "float",   "default": 0.1, "description": "ignore this much of the border for threshold estimation"},
+        "threshold": {"type": "number", "format": "float",   "default": 0.5, "description": "threshold, determines lightness"},
+        "maxskew":   {"type": "number", "format": "float",   "default": 1.0, "description": "skew angle estimation parameters (degrees)"},
+        "skewsteps": {"type": "number", "format": "integer", "default": 8,   "description": "steps for skew angle estimation (per degree)"},
+        "debug":     {"type": "number", "format": "integer", "default": 0,   "description": "display intermediate results"},
+        "parallel":  {"type": "number", "format": "integer", "default": 0,   "description": "???"},
+        "lo":        {"type": "number", "format": "integer", "default": 5,   "description": "percentile for black estimation"},
+        "hi":        {"type": "number", "format": "integer", "default": 90,   "description": "percentile for white estimation"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
+      }
+    },
+    "ocrd-anybaseocr-crop": {
+      "executable": "ocrd-anybaseocr-crop",
+      "description": "Image crop using non-linear processing",
+      "categories": ["Image preprocessing"],
+      "steps": ["preprocessing/optimization/cropping"],
+      "input_file_grp": ["OCR-D-IMG-DESKEW"],
+      "output_file_grp": ["OCR-D-IMG-CROP"],
+      "parameters": {
+        "colSeparator":  {"type": "number", "format": "float", "default": 0.04, "description": "consider space between column. 25% of width"},
+        "maxRularArea":  {"type": "number", "format": "float", "default": 0.3, "description": "Consider maximum rular area"},
+        "minArea":       {"type": "number", "format": "float", "default": 0.05, "description": "rular position in below"},
+        "minRularArea":  {"type": "number", "format": "float", "default": 0.01, "description": "Consider minimum rular area"},
+        "positionBelow": {"type": "number", "format": "float", "default": 0.75, "description": "rular position in below"},
+        "positionLeft":  {"type": "number", "format": "float", "default": 0.4, "description": "rular position in left"},
+        "positionRight": {"type": "number", "format": "float", "default": 0.6, "description": "rular position in right"},
+        "rularRatioMax": {"type": "number", "format": "float", "default": 10.0, "description": "rular position in below"},
+        "rularRatioMin": {"type": "number", "format": "float", "default": 3.0, "description": "rular position in below"},
+        "rularWidth":    {"type": "number", "format": "float", "default": 0.95, "description": "maximum rular width"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
+      }
+    },
+    "ocrd-anybaseocr-dewarp": {
+      "executable": "ocrd-anybaseocr-dewarp",
+      "description": "dewarp image with anyBaseOCR",
+      "categories": ["Image preprocessing"],
+      "steps": ["preprocessing/optimization/dewarping"],
+      "input_file_grp": ["OCR-D-IMG-CROP"],
+      "output_file_grp": ["OCR-D-IMG-DEWARP"],
+      "parameters": {
+        "imgresize":    { "type": "string",                      "default": "resize_and_crop", "description": "run on original size image"},
+        "pix2pixHD":    { "type": "string",                      "required": true, "description": "Path to pix2pixHD library"},
+        "gpu_id":       { "type": "number", "format": "integer", "default": 0,    "description": "gpu id"},
+        "resizeHeight": { "type": "number", "format": "integer", "default": 1024, "description": "resized image height"},
+        "resizeWidth":  { "type": "number", "format": "integer", "default": 1024, "description": "resized image width"}
+      }
+    },
     "ocrd-anybaseocr-tiseg": {
       "executable": "ocrd-anybaseocr-tiseg",
-      "input_file_grp": ["OCR-D-IMG-BIN"],
-      "output_file_grp": ["OCR-D-SEG-TI-ANY"],
+      "input_file_grp": ["OCR-D-IMG-CROP"],
+      "output_file_grp": ["OCR-D-SEG-TISEG"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/text-image"],
       "description": "separate text and non-text part with anyBaseOCR",
@@ -14,7 +94,7 @@
     },
     "ocrd-anybaseocr-textline": {
       "executable": "ocrd-anybaseocr-textline",
-      "input_file_grp": ["OCR-D-SEG-TI"],
+      "input_file_grp": ["OCR-D-SEG-TISEG"],
       "output_file_grp": ["OCR-D-SEG-LINE-ANY"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/line"],
@@ -39,6 +119,31 @@
         "parallel":    {"type": "number", "format": "integer", "default": 0, "description": "number of CPUs to use"},
         "libpath":     {"type": "string", "default": ".", "description": "Library Path for C Executables"}
       }
-    }
+    },
+    "ocrd-anybaseocr-layout-analysis": {
+      "executable": "ocrd-anybaseocr-layout-analysis",
+      "input_file_grp": ["OCR-D-IMG-CROP"],
+      "output_file_grp": ["OCR-D-SEG-LAYOUT"],
+      "categories": ["Layout analysis"],
+      "steps": ["layout/segmentation/text-image"],
+      "description": "Analysis of the input document",
+      "parameters": {
+        "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
+        "model_path":         { "type": "string",                     "required": true, "description": "Path to Layout Structure Classification Model"},
+        "class_mapping_path": { "type": "string",                     "required": true, "description": "Path to Layout Structure Classes"}
+      }
+    },
+    "ocrd-anybaseocr-block-segmentation": {
+      "executable": "ocrd-anybaseocr-block-segmentation",
+      "input_file_grp": ["OCR-D-IMG"],
+      "output_file_grp": ["OCR-D-BLOCK-SEGMENT"],
+      "categories": ["Layout analysis"],
+      "steps": ["layout/segmentation/text-image"],
+      "description": "Analysis of the input document",
+      "parameters": {        
+        "block_segmentation_model":   { "type": "string",                     "required": true, "description": "Path to Layout Structure Classification Model"},
+        "block_segmentation_weights": { "type": "string",                     "required": true, "description": "Path to Layout Structure Classes"}
+      }
+    }       
   }
 }

@@ -2,9 +2,9 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='layout-analysis',
+    name='ocrd-anybaseocr',
     version='v0.0.1',
-    author="Syed Saqib Bukhari",
+    author="DFKI",
     author_email="Saqib.Bukhari@dfki.de, Mohammad_mohsin.reza@dfki.de",
     url="https://github.com/mjenckel/LAYoutERkennung",
     license='Apache License 2.0',
@@ -17,8 +17,14 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'ocrd-anybaseocr-tiseg = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_tiseg',
-            'ocrd-anybaseocr-textline = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_textline'
+            'ocrd-anybaseocr-binarize           = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_binarize',
+            'ocrd-anybaseocr-deskew             = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_deskew',
+            'ocrd-anybaseocr-crop               = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_cropping',        
+            'ocrd-anybaseocr-dewarp             = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_dewarp',
+            'ocrd-anybaseocr-tiseg              = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_tiseg',
+            'ocrd-anybaseocr-textline           = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_textline',
+            'ocrd-anybaseocr-layout-analysis    = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_layout_analysis',
+            'ocrd-anybaseocr-block-segmentation = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_block_segmentation'
         ]
     },
 )

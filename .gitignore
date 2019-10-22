@@ -21,3 +21,5 @@ lib64
 **/ocrd_anybaseocr/samples
 **/ocrd_anybaseocr/work_dir
 **/ocrd_anybaseocr/OCR-D-*
+**/ocrd_anybaseocr/models/latest_net_G.pth
+**/ocrd_anybaseocr/pix2pixHD
