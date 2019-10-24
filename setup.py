@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ocrd-anybaseocr',
-    version='v0.0.1',
+    version='0.0.1',
     author="DFKI",
     author_email="Saqib.Bukhari@dfki.de, Mohammad_mohsin.reza@dfki.de",
     url="https://github.com/mjenckel/LAYoutERkennung",
