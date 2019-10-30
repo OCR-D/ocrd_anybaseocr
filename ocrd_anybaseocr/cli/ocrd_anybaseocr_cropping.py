@@ -41,10 +41,15 @@ from PIL import Image
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
-from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
+from ocrd_utils import (
+        getLogger,
+        crop_image,
+        concat_padded,
+        MIMETYPE_PAGE
+)
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import (
-    CoordsType,
+    CoordsType, AlternativeImageType,
     to_xml,
     MetadataItemType,
     LabelsType, LabelType
@@ -416,7 +421,7 @@ class OcrdAnybaseocrCropper(Processor):
             pcgts = page_from_file(self.workspace.download_file(input_file))
             page = pcgts.get_Page()
 
-             # add metadata about this operation and its runtime parameters:
+            # add metadata about this operation and its runtime parameters:
             metadata = pcgts.get_Metadata() # ensured by from_file()
             metadata.add_MetadataItem(
                 MetadataItemType(type_="processingStep",
@@ -428,8 +433,19 @@ class OcrdAnybaseocrCropper(Processor):
                                      Label=[LabelType(type_=name,
                                                       value=self.parameter[name])
                                             for name in self.parameter.keys()])]))
+            # warn of existing Border:
+            border = page.get_Border()
+            if border:
+                left, top, right, bottom = bbox_from_points(border.get_Coords().points)
+                LOG.warning('Overwriting existing Border: %i:%i,%i:%i',
+                            left, top, right, bottom)
 
-            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(
+                page, page_id,
+                # image must not have been cropped already,
+                # abort if no such image can be produced:
+                feature_filter='cropped')
+
             img_array = ocrolib.pil2array(page_image)
             img_array_bin = np.array(
                 img_array > ocrolib.midrange(img_array), 'i')
@@ -466,7 +482,22 @@ class OcrdAnybaseocrCropper(Processor):
 
             brd = BorderType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (
                 min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
-            pcgts.get_Page().set_Border(brd)
+            page.set_Border(brd)
+
+            page_image = crop_image(page_image,
+                box=(min_x, min_y, max_x, max_y))
+            page_xywh['features'] += ',cropped'
+
+            file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+            if file_id == input_file.ID:
+                file_id = concat_padded(self.image_grp, n)
+            file_path = self.workspace.save_image_file(page_image,
+                    file_id,
+                    page_id=page_id,
+                    file_grp=self.image_grp)
+            # update PAGE (reference the image file):
+            page.add_AlternativeImage(AlternativeImageType(
+                filename=file_path, comments=page_xywh['features']))
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
