@@ -45,15 +45,19 @@ from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import (
     CoordsType,
+    LabelType, LabelsType,
+    MetadataItemType,
     to_xml
 )
 from ocrd_models.ocrd_page_generateds import BorderType
 
+TOOL = 'ocrd-anybaseocr-crop'
+LOG = getLogger('processor.Cropping')
 
 class OcrdAnybaseocrCropper(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-crop']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrCropper, self).__init__(*args, **kwargs)
 
@@ -61,19 +65,12 @@ class OcrdAnybaseocrCropper(Processor):
         x1, y1, x2, y2 = coordinate
         with open(base + '-frame-pf.dat', 'w') as fp:
             fp.write(str(x1)+"\t"+str(y1)+"\t"+str(x2-x1)+"\t"+str(y2-y1))
-    
-    def rotate_image(self, orientation, image):  
-        return image.rotate(orientation)
 
     def remove_rular(self, arg):
-        #base = arg.split(".")[0]
-        #img = cv2.cvtColor(arg, cv2.COLOR_RGB2BGR)
-        gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)            
+        gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)
         contours, _ = cv2.findContours(
             gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-
-        
         height, width, _ = arg.shape
         imgArea = height*width
 
@@ -111,7 +108,6 @@ class OcrdAnybaseocrCropper(Processor):
             x, y, w, h, _ = predictRular[0]
             cv2.rectangle(arg, (x-15, y-15), (x+w+20, y+h+20),
                           (255, 255, 255), cv2.FILLED)
-        
         return arg
 
     def BorderLine(self, MaxBoundary, lines, index, flag, lineDetectH, lineDetectV):
@@ -405,32 +401,38 @@ class OcrdAnybaseocrCropper(Processor):
         return textarea
 
     def process(self):
+        """Performs border detection on the workspace.
+        """
         for (n, input_file) in enumerate(self.input_files):
+            page_id = input_file.pageId or input_file.ID
+            LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID            
             page = pcgts.get_Page()
+
+             # add metadata about this operation and its runtime parameters:
+            metadata = pcgts.get_Metadata() # ensured by from_file()
+            metadata.add_MetadataItem(
+                MetadataItemType(type_="processingStep",
+                                 name=self.ocrd_tool['steps'][0],
+                                 value=TOOL,
+                                 Labels=[LabelsType(
+                                     externalModel="ocrd-tool",
+                                     externalId="parameters",
+                                     Label=[LabelType(type_=name,
+                                                      value=self.parameter[name])
+                                            for name in self.parameter.keys()])]))
+
+            fname = page.imageFilename
+            base, _ = ocrolib.allsplitext(fname)
+
             page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
-            
-            # Get image orientation
-            orientation = pcgts.get_Page().get_orientation()            
-            rotated_image = self.rotate_image(orientation, page_image)
-            
-
-            LOG.info("INPUT FILE %s ", input_file.pageId or input_file.ID)
-            # base, _ = ocrolib.allsplitext(fname)
-
-            img_array = ocrolib.pil2array(rotated_image)
-
-            #Check if image is RGB or not
-            if len(img_array.shape)==2:
-                img_array = np.stack((img_array,)*3, axis=-1)
-
+            img_array = ocrolib.pil2array(page_image)
             img_array_bin = np.array(
                 img_array > ocrolib.midrange(img_array), 'i')
 
             lineDetectH = []
             lineDetectV = []
-            img_array_rr = self.remove_rular(img_array)        
+            img_array_rr = self.remove_rular(img_array)
 
             textarea, img_array_rr_ta, height, width = self.detect_textarea(
                 img_array_rr)
@@ -445,7 +447,7 @@ class OcrdAnybaseocrCropper(Processor):
                     min_x, min_y, max_x, max_y = self.select_borderLine(
                         img_array_rr, lineDetectH, lineDetectV)
                 else:
-                    min_x, min_y, max_x, max_y = textarea[0]                    
+                    min_x, min_y, max_x, max_y = textarea[0]
             elif len(textarea) == 1 and (height*width*0.5 < (abs(textarea[0][2]-textarea[0][0]) * abs(textarea[0][3]-textarea[0][1]))):
                 x1, y1, x2, y2 = textarea[0]
                 x1 = x1-20 if x1 > 20 else 0
@@ -453,12 +455,12 @@ class OcrdAnybaseocrCropper(Processor):
                 y1 = y1-40 if y1 > 40 else 0
                 y2 = y2+40 if y2 < height-40 else height
 
-                #self.save_pf(base, [x1, y1, x2, y2])                
+                #self.save_pf(base, [x1, y1, x2, y2])
                 min_x, min_y, max_x, max_y = textarea[0]
             else:
                 min_x, min_y, max_x, max_y = self.select_borderLine(
-                    img_array_rr, lineDetectH, lineDetectV)                
-                        
+                    img_array_rr, lineDetectH, lineDetectV)
+
             brd = BorderType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (
                 min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
             pcgts.get_Page().set_Border(brd)
@@ -477,6 +479,3 @@ class OcrdAnybaseocrCropper(Processor):
                                             file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
-            
-
-            

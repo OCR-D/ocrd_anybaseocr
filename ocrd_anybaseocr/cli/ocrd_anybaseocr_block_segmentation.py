@@ -36,7 +36,6 @@ ROOT_DIR = os.path.abspath("/b_test/bymana/ocrd_demo/block_segmentation")
 sys.path.append(ROOT_DIR)  # To find local version of the library
 from mrcnn import utils
 import mrcnn.model as modellib
-from mrcnn import visualize
 from mrcnn.config import Config
 
 # Directory to save logs and trained model
@@ -100,6 +99,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             for class_id in r['class_ids']:
                 print("Block Class : ",class_names[class_id])
             print("ROIs : ",r['rois'])
-            visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], class_names,file_name, r['scores'])
+            #
+            # FIXME: No debugging in ocr-d process function!
+            #visualize.display_instances(image, r['rois'], r['masks'], r['class_ids'], class_names,file_name, r['scores'])
             
     		
