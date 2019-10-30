@@ -107,8 +107,14 @@ class OcrdAnybaseocrBinarizer(Processor):
         oplevel = self.parameter['operation_level']
 
         for (n, input_file) in enumerate(self.input_files):
+            
             file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+#             page_id = input_file.pageId or input_file.ID
             page_id = input_file.pageId or input_file.ID
+#             if input_file.pageId is None:
+#                 continue
+#             page_id = input_file.pageId
+            
             LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
             metadata = pcgts.get_Metadata()
@@ -126,7 +132,7 @@ class OcrdAnybaseocrBinarizer(Processor):
             LOG.info("Binarizing on '%s' level in page '%s'", oplevel, page_id)                    
             
             if oplevel=="page":
-                self._process_segment(page, page_image.filename, page_id, file_id + ".bin")
+                self._process_segment(page_image, page, page_image.filename, page_id, file_id + ".bin")
             else:
                 regions = page.get_TextRegion() + page.get_TableRegion()
                 if not regions:
@@ -152,8 +158,11 @@ class OcrdAnybaseocrBinarizer(Processor):
 
 
 
-    def _process_segment(self, page, filename, page_id, file_id):
-        raw = ocrolib.read_image_gray(filename)
+    def _process_segment(self,page_image, page, filename, page_id, file_id):
+        #raw = ocrolib.read_image_gray(filename)
+        raw = ocrolib.pil2array(page_image)
+        raw = np.mean(raw,2)
+        raw = raw.astype("float64")
         self.dshow(raw, "input")
 
         # perform image normalization
@@ -163,12 +172,12 @@ class OcrdAnybaseocrBinarizer(Processor):
             return
         image /= amax(image)
 
-        if not self.parameter['nocheck']:
-            check = self.check_page(amax(image)-image)
-            if check is not None:
-                LOG.error(input_file.pageId or input_file.ID+" SKIPPED. "+check +
-                            " (use -n to disable this check)")
-                return
+#         if not self.parameter['nocheck']:
+#             check = self.check_page(amax(image)-image)
+#             if check is not None:
+#                 LOG.error(input_file.pageId or input_file.ID+" SKIPPED. "+check +
+#                             " (use -n to disable this check)")
+#                 return
 
         # check whether the image is already effectively binarized
         if self.parameter['gray']:
@@ -258,5 +267,4 @@ class OcrdAnybaseocrBinarizer(Processor):
                                    page_id=page_id,
                                    file_grp=self.image_grp
             )     
-        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comment="binarized"))        
-            
+        page.add_AlternativeImage(AlternativeImageType(filename=file_path))
