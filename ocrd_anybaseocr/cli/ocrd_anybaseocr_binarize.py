@@ -46,20 +46,30 @@ from scipy.ndimage import filters, interpolation, morphology
 from scipy import stats
 import numpy as np
 
-from ..utils import print_info, print_error
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_models.ocrd_page import to_xml
+from ocrd_models.ocrd_page import (
+    to_xml, 
+    AlternativeImageType,
+    MetadataItemType,
+    LabelsType, LabelType
+    )
 from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
-from PIL import Image
 
+# Ignore zoom warning from interpolation
+import warnings
+warnings.filterwarnings('ignore', '.*output shape of zoom.*')
+
+TOOL = 'ocrd-anybaseocr-binarize'
+LOG = getLogger('OcrdAnybaseocrBinarizer')
+FALLBACK_IMAGE_GRP = 'OCR-D-IMG-BIN'
 
 class OcrdAnybaseocrBinarizer(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-binarize']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrBinarizer, self).__init__(*args, **kwargs)
 
@@ -87,137 +97,166 @@ class OcrdAnybaseocrBinarizer(Processor):
         imshow(image)
         ginput(1, self.parameter['debug'])
 
-    def process(self):                
-        for (n, input_file) in enumerate(self.input_files):            
+    def process(self):
+        try:
+            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+        except ValueError:
+            self.page_grp = self.output_file_grp
+            self.image_grp = FALLBACK_IMAGE_GRP
+            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
+        oplevel = self.parameter['operation_level']
+
+        for (n, input_file) in enumerate(self.input_files):
+            file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+            page_id = input_file.pageId or input_file.ID
+            LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID
+            metadata = pcgts.get_Metadata()
+            metadata.add_MetadataItem(
+                    MetadataItemType(type_="processingStep",
+                                     name=self.ocrd_tool['steps'][0],
+                                     value=TOOL,                                     
+                                     Labels=[LabelsType(#externalRef="parameters",
+                                                        Label=[LabelType(type_=name,
+                                                                         value=self.parameter[name])
+                                                               for name in self.parameter.keys()])]))
+
             page = pcgts.get_Page()
-            fname = pcgts.get_Page().imageFilename
-            LOG.info("INPUT FILE %s", fname)          
-            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)            
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id)
+            LOG.info("Binarizing on '%s' level in page '%s'", oplevel, page_id)                    
             
-            raw = ocrolib.read_image_gray(page_image.filename)
-            self.dshow(raw, "input")
-
-            # perform image normalization
-            image = raw-amin(raw)
-            if amax(image) == amin(image):
-                print_info("# image is empty: %s" % (fname))
-                return
-            image /= amax(image)
-
-            if not self.parameter['nocheck']:
-                check = self.check_page(amax(image)-image)
-                if check is not None:
-                    print_error(fname+" SKIPPED. "+check +
-                                " (use -n to disable this check)")
-                    return
-
-            # check whether the image is already effectively binarized
-            if self.parameter['gray']:
-                extreme = 0
+            if oplevel=="page":
+                self._process_segment(page, page_image.filename, page_id, file_id + ".bin")
             else:
-                extreme = (np.sum(image < 0.05) + np.sum(image > 0.95)
-                           ) * 1.0 / np.prod(image.shape)
-            if extreme > 0.95:
-                comment = "no-normalization"
-                flat = image
-            else:
-                comment = ""
-                # if not, we need to flatten it by estimating the local whitelevel
-                print_info("flattening")
-                m = interpolation.zoom(image, self.parameter['zoom'])
-                m = filters.percentile_filter(
-                    m, self.parameter['perc'], size=(self.parameter['range'], 2))
-                m = filters.percentile_filter(
-                    m, self.parameter['perc'], size=(2, self.parameter['range']))
-                m = interpolation.zoom(m, 1.0/self.parameter['zoom'])
-                if self.parameter['debug'] > 0:
-                    clf()
-                    imshow(m, vmin=0, vmax=1)
-                    ginput(1, self.parameter['debug'])
-                w, h = minimum(array(image.shape), array(m.shape))
-                flat = clip(image[:w, :h]-m[:w, :h]+1, 0, 1)
-                if self.parameter['debug'] > 0:
-                    clf()
-                    imshow(flat, vmin=0, vmax=1)
-                    ginput(1, self.parameter['debug'])
+                regions = page.get_TextRegion() + page.get_TableRegion()
+                if not regions:
+                    LOG.warning("Page '%s' contains no text regions", page_id)
+                for region in regions:
+                    region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
+                    # strange TODO at the moment
+                    #self._process_segment(region.filename, region.id)
 
-            # estimate low and high thresholds
-            print_info("estimating thresholds")
-            d0, d1 = flat.shape
-            o0, o1 = int(self.parameter['bignore']
-                         * d0), int(self.parameter['bignore']*d1)
-            est = flat[o0:d0-o0, o1:d1-o1]
-            if self.parameter['escale'] > 0:
-                # by default, we use only regions that contain
-                # significant variance; this makes the percentile
-                # based low and high estimates more reliable
-                e = self.parameter['escale']
-                v = est-filters.gaussian_filter(est, e*20.0)
-                v = filters.gaussian_filter(v**2, e*20.0)**0.5
-                v = (v > 0.3*amax(v))
-                v = morphology.binary_dilation(
-                    v, structure=ones((int(e*50), 1)))
-                v = morphology.binary_dilation(
-                    v, structure=ones((1, int(e*50))))
-                if self.parameter['debug'] > 0:
-                    imshow(v)
-                    ginput(1, self.parameter['debug'])
-                est = est[v]
-            lo = stats.scoreatpercentile(est.ravel(), self.parameter['lo'])
-            hi = stats.scoreatpercentile(est.ravel(), self.parameter['hi'])
-            # rescale the image to get the gray scale image
-            print_info("rescaling")
-            flat -= lo
-            flat /= (hi-lo)
-            flat = clip(flat, 0, 1)
-            if self.parameter['debug'] > 0:
-                imshow(flat, vmin=0, vmax=1)
-                ginput(1, self.parameter['debug'])
-            binarized = 1*(flat > self.parameter['threshold'])
-
-            # output the normalized grayscale and the thresholded images
-            # print_info("%s lo-hi (%.2f %.2f) angle %4.1f %s" % (fname, lo, hi, angle, comment))
-            print_info("%s lo-hi (%.2f %.2f) %s" % (fname, lo, hi, comment))
-            print_info("writing")
-            if self.parameter['debug'] > 0 or self.parameter['show']:
-                clf()
-                gray()
-                imshow(binarized)
-                ginput(1, max(0.1, self.parameter['debug']))
-            base, _ = ocrolib.allsplitext(page_image.filename)
-            ocrolib.write_image_binary(base + ".bin.png", binarized)
-            # ocrolib.write_image_gray(base +".nrm.png", flat)
-            # print("########### File path : ", base+".nrm.png")
-            # write_to_xml(base+".bin.png")
-            # return base+".bin.png"
-
-            # bin_array = array(255*(binarized>ocrolib.midrange(binarized)),'B')
-            # bin_image = ocrolib.array2pil(bin_array)
-                                    
-            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
+            # To retain the basenames of files and their respective dir:
+            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)            
             if file_id == input_file.ID:
-                file_id = concat_padded(self.output_file_grp, n)
-
-
-            
-            '''
-            file_path = self.workspace.save_image_file(bin_image,
-                                       file_id + ".bin",
-                                       page_id=page_id,
-                                       file_grp=self.output_file_grp
-                )            
-            '''
-            page.add_AlternativeImage(AlternativeImageType(filename=base + ".bin.png", comment="binarized"))
-
+                file_id = concat_padded(self.output_file_grp, n)                
             self.workspace.add_file(
                 ID=file_id,
                 file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
-                mimetype = MIMETYPE_PAGE,                
+                mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,
-                                            file_id + '.xml'),
+                                        file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
-            )            
+            )
+
+
+
+    def _process_segment(self, page, filename, page_id, file_id):
+        raw = ocrolib.read_image_gray(filename)
+        self.dshow(raw, "input")
+
+        # perform image normalization
+        image = raw-amin(raw)
+        if amax(image) == amin(image):
+            LOG.info("# image is empty: %s" % (page_id))
+            return
+        image /= amax(image)
+
+        if not self.parameter['nocheck']:
+            check = self.check_page(amax(image)-image)
+            if check is not None:
+                LOG.error(input_file.pageId or input_file.ID+" SKIPPED. "+check +
+                            " (use -n to disable this check)")
+                return
+
+        # check whether the image is already effectively binarized
+        if self.parameter['gray']:
+            extreme = 0
+        else:
+            extreme = (np.sum(image < 0.05) + np.sum(image > 0.95)
+                       ) * 1.0 / np.prod(image.shape)
+        if extreme > 0.95:
+            comment = "no-normalization"
+            flat = image
+        else:
+            comment = ""
+            # if not, we need to flatten it by estimating the local whitelevel
+            LOG.info("Flattening")
+            m = interpolation.zoom(image, self.parameter['zoom'])
+            m = filters.percentile_filter(
+                m, self.parameter['perc'], size=(self.parameter['range'], 2))
+            m = filters.percentile_filter(
+                m, self.parameter['perc'], size=(2, self.parameter['range']))
+            m = interpolation.zoom(m, 1.0/self.parameter['zoom'])
+            if self.parameter['debug'] > 0:
+                clf()
+                imshow(m, vmin=0, vmax=1)
+                ginput(1, self.parameter['debug'])
+            w, h = minimum(array(image.shape), array(m.shape))
+            flat = clip(image[:w, :h]-m[:w, :h]+1, 0, 1)
+            if self.parameter['debug'] > 0:
+                clf()
+                imshow(flat, vmin=0, vmax=1)
+                ginput(1, self.parameter['debug'])
+
+        # estimate low and high thresholds
+        LOG.info("Estimating Thresholds")
+        d0, d1 = flat.shape
+        o0, o1 = int(self.parameter['bignore']
+                     * d0), int(self.parameter['bignore']*d1)
+        est = flat[o0:d0-o0, o1:d1-o1]
+        if self.parameter['escale'] > 0:
+            # by default, we use only regions that contain
+            # significant variance; this makes the percentile
+            # based low and high estimates more reliable
+            e = self.parameter['escale']
+            v = est-filters.gaussian_filter(est, e*20.0)
+            v = filters.gaussian_filter(v**2, e*20.0)**0.5
+            v = (v > 0.3*amax(v))
+            v = morphology.binary_dilation(
+                v, structure=ones((int(e*50), 1)))
+            v = morphology.binary_dilation(
+                v, structure=ones((1, int(e*50))))
+            if self.parameter['debug'] > 0:
+                imshow(v)
+                ginput(1, self.parameter['debug'])
+            est = est[v]
+        lo = stats.scoreatpercentile(est.ravel(), self.parameter['lo'])
+        hi = stats.scoreatpercentile(est.ravel(), self.parameter['hi'])
+        # rescale the image to get the gray scale image
+        LOG.info("Rescaling")
+        flat -= lo
+        flat /= (hi-lo)
+        flat = clip(flat, 0, 1)
+        if self.parameter['debug'] > 0:
+            imshow(flat, vmin=0, vmax=1)
+            ginput(1, self.parameter['debug'])
+        binarized = 1*(flat > self.parameter['threshold'])
+
+        # output the normalized grayscale and the thresholded images
+        # print_info("%s lo-hi (%.2f %.2f) angle %4.1f %s" % (fname, lo, hi, angle, comment))
+        LOG.info("%s lo-hi (%.2f %.2f) %s" % (page_id, lo, hi, comment))
+        LOG.info("writing")
+        if self.parameter['debug'] > 0 or self.parameter['show']:
+            clf()
+            gray()
+            imshow(binarized)
+            ginput(1, max(0.1, self.parameter['debug']))
+        #base, _ = ocrolib.allsplitext(filename)
+        #ocrolib.write_image_binary(base + ".bin.png", binarized)
+        # ocrolib.write_image_gray(base +".nrm.png", flat)
+        # print("########### File path : ", base+".nrm.png")
+        # write_to_xml(base+".bin.png")
+        # return base+".bin.png"
+
+        bin_array = array(255*(binarized>ocrolib.midrange(binarized)),'B')
+        bin_image = ocrolib.array2pil(bin_array)                            
+        
+        file_path = self.workspace.save_image_file(bin_image,
+                                   file_id,
+                                   page_id=page_id,
+                                   file_grp=self.image_grp
+            )     
+        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comment="binarized"))        
             

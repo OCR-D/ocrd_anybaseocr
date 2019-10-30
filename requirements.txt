@@ -10,4 +10,5 @@ dominate>=2.3.5
 pandas
 keras
 mrcnn
-IPython
+tensorflow-gpu==1.14
+scikit-image

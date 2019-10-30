@@ -4,7 +4,6 @@
 # Email: Saqib.Bukhari@dfki.de
 # Paper: Syed Saqib Bukhari, Faisal Shafait, Thomas M. Breuel, "Improved document image segmentation algorithm using multiresolution morphology," Proc. SPIE 7874, Document Recognition and Retrieval XVIII, 78740D (24 January 2011);
 
-# The anyBaseOCR-tiseg is licensed under the "OpenContent License". While using/refering this work, always add the reference of the following paper:
 # "Syed Saqib Bukhari, Ahmad Kadi, Mohammad Ayman Jouneh, Fahim Mahmood Mir, Andreas Dengel, “anyOCR: An Open-Source OCR System for Historical Archives”, The 14th IAPR International Conference on Document Analysis and Recognition (ICDAR 2017), Kyoto, Japan, 2017.
 # URL - https://www.dfki.de/fileadmin/user_upload/import/9512_ICDAR2017_anyOCR.pdf
 
@@ -23,13 +22,15 @@ from ..constants import OCRD_TOOL
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import to_xml, parse
-from ocrd_utils import concat_padded
+from ocrd_utils import concat_padded, getLogger
 
+TOOL = 'ocrd-anybaseocr-tiseg'
+LOG = getLogger('OcrdAnybaseocrTiseg')
 
 class OcrdAnybaseocrTiseg(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-tiseg']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrTiseg, self).__init__(*args, **kwargs)
 
@@ -40,17 +41,23 @@ class OcrdAnybaseocrTiseg(Processor):
 
     def process(self):
         for (n, input_file) in enumerate(self.input_files):
-            local_input_file = self.workspace.download_file(input_file)
-            pcgts = parse(local_input_file.url, silence=True)
-            image_coords = pcgts.get_Page().get_Border().get_Coords().points.split()
-            fname = pcgts.get_Page().imageFilename
+            pcgts = page_from_file(self.workspace.download_file(input_file))
+            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID
+            page = pcgts.get_Page()
+            LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
+            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)            
+            # image_coords = pcgts.get_Page().get_Border().get_Coords().points.split()
 
-            # I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png                        
+            # why does it return Image type when there is data (border info from crop)
+            print("----------", type(page_image), page_xywh)
+
+            # I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png
+            '''
             min_x, min_y = image_coords[0].split(",")
             max_x, max_y = image_coords[2].split(",")
             crop_region = int(min_x), int(
                 min_y), int(max_x), int(max_y)
-            cropped_img = self.crop_image(fname, crop_region)
+            cropped_img = self.crop_image(page_image.filename, crop_region)
 
             I = ocrolib.pil2array(cropped_img)
             I = 1-I/I.max()
@@ -84,6 +91,7 @@ class OcrdAnybaseocrTiseg(Processor):
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.output_file_grp, n)
+                
             self.workspace.add_file(
                 ID=file_id,
                 file_grp=self.output_file_grp,
@@ -156,3 +164,4 @@ class OcrdAnybaseocrTiseg(Processor):
         A[:, 2:4*c:4] = A[:, 0:4*c:4]
         A[:, 3:4*c:4] = A[:, 0:4*c:4]
         return A
+    '''

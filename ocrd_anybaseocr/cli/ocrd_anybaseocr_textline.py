@@ -21,13 +21,16 @@ import subprocess
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import to_xml
-from ocrd_utils import concat_padded
+from ocrd_utils import concat_padded, getLogger
+
+TOOL = 'ocrd-anybaseocr-textline'
+LOG = getLogger('OcrdAnybaseocrTextline')
 
 
 class OcrdAnybaseocrTextline(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-textline']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrTextline, self).__init__(*args, **kwargs)
 
@@ -45,14 +48,15 @@ class OcrdAnybaseocrTextline(Processor):
     def process(self):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            binImg = self.workspace.resolve_image_as_pil(pcgts.get_Page().imageFilename)
-            # I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png
-            fname = pcgts.get_Page().imageFilename
-            image = ocrolib.read_image_binary(fname)
+            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID
+            page = pcgts.get_Page()
+            LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
+            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)            
+            image = ocrolib.read_image_binary(page_image.filename)
             height, width = image.shape
             H = height
             W = width
-            base, _ = ocrolib.allsplitext(fname)
+            base, _ = ocrolib.allsplitext(page_image.filename)
             
             if not os.path.exists("%s/lines" % base):                
                 os.system("mkdir -p %s/lines" % base)
@@ -102,7 +106,7 @@ class OcrdAnybaseocrTextline(Processor):
                 offset = (offX, offY)
                 background.paste(img, offset)
                 background.save("%s/temp.png" % base)
-                command = "python "+"/b_test/bymana/ocrd_demo/OCR-D-LAYoutERkennung/ocrd_anybaseocr/anyBaseOCR-gpageseg.py %s/temp.png -n --minscale %f --maxlines %f --scale %f --hscale %f --vscale %f --threshold %f --noise %d --maxseps %d --sepwiden %d --maxcolseps %d --csminaspect %f --csminheight %f -p %d -e %d -Q %d" % (
+                command = "python "+ self.parameter['libpath'] + "anyBaseOCR-gpageseg.py %s/temp.png -n --minscale %f --maxlines %f --scale %f --hscale %f --vscale %f --threshold %f --noise %d --maxseps %d --sepwiden %d --maxcolseps %d --csminaspect %f --csminheight %f -p %d -e %d -Q %d" % (
                     base, self.parameter['minscale'], self.parameter['maxlines'], self.parameter['scale'], self.parameter['hscale'], self.parameter['vscale'], self.parameter['threshold'], self.parameter['noise'], self.parameter['maxseps'], self.parameter['sepwiden'], self.parameter['maxcolseps'], self.parameter['csminaspect'], self.parameter['csminheight'], self.parameter['pad'], self.parameter['expand'], self.parameter['parallel'])
                 if(self.parameter['blackseps']):
                     command = command + " -b"

@@ -17,11 +17,13 @@ from pathlib import Path
 from PIL import Image
 import ocrolib
 
+TOOL = 'ocrd-anybaseocr-dewarp'
+LOG = getLogger('OcrdAnybaseocrDewarper')
 
 class OcrdAnybaseocrDewarper(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-dewarp']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']        
         super(OcrdAnybaseocrDewarper, self).__init__(*args, **kwargs)
 
@@ -30,16 +32,15 @@ class OcrdAnybaseocrDewarper(Processor):
         cropped = img.crop(crop_region)
         return cropped
 
-    def process(self):
-        print(Path(self.parameter['pix2pixHD']).absolute())
+    def process(self):        
         if not torch.cuda.is_available():
-            print("Your system has no CUDA installed. No GPU detected.")
+            LOG.error("Your system has no CUDA installed. No GPU detected.")
             sys.exit(1)
 
         path = Path(self.parameter['pix2pixHD']).absolute()
 
         if not Path(path).is_dir():
-            print("""\
+            LOG.error("""\
                 NVIDIA's pix2pixHD was not found at '%s'. Make sure the `pix2pixHD` parameter 
                 in params.json points to the local path to the cloned pix2pixHD repository.
 
@@ -53,7 +54,7 @@ class OcrdAnybaseocrDewarper(Processor):
             pcgts = parse(local_input_file.url, silence=True)
             image_coords = pcgts.get_Page().get_Border().get_Coords().points.split()
             fname = pcgts.get_Page().imageFilename
-
+            LOG.info("INPUT FILE %s", fname)
 
             # Get page Co-ordinates
             min_x, min_y = image_coords[0].split(",")
@@ -70,11 +71,7 @@ class OcrdAnybaseocrDewarper(Processor):
 
             base, _ = ocrolib.allsplitext(fname)
             filename = base.split("/")[-1] + ".png"
-            cropped_img.save(img_tmp_dir + "/" + filename)            
-
-            #os.system("cp %s %s" % (str(fname), os.path.join(img_tmp_dir, os.path.basename(str(fname)))))
-            #os.system("mkdir -p %s" % img_tmp_dir)
-            #os.system("cp %s %s" % (str(fname), os.path.join(img_tmp_dir, os.path.basename(str(fname)))))
+            cropped_img.save(img_tmp_dir + "/" + filename)                    
             
             os.system("python " + str(path) + "/test.py --dataroot %s --checkpoints_dir ./ --name models --results_dir %s --label_nc 0 --no_instance --no_flip --resize_or_crop none --n_blocks_global 10 --n_local_enhancers 2 --gpu_ids %s --loadSize %d --fineSize %d --resize_or_crop %s" %
                       (os.path.dirname(img_tmp_dir), img_dir, self.parameter['gpu_id'], self.parameter['resizeHeight'], self.parameter['resizeWidth'], self.parameter['imgresize']))

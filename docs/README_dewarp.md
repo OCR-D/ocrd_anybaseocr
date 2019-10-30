@@ -17,12 +17,11 @@ Link: http://gepris.dfg.de/gepris/projekt/394343055?language=en
 This function takes a document image as input and make the text line straight if its curved.
 
 # LICENSE
-Copyright 2018 Syed Saqib Bukhari, Mohammad Mohsin Reza, Md. Ajraf Rakib
+Copyright 2018 Syed Saqib Bukhari, Mohammad Mohsin Reza
 Apache License 2.0
 
-pix2pixHD: Copyright (C) 2017 NVIDIA Corporation. Ting-Chun Wang, Ming-Yu Liu, Jun-Yan Zhu.
-All rights reserved. 
-Licensed under the CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode).
+pix2pixHD: Copyright (C) 2017 NVIDIA Corporation. Ting-Chun Wang, Ming-Yu Liu, Jun-Yan Zhu. 
+BSD License. All rights reserved. 
 
 @inproceedings{wang2018pix2pixHD,
   title={High-Resolution Image Synthesis and Semantic Manipulation with Conditional GANs},
@@ -40,10 +39,7 @@ A permissive license whose main conditions require preservation of copyright and
 - PyTorch and torchvision for GPU support version (from http://pytorch.org)
 - dominate (i.e., pip install dominate)
 
-- Download pix2pixHD from the gitHub (https://github.com/NVIDIA/pix2pixHD). Extract zip file to the ocrd-anybaseocr script directory and rename the folder name "pix2pixHD"
-- Move following files from pix2pixHD_modified folder to pix2pixHD.
-	- test.py move/replace to pix2pixHD/test.py
-	- visualizer.py move/replace to pix2pixHD/util/visualizer.py
+- Download pix2pixHD from the gitHub (https://github.com/NVIDIA/pix2pixHD).
 - Download model from https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy. Copy the file into "models" folder
 
 

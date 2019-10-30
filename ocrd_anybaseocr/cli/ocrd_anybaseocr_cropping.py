@@ -45,14 +45,15 @@ from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import (
     CoordsType,
-    LabelType, LabelsType,
+    to_xml,
     MetadataItemType,
-    to_xml
+    LabelsType, LabelType
 )
 from ocrd_models.ocrd_page_generateds import BorderType
 
 TOOL = 'ocrd-anybaseocr-crop'
-LOG = getLogger('processor.Cropping')
+LOG = getLogger('OcrdAnybaseocrCropper')
+FALLBACK_IMAGE_GRP = 'OCR-D-IMG-CROP'
 
 class OcrdAnybaseocrCropper(Processor):
 
@@ -324,8 +325,7 @@ class OcrdAnybaseocrCropper(Processor):
     def marge_columns(self, textarea):
         tmp = []
         marge = []
-        #  height, _ = binImg.shape
-        # print binImg.shape
+        #  height, _ = binImg.shape        
         textarea.sort(key=lambda x: (x[0]))
         # print self.parameter['colSeparator']
         for i in range(len(textarea)-1):
@@ -403,6 +403,13 @@ class OcrdAnybaseocrCropper(Processor):
     def process(self):
         """Performs border detection on the workspace.
         """
+        try:
+            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+        except ValueError:
+            self.page_grp = self.output_file_grp
+            self.image_grp = FALLBACK_IMAGE_GRP
+            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
+
         for (n, input_file) in enumerate(self.input_files):
             page_id = input_file.pageId or input_file.ID
             LOG.info("INPUT FILE %i / %s", n, page_id)
@@ -421,9 +428,6 @@ class OcrdAnybaseocrCropper(Processor):
                                      Label=[LabelType(type_=name,
                                                       value=self.parameter[name])
                                             for name in self.parameter.keys()])]))
-
-            fname = page.imageFilename
-            base, _ = ocrolib.allsplitext(fname)
 
             page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)
             img_array = ocrolib.pil2array(page_image)
@@ -455,7 +459,6 @@ class OcrdAnybaseocrCropper(Processor):
                 y1 = y1-40 if y1 > 40 else 0
                 y2 = y2+40 if y2 < height-40 else height
 
-                #self.save_pf(base, [x1, y1, x2, y2])
                 min_x, min_y, max_x, max_y = textarea[0]
             else:
                 min_x, min_y, max_x, max_y = self.select_borderLine(

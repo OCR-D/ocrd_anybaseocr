@@ -1,7 +1,5 @@
-import os
 import sys
 import pickle
-
 import numpy as np
 import warnings
 warnings.filterwarnings('ignore',category=FutureWarning) 
@@ -14,15 +12,10 @@ from keras.preprocessing.image import ImageDataGenerator
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
-from ocrd_utils import getLogger, concat_padded
 from ocrd_modelfactory import page_from_file
-from ocrd_models.ocrd_page import to_xml, parse, TextRegionType
-from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
-from ocrd_models.ocrd_page_generateds import RegionType
+from ocrd_models.ocrd_page import to_xml
+from ocrd_utils import getLogger
 
-import logging
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-logging.getLogger('tensorflow').setLevel(logging.FATAL)
 
 from pathlib import Path
 import ocrolib
@@ -50,6 +43,8 @@ TAG_METS_STRUCTLINK = '{%s}structLink' % NS['mets']
 TAG_METS_SMLINK = '{%s}smLink' % NS['mets']
 
 
+TOOL = 'ocrd-anybaseocr-layout-analysis'
+LOG = getLogger('OcrdAnybaseocrLayoutAnalyser')
 
 
 class OcrdAnybaseocrLayoutAnalyser(Processor):
@@ -57,7 +52,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
     def __init__(self, *args, **kwargs):
         self.last_result = None 
         self.logID = 0
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools']['ocrd-anybaseocr-layout-analysis']
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrLayoutAnalyser, self).__init__(*args, **kwargs)
 
@@ -68,7 +63,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         elif model == "resnet50":
             model = resnet50.ResNet50(include_top=True, weights=None, input_tensor=input_dims, classes=classes)
         else:
-            print('wrong input')
+            LOG.error('wrong input')
             sys.exit(0)                      
                 
     def create_model(self, path, model_name='inception_v3', def_weights=True, num_classes=34, input_size=(600, 500, 1)):
@@ -126,13 +121,13 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
 
     def process(self):
         if not tf.test.is_gpu_available():
-            print("Your system has no CUDA installed. No GPU detected.")
+            LOG.error("Your system has no CUDA installed. No GPU detected.")
             sys.exit(1)
 
         model_path = Path(self.parameter['model_path'])
         class_mapper_path = Path(self.parameter['class_mapping_path'])
 
-        print('Loading model from file ', model_path)
+        LOG.info('Loading model from file ', model_path)
         model = self.create_model(str(model_path))
         # load the mapping
         pickle_in = open(str(class_mapper_path), "rb")
@@ -140,7 +135,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
 
         
         if not Path(model_path).is_file():
-            print("""\
+            LOG.error("""\
                 Layout Classfication model was not found at '%s'. Make sure the `model_path` parameter
                 points to the local model path.
 
@@ -148,7 +143,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
                 """ % model_path)
             sys.exit(1)
         else:
-            print('Loading model from file ', model_path)
+            LOG.info('Loading model from file ', model_path)
             model = self.create_model(str(model_path))
             # load the mapping
             pickle_in = open(str(class_mapper_path), "rb")
@@ -158,13 +153,13 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
             fname = pcgts.get_Page().imageFilename
-            print(fname)
+            LOG.info("INPUT FILE %s", fname)
             size = 600, 500
             img = Image.open(fname)
             img_array = ocrolib.pil2array(img.resize((500, 600), Image.ANTIALIAS))
             img_array = img_array[np.newaxis, :, :, np.newaxis]            
             results = self.start_test(model, img_array, fname, class_indices)
-            print(results)
+            LOG.info(results)
             self.workspace.mets.set_physical_page_for_file("PHYS_000" + str(n) , input_file)
             self.create_logmap_smlink(pcgts)
             self.write_to_mets(results, "PHYS_000" + str(n))

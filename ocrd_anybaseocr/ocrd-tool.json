@@ -10,19 +10,20 @@
       "input_file_grp": ["OCR-D-IMG"],
       "output_file_grp": ["OCR-D-IMG-BIN"],
       "parameters": {
-        "nocheck":   {"type": "boolean",                     "default": false, "description": "disable error checking on inputs"},
-        "show":      {"type": "boolean",                     "default": false, "description": "display final results"},
-        "raw_copy":  {"type": "boolean",                     "default": false, "description": "also copy the raw image"},
-        "gray":      {"type": "boolean",                     "default": false, "description": "force grayscale processing even if image seems binary"},
-        "bignore":   {"type": "number", "format": "float",   "default": 0.1,   "description": "ignore this much of the border for threshold estimation"},
-        "debug":     {"type": "number", "format": "integer", "default": 0,     "description": "display intermediate results"},
-        "escale":    {"type": "number", "format": "float",   "default": 1.0,   "description": "scale for estimating a mask over the text region"},
-        "hi":        {"type": "number", "format": "float",   "default": 90,    "description": "percentile for white estimation"},
-        "lo":        {"type": "number", "format": "float",   "default": 5,     "description": "percentile for black estimation"},
-        "perc":      {"type": "number", "format": "float",   "default": 80,    "description": "percentage for filters"},
-        "range":     {"type": "number", "format": "integer", "default": 20,    "description": "range for filters"},
-        "threshold": {"type": "number", "format": "float",   "default": 0.5,   "description": "threshold, determines lightness"},
-        "zoom":      {"type": "number", "format": "float",   "default": 0.5,   "description": "zoom for page background estimation, smaller=faster"}
+        "nocheck":         {"type": "boolean",                     "default": false, "description": "disable error checking on inputs"},
+        "show":            {"type": "boolean",                     "default": false, "description": "display final results"},
+        "raw_copy":        {"type": "boolean",                     "default": false, "description": "also copy the raw image"},
+        "gray":            {"type": "boolean",                     "default": false, "description": "force grayscale processing even if image seems binary"},
+        "bignore":         {"type": "number", "format": "float",   "default": 0.1,   "description": "ignore this much of the border for threshold estimation"},
+        "debug":           {"type": "number", "format": "integer", "default": 0,     "description": "display intermediate results"},
+        "escale":          {"type": "number", "format": "float",   "default": 1.0,   "description": "scale for estimating a mask over the text region"},
+        "hi":              {"type": "number", "format": "float",   "default": 90,    "description": "percentile for white estimation"},
+        "lo":              {"type": "number", "format": "float",   "default": 5,     "description": "percentile for black estimation"},
+        "perc":            {"type": "number", "format": "float",   "default": 80,    "description": "percentage for filters"},
+        "range":           {"type": "number", "format": "integer", "default": 20,    "description": "range for filters"},
+        "threshold":       {"type": "number", "format": "float",   "default": 0.5,   "description": "threshold, determines lightness"},
+        "zoom":            {"type": "number", "format": "float",   "default": 0.5,   "description": "zoom for page background estimation, smaller=faster"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
     "ocrd-anybaseocr-deskew": {
@@ -41,7 +42,8 @@
         "debug":     {"type": "number", "format": "integer", "default": 0,   "description": "display intermediate results"},
         "parallel":  {"type": "number", "format": "integer", "default": 0,   "description": "???"},
         "lo":        {"type": "number", "format": "integer", "default": 5,   "description": "percentile for black estimation"},
-        "hi":        {"type": "number", "format": "integer", "default": 90,   "description": "percentile for white estimation"}
+        "hi":        {"type": "number", "format": "integer", "default": 90,   "description": "percentile for white estimation"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
     "ocrd-anybaseocr-crop": {
@@ -61,7 +63,8 @@
         "positionRight": {"type": "number", "format": "float", "default": 0.6, "description": "rular position in right"},
         "rularRatioMax": {"type": "number", "format": "float", "default": 10.0, "description": "rular position in below"},
         "rularRatioMin": {"type": "number", "format": "float", "default": 3.0, "description": "rular position in below"},
-        "rularWidth":    {"type": "number", "format": "float", "default": 0.95, "description": "maximum rular width"}
+        "rularWidth":    {"type": "number", "format": "float", "default": 0.95, "description": "maximum rular width"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
     "ocrd-anybaseocr-dewarp": {

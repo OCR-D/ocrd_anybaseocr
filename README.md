@@ -20,12 +20,12 @@ Alternatively, dependencies can be installed into a Virtual Environment:
 
 To see how to run binarization, deskew, crop and dewarp, text/non-text segmentation and textline segmentation methods, please follow corresponding below files for a detailed description :
 
-   * [README_binarize.md](README_binarize.md) instruction for binarization method
-   * [README_deskew.md](README_deskew.md) instruction for deskew method
-   * [README_cropping.md](README_cropping.md) instruction for cropping method
-   * [README_dewarp.md](README_dewarp.md) instruction for dewarp method
-   * [README_tiseg.md](README_tigseg.md) instruction for text/non-text segmentation method
-   * [README_textline.md](README_textline.md) instruction for textline segmentation method
+   * [README_binarize.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_binarize.md) instruction for binarization method
+   * [README_deskew.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_deskew.md) instruction for deskew method
+   * [README_cropping.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_cropping.md) instruction for cropping method
+   * [README_dewarp.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_dewarp.md) instruction for dewarp method
+   * [README_tiseg.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_tigseg.md) instruction for text/non-text segmentation method
+   * [README_textline.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_textline.md) instruction for textline segmentation method
 
 ## Binarizer
 
@@ -150,7 +150,6 @@ Run `make test` to run all tests.
 
 ## License
 
-> Except for text/non-text segmentation script (ocrd_anybaseocr_tiseg.py) rest of the scripts are licensed under Apache License.
 
 ```
  Licensed under the Apache License, Version 2.0 (the "License");
