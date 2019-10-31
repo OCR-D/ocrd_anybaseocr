@@ -95,11 +95,7 @@ class OcrdAnybaseocrDeskewer(Processor):
         oplevel = self.parameter['operation_level']
 
         for (n, input_file) in enumerate(self.input_files):
-            #file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
             page_id = input_file.pageId or input_file.ID 
-            #if input_file.mimetype !="image/png":
-            #    continue
-            #page_id = input_file.pageId
             
             LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))

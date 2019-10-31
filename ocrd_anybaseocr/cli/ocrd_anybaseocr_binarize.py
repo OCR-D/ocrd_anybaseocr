@@ -108,9 +108,6 @@ class OcrdAnybaseocrBinarizer(Processor):
 
         for (n, input_file) in enumerate(self.input_files):            
             page_id = input_file.pageId or input_file.ID
-#             if input_file.pageId is None:
-#                 continue
-#             page_id = input_file.pageId
             
             LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
@@ -159,7 +156,6 @@ class OcrdAnybaseocrBinarizer(Processor):
         if len(raw.shape) > 2:
             raw = np.mean(raw, 2)
         raw = raw.astype("float64")
-
         # perform image normalization
         image = raw-amin(raw)
         if amax(image) == amin(image):
@@ -255,3 +251,4 @@ class OcrdAnybaseocrBinarizer(Processor):
                                    file_grp=self.image_grp
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
+

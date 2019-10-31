@@ -424,12 +424,8 @@ class OcrdAnybaseocrCropper(Processor):
             self.image_grp = FALLBACK_IMAGE_GRP
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
-
         for (n, input_file) in enumerate(self.input_files):
             page_id = input_file.pageId or input_file.ID 
-            #if input_file.mimetype =="image/png":
-            #    continue
-            #page_id = input_file.pageId  
             
             LOG.info("INPUT FILE %i / %s", n, page_id)
             
@@ -463,6 +459,7 @@ class OcrdAnybaseocrCropper(Processor):
                 LOG.warning('Operation level %s, but should be "page".', oplevel)
                 break
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
+
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
             if file_id == input_file.ID:
@@ -500,7 +497,6 @@ class OcrdAnybaseocrCropper(Processor):
             img_array_rr)
         self.parameter['colSeparator'] = int(
             width * self.parameter['colSeparator'])
-
         if len(textarea) > 1:
             textarea = self.crop_area(
                 textarea, img_array_bin, img_array_rr_ta)
@@ -517,7 +513,6 @@ class OcrdAnybaseocrCropper(Processor):
             y1 = y1-40 if y1 > 40 else 0
             y2 = y2+40 if y2 < height-40 else height
 
-            #self.save_pf(base, [x1, y1, x2, y2])                
             min_x, min_y, max_x, max_y = textarea[0]
         else:
             min_x, min_y, max_x, max_y = self.select_borderLine(
@@ -540,3 +535,4 @@ class OcrdAnybaseocrCropper(Processor):
                                file_grp=self.image_grp
         )        
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
+
