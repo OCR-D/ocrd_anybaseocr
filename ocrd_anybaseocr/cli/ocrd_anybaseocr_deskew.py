@@ -43,7 +43,7 @@
 
 import os
 import numpy as np
-from pylab import amin, amax, linspace, mean, var, plot, ginput, ones, clip, imshow
+from pylab import amin,array, amax, linspace, mean, var, plot, ginput, ones, clip, imshow
 from scipy.ndimage import filters, interpolation, morphology
 from scipy import stats
 import ocrolib
@@ -53,6 +53,7 @@ from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import (
     to_xml,
+    AlternativeImageType,
     MetadataItemType,
     LabelsType, LabelType
     )
@@ -72,7 +73,7 @@ class OcrdAnybaseocrDeskewer(Processor):
     def estimate_skew_angle(self, image, angles):
         
         estimates = []
-
+        
         for a in angles:
             v = mean(interpolation.rotate(
                 image, a, order=0, mode='constant'), axis=1)
@@ -94,8 +95,12 @@ class OcrdAnybaseocrDeskewer(Processor):
         oplevel = self.parameter['operation_level']
 
         for (n, input_file) in enumerate(self.input_files):
-            file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
-            page_id = input_file.pageId or input_file.ID
+            #file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+            page_id = input_file.pageId or input_file.ID 
+            #if input_file.mimetype !="image/png":
+            #    continue
+            #page_id = input_file.pageId
+            
             LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
             metadata = pcgts.get_Metadata()
@@ -108,11 +113,20 @@ class OcrdAnybaseocrDeskewer(Processor):
                                                                          value=self.parameter[name])
                                                                for name in self.parameter.keys()])]))
             page = pcgts.get_Page()
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id)
+            angle = page.get_orientation()
+            if angle:
+                LOG.warning('Overwriting existing deskewing angle: %i', angle)
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='deskewed')
+            
                         
             if oplevel=="page":
-                self._process_segment(page, page_image.filename, page_id, file_id + ".ds")
-
+                self._process_segment(page_image, page, page_xywh, page_id, input_file, n) 
+            else:
+                LOG.warning('Operation level %s, but should be "page".', oplevel)
+                break
+            
+            # Use input_file's basename for the new file -
+            # this way the files retain the same basenames:
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.output_file_grp, n)
@@ -127,13 +141,11 @@ class OcrdAnybaseocrDeskewer(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
     
-    def _process_segment(self, page, filename, page_id, file_id):                
-        if self.parameter['parallel'] < 2:
-                LOG.info("INPUT FILE %s ", filename)
-        raw = ocrolib.read_image_gray(filename)
+    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n):                
+                
+        raw = ocrolib.pil2array(page_image)
+        flat = raw.astype("float64")
 
-        flat = raw
-        #flat = np.array(binImg)
         # estimate skew angle and rotate
         if self.parameter['maxskew'] > 0:
             if self.parameter['parallel'] < 2:
@@ -177,6 +189,7 @@ class OcrdAnybaseocrDeskewer(Processor):
             est = est[v]
         lo = stats.scoreatpercentile(est.ravel(), self.parameter['lo'])
         hi = stats.scoreatpercentile(est.ravel(), self.parameter['hi'])
+
         # rescale the image to get the gray scale image
         if self.parameter['parallel'] < 2:
             LOG.info("Rescaling")
@@ -189,21 +202,31 @@ class OcrdAnybaseocrDeskewer(Processor):
         deskewed = 1*(flat > self.parameter['threshold'])
 
         # output the normalized grayscale and the thresholded images
-        LOG.info("%s lo-hi (%.2f %.2f) angle %4.1f" %
-                   (filename, lo, hi, angle))
-        if self.parameter['parallel'] < 2:
-            LOG.info("Writing")
-        #ocrolib.write_image_binary(base+".ds.png", deskewed)
+        #LOG.info("%s lo-hi (%.2f %.2f) angle %4.1f" %(lo, hi, angle))
 
         #TODO: Need some clarification as the results effect the following pre-processing steps.
         #orientation = -angle
         #orientation = 180 - ((180 - orientation) % 360)
+        
+        if angle is None: # FIXME: quick fix to prevent angle of "none"
+            angle = 0
+        
         page.set_orientation(angle)
         
-        file_path = self.workspace.save_image_file(bin_image,
+        page_xywh['features'] += ',deskewed'
+        bin_array = array(255*(deskewed>ocrolib.midrange(deskewed)),'B')
+        page_image = ocrolib.array2pil(bin_array)
+        
+        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+        if file_id == input_file.ID:
+            file_id = concat_padded(self.image_grp, n)
+        file_path = self.workspace.save_image_file(page_image,
                                file_id,
                                page_id=page_id,
                                file_grp=self.image_grp
         )        
-        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comment="deskewed"))
+        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
+        
+        
+        
         

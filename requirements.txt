@@ -9,5 +9,5 @@ torchvision
 dominate>=2.3.5
 pandas
 keras
-tensorflow-gpu
+tensorflow-gpu==1.13.1
 scikit-image

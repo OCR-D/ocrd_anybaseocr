@@ -16,16 +16,7 @@ Alternatively, dependencies can be installed into a Virtual Environment:
     $ source venv/bin/activate
     $ pip install -e .
 
-## Tools included
-
-To see how to run binarization, deskew, crop and dewarp, text/non-text segmentation and textline segmentation methods, please follow corresponding below files for a detailed description :
-
-   * [README_binarize.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_binarize.md) instruction for binarization method
-   * [README_deskew.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_deskew.md) instruction for deskew method
-   * [README_cropping.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_cropping.md) instruction for cropping method
-   * [README_dewarp.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_dewarp.md) instruction for dewarp method
-   * [README_tiseg.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_tigseg.md) instruction for text/non-text segmentation method
-   * [README_textline.md](https://github.com/mjenckel/OCR-D-LAYoutERkennung/tree/master/docs/README_textline.md) instruction for textline segmentation method
+#Tools
 
 ## Binarizer
 
@@ -42,7 +33,8 @@ ocrd-anybaseocr-binarize -m (path to METs input file) -I (Input group name) -O (
 ocrd-anybaseocr-binarize \
    -m mets.xml \
    -I OCR-D-IMG \
-   -O OCR-D-IMG-BIN
+   -O OCR-D-IMG-BIN \
+   -O OCR-D-PAGE-BIN
 ```
 
 ## Deskewer
@@ -59,8 +51,9 @@ ocrd-anybaseocr-deskew -m (path to METs input file) -I (Input group name) -O (Ou
 ```sh
 ocrd-anybaseocr-deskew \
   -m mets.xml \
-  -I OCR-D-IMG-BIN \
-  -O OCR-D-IMG-DESKEW
+  -I OCR-D-PAGE-BIN \
+  -O OCR-D-IMG-DESKEW \
+  -O OCR-D-PAGE-DESKEW
 ```
 
 ## Cropper
@@ -70,15 +63,16 @@ ocrd-anybaseocr-deskew \
  
  #### Usage:
 ```sh
-ocrd-anybaseocr-cropping -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
+ocrd-anybaseocr-crop -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
 ```
 
 #### Example: 
 ```sh
-ocrd-anybaseocr-cropping \
+ocrd-anybaseocr-crop \
    -m mets.xml \
-   -I OCR-D-IMG-DESKEW \
-   -O OCR-D-IMG-CROP
+   -I OCR-D-PAGE-DESKEW \
+   -O OCR-D-IMG-CROP \
+   -O OCR-D-PAGE-CROP
 ```
 
 
@@ -97,9 +91,9 @@ ocrd-anybaseocr-dewarp -m (path to METs input file) -I (Input group name) -O (Ou
 ```sh
 CUDA_VISIBLE_DEVICES=0 ocrd-anybaseocr-dewarp \
    -m mets.xml \
-   -I OCR-D-IMG-CROP \
-   -O OCR-D-IMG-DEWARP
-   -p params.json 
+   -I OCR-D-PAGE-CROP \
+   -O OCR-D-IMG-DEWARP \
+   -O OCR-D-PAGE-DEWARP
 ```
 
 ## Text/Non-Text Segmenter
@@ -115,9 +109,10 @@ ocrd-anybaseocr-tiseg -m (path to METs input file) -I (Input group name) -O (Out
 #### Example: 
 ```sh
 ocrd-anybaseocr-tiseg \
-	-m mets.xml \
-	-I OCR-D-IMG-CROP \
-	-O OCR-D-IMG-TISEG
+   -m mets.xml \
+   -I OCR-D-PAGE-CROP \
+   -O OCR-D-IMG-TISEG \
+   -O OCR-D-PAGE-TISEG
 ```
 
 ## Textline Segmenter
@@ -133,9 +128,10 @@ ocrd-anybaseocr-textline -m (path to METs input file) -I (Input group name) -O (
 #### Example: 
 ```sh
 ocrd-anybaseocr-textline \
-	-m mets.xml \
-	-I OCR-D-IMG-TISEG \
-	-O OCR-D-IMG-TL
+   -m mets.xml \
+   -I OCR-D-PAGE-TISEG \
+   -O OCR-D-IMG-TL \
+   -O OCR-D-PAGE-TL
 ```
 
 

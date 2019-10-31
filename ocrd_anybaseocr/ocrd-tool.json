@@ -76,10 +76,13 @@
       "output_file_grp": ["OCR-D-IMG-DEWARP"],
       "parameters": {
         "imgresize":    { "type": "string",                      "default": "resize_and_crop", "description": "run on original size image"},
-        "pix2pixHD":    { "type": "string",                      "required": true, "description": "Path to pix2pixHD library"},
+        "pix2pixHD":    { "type": "string", "default":"/home/ahmed/project/pix2pixHD", "description": "Path to pix2pixHD library"},
+        "model_name":	{ "type": "string", "default":"models", "description": "name of dir with trained pix2pixHD model (latest_net_G.pth)"},
+        "checkpoint_dir":   { "type": "string", "default":"./", "description": "Path to where to look for dir with model name"},
         "gpu_id":       { "type": "number", "format": "integer", "default": 0,    "description": "gpu id"},
         "resizeHeight": { "type": "number", "format": "integer", "default": 1024, "description": "resized image height"},
-        "resizeWidth":  { "type": "number", "format": "integer", "default": 1024, "description": "resized image width"}
+        "resizeWidth":  { "type": "number", "format": "integer", "default": 1024, "description": "resized image width"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
     "ocrd-anybaseocr-tiseg": {
@@ -141,8 +144,8 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Analysis of the input document",
       "parameters": {        
-        "block_segmentation_model":   { "type": "string",                     "required": true, "description": "Path to Layout Structure Classification Model"},
-        "block_segmentation_weights": { "type": "string",                     "required": true, "description": "Path to Layout Structure Classes"}
+        "block_segmentation_model":   { "type": "string",                     "required": true, "description": "Path to block segmentation Model"},
+        "block_segmentation_weights": { "type": "string",                     "required": true, "description": "Path tomodel weights"}
       }
     }       
   }

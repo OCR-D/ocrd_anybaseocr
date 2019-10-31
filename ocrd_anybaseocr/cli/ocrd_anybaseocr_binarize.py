@@ -106,9 +106,12 @@ class OcrdAnybaseocrBinarizer(Processor):
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
 
-        for (n, input_file) in enumerate(self.input_files):
-            file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+        for (n, input_file) in enumerate(self.input_files):            
             page_id = input_file.pageId or input_file.ID
+#             if input_file.pageId is None:
+#                 continue
+#             page_id = input_file.pageId
+            
             LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
             metadata = pcgts.get_Metadata()
@@ -122,21 +125,22 @@ class OcrdAnybaseocrBinarizer(Processor):
                                                                for name in self.parameter.keys()])]))
 
             page = pcgts.get_Page()
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id)
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter="binarized")
             LOG.info("Binarizing on '%s' level in page '%s'", oplevel, page_id)                    
             
             if oplevel=="page":
-                self._process_segment(page, page_image.filename, page_id, file_id + ".bin")
+                self._process_segment(page_image, page, page_xywh, page_id, input_file, n)
             else:
                 regions = page.get_TextRegion() + page.get_TableRegion()
                 if not regions:
                     LOG.warning("Page '%s' contains no text regions", page_id)
-                for region in regions:
+                for (k, region) in enumerate(regions):
                     region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
-                    # strange TODO at the moment
-                    #self._process_segment(region.filename, region.id)
+                    # TODO: not tested on regions
+                    self._process_segment(region_image, page, region_xywh, region.id, input_file, str(n)+"_"+str(k))
 
-            # To retain the basenames of files and their respective dir:
+            # Use input_file's basename for the new file -
+            # this way the files retain the same basenames:
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)            
             if file_id == input_file.ID:
                 file_id = concat_padded(self.output_file_grp, n)                
@@ -150,11 +154,11 @@ class OcrdAnybaseocrBinarizer(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-
-
-    def _process_segment(self, page, filename, page_id, file_id):
-        raw = ocrolib.read_image_gray(filename)
-        self.dshow(raw, "input")
+    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n):
+        raw = ocrolib.pil2array(page_image)
+        if len(raw.shape) > 2:
+            raw = np.mean(raw, 2)
+        raw = raw.astype("float64")
 
         # perform image normalization
         image = raw-amin(raw)
@@ -162,13 +166,6 @@ class OcrdAnybaseocrBinarizer(Processor):
             LOG.info("# image is empty: %s" % (page_id))
             return
         image /= amax(image)
-
-        if not self.parameter['nocheck']:
-            check = self.check_page(amax(image)-image)
-            if check is not None:
-                LOG.error(input_file.pageId or input_file.ID+" SKIPPED. "+check +
-                            " (use -n to disable this check)")
-                return
 
         # check whether the image is already effectively binarized
         if self.parameter['gray']:
@@ -243,20 +240,18 @@ class OcrdAnybaseocrBinarizer(Processor):
             gray()
             imshow(binarized)
             ginput(1, max(0.1, self.parameter['debug']))
-        #base, _ = ocrolib.allsplitext(filename)
-        #ocrolib.write_image_binary(base + ".bin.png", binarized)
-        # ocrolib.write_image_gray(base +".nrm.png", flat)
-        # print("########### File path : ", base+".nrm.png")
-        # write_to_xml(base+".bin.png")
-        # return base+".bin.png"
-
+        
+        page_xywh['features'] += ',binarized'  
+       
         bin_array = array(255*(binarized>ocrolib.midrange(binarized)),'B')
         bin_image = ocrolib.array2pil(bin_array)                            
         
+        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+        if file_id == input_file.ID:
+            file_id = concat_padded(self.image_grp, n)
         file_path = self.workspace.save_image_file(bin_image,
                                    file_id,
                                    page_id=page_id,
                                    file_grp=self.image_grp
             )     
-        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comment="binarized"))        
-            
+        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
