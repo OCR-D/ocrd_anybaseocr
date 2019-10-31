@@ -93,6 +93,7 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "separate text and non-text part with anyBaseOCR",
       "parameters": {
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
     "ocrd-anybaseocr-textline": {
@@ -120,7 +121,8 @@
         "pad":         {"type": "number", "format": "integer", "default": 3, "description": "padding for extracted lines"},
         "expand":      {"type": "number", "format": "integer", "default": 3, "description": "expand mask for grayscale extraction"},
         "parallel":    {"type": "number", "format": "integer", "default": 0, "description": "number of CPUs to use"},
-        "libpath":     {"type": "string", "default": ".", "description": "Library Path for C Executables"}
+        "libpath":     {"type": "string", "default": ".", "description": "Library Path for C Executables"},
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
     "ocrd-anybaseocr-layout-analysis": {
@@ -132,8 +134,8 @@
       "description": "Analysis of the input document",
       "parameters": {
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
-        "model_path":         { "type": "string",                     "required": true, "description": "Path to Layout Structure Classification Model"},
-        "class_mapping_path": { "type": "string",                     "required": true, "description": "Path to Layout Structure Classes"}
+        "model_path":         { "type": "string", "default":"models/structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
+        "class_mapping_path": { "type": "string", "default":"models/mapping_DenseNet.h5","required": false, "description": "Path to Layout Structure Classes"}
       }
     },
     "ocrd-anybaseocr-block-segmentation": {
@@ -144,9 +146,9 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Analysis of the input document",
       "parameters": {        
-        "block_segmentation_model":   { "type": "string",                     "required": true, "description": "Path to block segmentation Model"},
-        "block_segmentation_weights": { "type": "string",                     "required": true, "description": "Path tomodel weights"}
-      }
+        "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
+        "block_segmentation_weights": { "type": "string","default":"mrcnn/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
+         "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
     }       
   }
 }

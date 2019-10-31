@@ -15,17 +15,25 @@ import ocrolib
 import json
 from PIL import Image
 import os
+import numpy as np
 
 
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_models.ocrd_page import to_xml, parse
-from ocrd_utils import concat_padded, getLogger
+from ocrd_utils import concat_padded, getLogger, MIMETYPE_PAGE
+
+from ocrd_models.ocrd_page import (
+    to_xml, 
+    AlternativeImageType,
+    MetadataItemType,
+    LabelsType, LabelType
+    )
 
 TOOL = 'ocrd-anybaseocr-tiseg'
 LOG = getLogger('OcrdAnybaseocrTiseg')
+FALLBACK_IMAGE_GRP = 'OCR-D-IMG-TISEG'
 
 class OcrdAnybaseocrTiseg(Processor):
 
@@ -40,69 +48,100 @@ class OcrdAnybaseocrTiseg(Processor):
         return cropped
 
     def process(self):
+        try:
+            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+        except ValueError:
+            self.page_grp = self.output_file_grp
+            self.image_grp = FALLBACK_IMAGE_GRP
+            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
+        oplevel = self.parameter['operation_level']
+        
         for (n, input_file) in enumerate(self.input_files):
+            page_id = input_file.pageId or input_file.ID
+            
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            page_id = pcgts.pcGtsId or input_file.pageId or input_file.ID
+            metadata = pcgts.get_Metadata()
+            metadata.add_MetadataItem(
+                    MetadataItemType(type_="processingStep",
+                                     name=self.ocrd_tool['steps'][0],
+                                     value=TOOL,                                     
+                                     Labels=[LabelsType(#externalRef="parameters",
+                                                        Label=[LabelType(type_=name,
+                                                                         value=self.parameter[name])
+                                                               for name in self.parameter.keys()])]))
+
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
-            page_image, page_xywh, _ = self.workspace.image_from_page(page, page_id)            
-            # image_coords = pcgts.get_Page().get_Border().get_Coords().points.split()
-
-            # why does it return Image type when there is data (border info from crop)
-            print("----------", type(page_image), page_xywh)
-
-            # I: binarized-input-image; imftext: output-text-portion.png; imfimage: output-image-portion.png
-            '''
-            min_x, min_y = image_coords[0].split(",")
-            max_x, max_y = image_coords[2].split(",")
-            crop_region = int(min_x), int(
-                min_y), int(max_x), int(max_y)
-            cropped_img = self.crop_image(page_image.filename, crop_region)
-
-            I = ocrolib.pil2array(cropped_img)
-            I = 1-I/I.max()
-            rows, cols = I.shape
-
-            # Generate Mask and Seed Images
-            Imask, Iseed = self.pixMorphSequence_mask_seed_fill_holes(I)
-
-            # Iseedfill: Union of Mask and Seed Images
-            Iseedfill = self.pixSeedfillBinary(Imask, Iseed)
-
-            # Dilation of Iseedfill
-            mask = ones((3, 3))
-            Iseedfill = ndimage.binary_dilation(Iseedfill, mask)
-
-            # Expansion of Iseedfill to become equal in size of I
-            Iseedfill = self.expansion(Iseedfill, (rows, cols))
-
-            # Write  Text and Non-Text images
-            image_part = array((1-I*Iseedfill), dtype=int)
-            image_part[0, 0] = 0  # only for visualisation purpose
-            text_part = array((1-I*(1-Iseedfill)), dtype=int)
-            text_part[0, 0] = 0  # only for visualisation purpose
-
-            base, _ = ocrolib.allsplitext(fname)
-            ocrolib.write_image_binary(base + ".ts.png", text_part)
-
-            #imf_image = imf[0:-3] + "nts.png"
-            #ocrolib.write_image_binary(base + ".nts.png", image_part)
-            # return [base + ".ts.png", base + ".nts.png"]
-            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
+            
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='tiseged')            
+            if oplevel == 'page':
+                self._process_segment(page_image, page, page_xywh, page_id, input_file, n)
+            else:
+                LOG.warning('Operation level %s, but should be "page".', oplevel)
+                break
+        
+            # Use input_file's basename for the new file -
+            # this way the files retain the same basenames:
+            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)            
             if file_id == input_file.ID:
-                file_id = concat_padded(self.output_file_grp, n)
-                
+                file_id = concat_padded(self.output_file_grp, n)                
             self.workspace.add_file(
                 ID=file_id,
                 file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
-                mimetype="image/png",
-                url=base + ".ts.png",
+                mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,
-                                            file_id + '.xml'),
+                                        file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
+                    
+    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n):
+    
+        I = ocrolib.pil2array(page_image)
+        if len(I.shape) > 2:
+            I = np.mean(I, 2)
+        I = 1-I/I.max()
+        rows, cols = I.shape
 
+        # Generate Mask and Seed Images
+        Imask, Iseed = self.pixMorphSequence_mask_seed_fill_holes(I)
+
+        # Iseedfill: Union of Mask and Seed Images
+        Iseedfill = self.pixSeedfillBinary(Imask, Iseed)
+
+        # Dilation of Iseedfill
+        mask = ones((3, 3))
+        Iseedfill = ndimage.binary_dilation(Iseedfill, mask)
+
+        # Expansion of Iseedfill to become equal in size of I
+        Iseedfill = self.expansion(Iseedfill, (rows, cols))
+
+        # Write Text and Non-Text images
+        image_part = array((1-I*Iseedfill), dtype=int)
+        image_part[0, 0] = 0  # only for visualisation purpose
+        text_part = array((1-I*(1-Iseedfill)), dtype=int)
+        text_part[0, 0] = 0  # only for visualisation purpose
+
+        page_xywh['features'] += ',tiseged'
+
+        bin_array = array(255*(text_part>ocrolib.midrange(text_part)),'B')
+        bin_image = ocrolib.array2pil(bin_array)                            
+        
+        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+        if file_id == input_file.ID:
+            file_id = concat_padded(self.image_grp, n)
+        file_path = self.workspace.save_image_file(bin_image,
+                                   file_id,
+                                   page_id=page_id,
+                                   file_grp=self.image_grp
+            )     
+        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
+
+        
+        
+        
+        
+    
     def pixMorphSequence_mask_seed_fill_holes(self, I):
         Imask = self.reduction_T_1(I)
         Imask = self.reduction_T_1(Imask)
@@ -164,4 +203,3 @@ class OcrdAnybaseocrTiseg(Processor):
         A[:, 2:4*c:4] = A[:, 0:4*c:4]
         A[:, 3:4*c:4] = A[:, 0:4*c:4]
         return A
-    '''
