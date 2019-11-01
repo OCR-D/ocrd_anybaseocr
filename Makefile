@@ -9,24 +9,34 @@ PIP = pip
 LOG_LEVEL = INFO
 PYTHONIOENCODING=utf8
 
+# Tag to publish docker image to
+DOCKER_TAG = ocrd/anybaseocr
+
 # BEGIN-EVAL makefile-parser --make-help Makefile
 
 help:
 	@echo ""
 	@echo "  Targets"
 	@echo ""
-	@echo "    deps           Install python deps via pip"
-	@echo "    install        Install"
-	@echo "    repo/assets    Clone OCR-D/assets to ./repo/assets"
-	@echo "    assets-clean   Remove assets"
-	@echo "    assets         Setup test assets"
-	@echo "    test           Run all tests"
-	@echo "    test-binarize  Test binarization"
-	@echo "    test-deskew    Test deskewing"
-	@echo "    test-crop      Test cropping"
+	@echo "    deps                     Install python deps via pip"
+	@echo "    install                  Install"
+	@echo "    model                    Download sample model TODO Add other models here"
+	@echo "    repo/assets              Clone OCR-D/assets to ./repo/assets"
+	@echo "    assets-clean             Remove assets"
+	@echo "    assets                   Setup test assets"
+	@echo "    #test                    Run all tests"
+	@echo "    test                     Run minimum sample"
+	@echo "    test-binarize            Test binarization"
+	@echo "    test-deskew              Test deskewing"
+	@echo "    test-crop                Test cropping"
+	@echo "    test-tiseg               Test text/non-text segmentation"
+	@echo "    test-textline            Test textline extraction"
+	@echo "    test-block-segmentation  Test block segmentation"
+	@echo "    test-layout-analysis     Test document structure analysis"
 	@echo ""
 	@echo "  Variables"
 	@echo ""
+	@echo "    DOCKER_TAG  Tag to publish docker image to"
 
 # END-EVAL
 
@@ -42,12 +52,15 @@ install:
 # Assets
 #
 
-#Add other models here
-# Download sample model
-#model: ocrd_anybaseocr/models/latest_net_G.pth
 
-#ocrd_anybaseocr/models/latest_net_G.pth:
-#	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download"
+# Download sample model TODO Add other models here
+model: ocrd_anybaseocr/models/latest_net_G.pth
+
+ocrd_anybaseocr/models/latest_net_G.pth:
+	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download"
+
+docker:
+	docker build -t '$(DOCKER_TAG)' .
 
 # Clone OCR-D/assets to ./repo/assets
 repo/assets:
@@ -95,9 +108,9 @@ test-textline: assets-clean assets
 
 
 # Test block segmentation
-test-block-segmentation: 
+test-block-segmentation:
 	cd $(testdir)/ocrd_anybaseocr && CUDA_VISIBLE_DEVICES=0 && $(exec_name_prefix)-block-segmentation -m mets_block.xml -I OCR-D-BLOCK -O OCR-D-BLOCK-SEGMENT -p params.json
 
 # Test document structure analysis
-test-layout-analysis: 
+test-layout-analysis:
 	cd $(testdir)/ocrd_anybaseocr && CUDA_VISIBLE_DEVICES=0 && $(exec_name_prefix)-layout-analysis -m mets_docanalysis.xml -I OCR-D-DOC -O OCR-D-IMG-LAYOUT -p params.json
