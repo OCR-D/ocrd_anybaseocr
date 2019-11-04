@@ -148,7 +148,8 @@
       "parameters": {        
         "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
         "block_segmentation_weights": { "type": "string","default":"mrcnn/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
-         "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
-    }       
+        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
+      }       
+    }
   }
 }
