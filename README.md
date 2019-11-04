@@ -33,7 +33,6 @@ ocrd-anybaseocr-binarize -m (path to METs input file) -I (Input group name) -O (
 ocrd-anybaseocr-binarize \
    -m mets.xml \
    -I OCR-D-IMG \
-   -O OCR-D-IMG-BIN \
    -O OCR-D-PAGE-BIN
 ```
 
@@ -52,7 +51,6 @@ ocrd-anybaseocr-deskew -m (path to METs input file) -I (Input group name) -O (Ou
 ocrd-anybaseocr-deskew \
   -m mets.xml \
   -I OCR-D-PAGE-BIN \
-  -O OCR-D-IMG-DESKEW \
   -O OCR-D-PAGE-DESKEW
 ```
 
@@ -71,7 +69,6 @@ ocrd-anybaseocr-crop -m (path to METs input file) -I (Input group name) -O (Outp
 ocrd-anybaseocr-crop \
    -m mets.xml \
    -I OCR-D-PAGE-DESKEW \
-   -O OCR-D-IMG-CROP \
    -O OCR-D-PAGE-CROP
 ```
 
@@ -92,7 +89,6 @@ ocrd-anybaseocr-dewarp -m (path to METs input file) -I (Input group name) -O (Ou
 CUDA_VISIBLE_DEVICES=0 ocrd-anybaseocr-dewarp \
    -m mets.xml \
    -I OCR-D-PAGE-CROP \
-   -O OCR-D-IMG-DEWARP \
    -O OCR-D-PAGE-DEWARP
 ```
 
@@ -111,7 +107,6 @@ ocrd-anybaseocr-tiseg -m (path to METs input file) -I (Input group name) -O (Out
 ocrd-anybaseocr-tiseg \
    -m mets.xml \
    -I OCR-D-PAGE-CROP \
-   -O OCR-D-IMG-TISEG \
    -O OCR-D-PAGE-TISEG
 ```
 
@@ -130,8 +125,43 @@ ocrd-anybaseocr-textline -m (path to METs input file) -I (Input group name) -O (
 ocrd-anybaseocr-textline \
    -m mets.xml \
    -I OCR-D-PAGE-TISEG \
-   -O OCR-D-IMG-TL \
    -O OCR-D-PAGE-TL
+```
+
+## Block Segmenter
+
+### Method Behaviour 
+ This function takes raw document image as an input and segments the image into the different text blocks.
+ 
+ #### Usage:
+```sh
+ocrd-anybaseocr-block-segmenter -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
+```
+
+#### Example: 
+```sh
+ocrd-anybaseocr-block-segmenter \
+   -m mets.xml \
+   -I OCR-IMG \
+   -O OCR-D-PAGE-BLOCK
+```
+
+## Document Analyser
+
+### Method Behaviour 
+ This function takes all the cropped document images of a single book and its corresponding text regions as input and generates the logical structure on the book level.
+ 
+ #### Usage:
+```sh
+ocrd-anybaseocr-layout-analysis -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
+```
+
+#### Example: 
+```sh
+ocrd-anybaseocr-layout-analysis \
+   -m mets.xml \
+   -I OCR-IMG \
+   -O OCR-D-PAGE-BLOCK
 ```
 
 
