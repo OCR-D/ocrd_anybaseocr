@@ -6,7 +6,7 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow as tf
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
-
+from collections import defaultdict
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
@@ -49,8 +49,9 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
 
     def __init__(self, *args, **kwargs):
         self.last_result = [] 
-        self.logID = -1
-        self.logIDs = {}
+        self.logID = 0 # counter for new key
+        self.logIDs = defaultdict(int) # dict to keep track of previous keys for labels other then chapter or section
+        self.log_id = 0 # var to keep the current ongoing key
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrLayoutAnalyser, self).__init__(*args, **kwargs)
@@ -64,7 +65,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         return model
 
     def start_test(self, model, img_array, filename, labels):
-
+    
         # shape should be 1,600,500 for keras
         pred = model.predict(img_array)
         pred = np.array(pred)
@@ -75,15 +76,14 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
 
         predictions = []
         preds = (pred>=0.5)
-        
-        temp = []
+        predictions = []
         for index, cls in enumerate(preds):
             if cls:
-                temp.append(labels[index])
+                predictions.append(labels[index])
         
-        if len(temp) == 0:
-            temp.append('page') # default label
-        predictions.append(",".join(temp))       
+        if len(predictions) == 0:
+            predictions.append('page') # default label
+        #predictions.append(",".join(temp))       
         return predictions
 
     def img_resize(self, image_path):
@@ -93,43 +93,48 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
     
     def write_to_mets(self, result, pageID):  
         
-        log_id = None
+        #log_id = self.logID
         
-        create_new_logical = False
         for i in result:   
+            create_new_logical = False
             # check if label is page skip 
-            if i =="page":
-                continue
+            if i !="page":
+            
             # if not page, chapter and section then its something old
-            if i!="chapter" and i!="section":
-                if i not in self.last_result:
-                    create_new_logical = True
-                    
+                if i!="chapter" and i!="section":
+        
+                    if i in self.last_result:
+                        self.log_id = self.logIDs[i]
+                    else:
+                        create_new_logical = True
+
                 else:
-                    # the same label exists in last one so find the old key of other label
-                    log_id = self.logIDs[i]
-                
-            else:
-                create_new_logical = True
-            
-            if create_new_logical:
-            #if result != self.last_result and result != "page":
-                #create div in logmap
-            
-                self.logID += 1
-                log_div = ET.SubElement(self.log_map, TAG_METS_DIV)
-                log_div.set('TYPE', str(i))            
-                log_div.set('ID', "LOG_"+str(self.logID))
-                self.last_result = result
-                if i!='chapter' and i!='section':
+                    create_new_logical = True
+
+                if create_new_logical:
+
+                    log_div = ET.SubElement(self.log_map, TAG_METS_DIV)
+                    log_div.set('TYPE', str(i))            
+                    log_div.set('ID', "LOG_"+str(self.logID))
+      
+                    #if i!='chapter' and i!='section':
                     self.logIDs[i] = self.logID
-                    
-                log_id = self.logID
-                               
-            #add smlink
+                    self.log_id = self.logID
+                    self.logID += 1
+            
+            else:
+                if self.logIDs['chapter'] > self.logIDs['section']:
+                    self.log_id = self.logIDs['chapter']
+                 
+                if self.logIDs['section'] > self.logIDs['chapter']:
+                    self.log_id = self.logIDs['section']
+                
+                
             smLink = ET.SubElement(self.link, TAG_METS_SMLINK)
             smLink.set('{'+NS['xlink']+'}'+'to', pageID)
-            smLink.set('{'+NS['xlink']+'}'+'from', "LOG_"+str(log_id))
+            smLink.set('{'+NS['xlink']+'}'+'from', "LOG_"+str(self.log_id))
+        
+        self.last_result = result
     
     def create_logmap_smlink(self, workspace):
         el_root = self.workspace.mets._tree.getroot()
@@ -137,6 +142,8 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         if log_map is None:
             log_map = ET.SubElement(el_root, TAG_METS_STRUCTMAP)
             log_map.set('TYPE', 'LOGICAL')
+        else:
+            LOG.info('LOGICAL structMap already exists, adding to it')
         link = el_root.find('mets:structLink', NS)
         if link is None:
             link = ET.SubElement(el_root, TAG_METS_STRUCTLINK)
@@ -173,6 +180,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             size = 600, 500
             img = Image.open(fname)
             img_array = ocrolib.pil2array(img.resize((500, 600), Image.ANTIALIAS))
+            img_array = img_array * 1./255.
             img_array = img_array[np.newaxis, :, :, np.newaxis]            
             results = self.start_test(model, img_array, fname, label_mapping)
             LOG.info(results)
