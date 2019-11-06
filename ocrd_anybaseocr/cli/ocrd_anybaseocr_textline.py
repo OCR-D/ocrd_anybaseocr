@@ -80,7 +80,7 @@ class OcrdAnybaseocrTextline(Processor):
             
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='tiseged')            
             if oplevel == 'page':
-                self._process_segment(page_image, page, page_xywh, page_id, input_file, n)
+                self._process_segment(page_image, page, None, page_xywh, page_id, input_file, n)
                 LOG.warning("Operation level should not be page.")
             else:
                 regions = page.get_TextRegion() + page.get_TableRegion()
@@ -89,7 +89,7 @@ class OcrdAnybaseocrTextline(Processor):
                 for (k, region) in enumerate(regions):
                     region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
                     # TODO: not tested on regions
-                    self._process_segment(region_image, page, region_xywh, region.id, input_file, str(n)+"_"+str(k))
+                    self._process_segment(region_image, page, region, region_xywh, region.id, input_file, n)
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
@@ -106,28 +106,30 @@ class OcrdAnybaseocrTextline(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-    def _process_segment(self, page_image, page, region_xywh, page_id, input_file, n):
+    def _process_segment(self, page_image, page, textregion, region_xywh, page_id, input_file, n):
         binary = ocrolib.pil2array(page_image)
+        if len(binary.shape) > 2:
+            binary = np.mean(binary, 2)
         binary = np.array(1-binary/np.amax(binary),'B')
-        if page.get_TextRegion() is None or len(page.get_TextRegion()) <1:
+
+        if textregion is None:
             min_x, max_x = (0, binary.shape[0])
             min_y, max_y = (0, binary.shape[1])
             textregion = TextRegionType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
             page.add_TextRegion(textregion)
-        else: 
-            textregion = page.get_TextRegion()[-1]
-        ocrolib.write_image_binary("test.bin.png", binary)
+        
+        #ocrolib.write_image_binary("test.bin.png", binary)
         if self.parameter['scale'] == 0:
             scale = psegutils.estimate_scale(binary)
         else:
             scale = self.parameter['scale']
         if np.isnan(scale) or scale > 1000.0 or scale < self.parameter['minscale']:
-            LOG.warning("%s: bad scale (%g); skipping\n" % (fname, scale))
+            LOG.warning(str(scale)+": bad scale; skipping!\n" )
             return
         
         segmentation = self.compute_segmentation(binary, scale)
         if np.amax(segmentation) > self.parameter['maxlines']:
-            LOG.warning("%s: too many lines %i", (fname, np.amax(segmentation)))
+            LOG.warning("too many lines %i; skipping!\n", (np.amax(segmentation)))
             return
         lines = psegutils.compute_lines(segmentation, scale)
         order = psegutils.reading_order([l.bounds for l in lines])
@@ -158,7 +160,7 @@ class OcrdAnybaseocrTextline(Processor):
                 file_id = concat_padded(self.image_grp, n)
         
             file_path = self.workspace.save_image_file(img,
-                                   file_id+"_"+str(i),
+                                   file_id+"_"+str(n)+"_"+str(i),
                                    page_id=page_id,
                                    file_grp=self.image_grp
                 )

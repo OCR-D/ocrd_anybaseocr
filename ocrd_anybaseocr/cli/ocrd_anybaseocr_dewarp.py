@@ -87,11 +87,10 @@ class OcrdAnybaseocrDewarper(Processor):
             sys.exit(1)
 
         path = self.parameter['pix2pixHD']
-
         if not Path(path).is_dir():
             LOG.error("""\
                 NVIDIA's pix2pixHD was not found at '%s'. Make sure the `pix2pixHD` parameter 
-                in params.json points to the local path to the cloned pix2pixHD repository.
+                in ocrd-tools.json points to the local path to the cloned pix2pixHD repository.
 
                 pix2pixHD can be downloaded from https://github.com/NVIDIA/pix2pixHD
                 """ % path)
@@ -119,7 +118,8 @@ class OcrdAnybaseocrDewarper(Processor):
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='dewarped')
             if oplevel == 'page':
                 dataset = self.prepare_data(opt, page_image, path)
-                self._process_segment(model, dataset, page, page_xywh, page_id, input_file, n)
+                orig_img_size = page_image.size
+                self._process_segment(model, dataset, page, page_xywh, page_id, input_file, orig_img_size, n)
             else:
                 regions = page.get_TextRegion() + page.get_TableRegion() #get all regions?
                 if not regions: 
@@ -129,7 +129,8 @@ class OcrdAnybaseocrDewarper(Processor):
                     # TODO: not tested on regions
                     # TODO: region has to exist as a physical file to be processed by pix2pixHD
                     dataset = self.prepare_data(opt, region_image, path)
-                    self._process_segment(model, dataset, page, region_xywh, region.id, input_file, str(n)+"_"+str(k))
+                    orig_img_size = region_image.size
+                    self._process_segment(model, dataset, page, region_xywh, region.id, input_file, orig_img_size, n)
            
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
@@ -148,12 +149,14 @@ class OcrdAnybaseocrDewarper(Processor):
         os.rmdir(self.input_file_grp+"/test_A/") #FIXME: better way of deleting a temp_dir?
         
 
-    def _process_segment(self, model, dataset, page, page_xywh, page_id, input_file, n):
+    def _process_segment(self, model, dataset, page, page_xywh, page_id, input_file, orig_img_size, n):
         for i, data in enumerate(dataset):
+            w,h = orig_img_size
             generated = model.inference(data['label'], data['inst'], data['image'])
             dewarped = array(generated.data[0].permute(1,2,0).detach().cpu())
             bin_array = array(255*(dewarped>ocrolib.midrange(dewarped)),'B')
-            dewarped = ocrolib.array2pil(bin_array)                            
+            dewarped = ocrolib.array2pil(bin_array)
+            dewarped = dewarped.resize((w,h))                        
             
             page_xywh['features'] += ',dewarped'  
             

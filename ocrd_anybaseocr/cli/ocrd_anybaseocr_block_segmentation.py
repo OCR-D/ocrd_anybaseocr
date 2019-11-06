@@ -68,7 +68,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         model_weights = Path(self.parameter['block_segmentation_weights'])
         class_names = ['BG','page-number', 'paragraph', 'catch-word', 'heading', 'drop-capital', 'signature-mark','header',
                        'marginalia', 'footnote', 'footnote-continued', 'caption', 'endnote', 'footer','keynote']
-        
+        '''
         if not Path(model_path).is_dir():
             LOG.error("""\
                 Block Segmentation model was not found at '%s'. Make sure the `model_path` parameter
@@ -77,9 +77,9 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 model can be downloaded from http://url
                 """ % model_path)
             sys.exit(1)
-            
+        '''    
         config = InferenceConfig()
-        mrcnn_model = model.MaskRCNN(mode="inference", model_dir=str(model_path), config=config)
+        mrcnn_model = model.MaskRCNN(mode="inference", model_dir="./", config=config)
         mrcnn_model.load_weights(str(model_weights), by_name=True)
 
         oplevel = self.parameter['operation_level']
@@ -96,7 +96,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 #             file_name=fname.split(".tif")[0]
             
             #code added for workspace
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id) 
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id)#, feature_filter="binarized,deskewed,cropped,dewarped,tiseged") 
 
             
             if oplevel=="page":
