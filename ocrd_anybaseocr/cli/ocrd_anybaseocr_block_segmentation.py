@@ -1,6 +1,7 @@
 import sys
 import skimage
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' #No prints from the tensorflow side
 
 from ..constants import OCRD_TOOL
 
@@ -18,7 +19,7 @@ import numpy as np
 from ocrd_anybaseocr.mrcnn import model
 #from ocrd_anybaseocr.mrcnn import visualize
 from ocrd_anybaseocr.mrcnn.config import Config
-
+from ocrd_models.constants import NAMESPACES as NS
 
 from ocrd_models.ocrd_page import (
     CoordsType,
@@ -56,7 +57,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             sys.exit(1)
         
         try:
-            print("OUTPUT FILE ", self.output_file_grp)
             self.page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
             self.page_grp = self.output_file_grp
@@ -88,16 +88,13 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             pcgts = page_from_file(self.workspace.download_file(input_file))
             page = pcgts.get_Page()
             page_id = input_file.pageId or input_file.ID 
-            
-#             fname = pcgts.get_Page().imageFilename
-#             LOG.info("INPUT FILE %s", fname)
 
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id) 
             
-#             file_name=fname.split(".tif")[0]
-            
-            #code added for workspace
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id)#, feature_filter="binarized,deskewed,cropped,dewarped,tiseged") 
-
+            #Display Warning If image segment results already exist or not in StructMap?
+            regions = page.get_TextRegion() + page.get_TableRegion()
+            if regions:
+                LOG.warning("Image already has text segments!")
             
             if oplevel=="page":
                 self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model,class_names)
@@ -105,7 +102,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 LOG.warning('Operation level %s, but should be "page".', oplevel)
                 break
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
-
+            
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
             if file_id == input_file.ID:
@@ -125,14 +122,24 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         img_array = ocrolib.pil2array(page_image)
         results = mrcnn_model.detect([img_array], verbose=1)    
         r = results[0]        
+        
+        page_xywh['features'] += ',blksegmented'
+        
         for i in range(len(r['rois'])):                
-            LOG.info("Block Class: %s", class_names[i])            
+            
+            width,height,_ = img_array.shape
             min_x = r['rois'][i][0]
             min_y = r['rois'][i][1]
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
             
-            page_xywh['features'] += ',blksegmented'
+            #small post-processing incase of paragrapgh to not cut last alphabets
+            if (min_x - 5) > width and r['class_ids'][i] == 2:
+                min_x-=5
+            if (max_x + 10) < width and r['class_ids'][i] == 2:
+                min_x+=10
+            
+            # this can be tested, provided whether we need previous comments or not?
             
             region_img = img_array[min_x:max_x,min_y:max_y] #extract from points and img_array
             region_img = ocrolib.array2pil(region_img)
@@ -144,11 +151,11 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             file_path = self.workspace.save_image_file(region_img,
                                    file_id+"_"+str(i),
                                    page_id=page_id,
-                                   file_grp=self.image_grp)        
+                                   file_grp=self.image_grp)
+            
             ai = AlternativeImageType(filename=file_path, comments=page_xywh['features'])
             coords = CoordsType("%i,%i %i,%i %i,%i %i,%i" % (
             min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y))
             textregion = TextRegionType(Coords=coords, type_=class_names[r['class_ids'][i]])
             textregion.add_AlternativeImage(ai)
             page.add_TextRegion(textregion)
-        

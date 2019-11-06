@@ -135,7 +135,7 @@
       "parameters": {
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
         "model_path":         { "type": "string", "default":"models/structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
-        "class_mapping_path": { "type": "string", "default":"models/mapping_DenseNet.h5","required": false, "description": "Path to Layout Structure Classes"}
+        "class_mapping_path": { "type": "string", "default":"models/mapping_DenseNet.pickle","required": false, "description": "Path to Layout Structure Classes"}
       }
     },
     "ocrd-anybaseocr-block-segmentation": {
