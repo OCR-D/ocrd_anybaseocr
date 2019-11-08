@@ -22,7 +22,14 @@ from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_utils import concat_padded, getLogger, MIMETYPE_PAGE
+from ocrd_utils import (
+    getLogger, 
+    concat_padded, 
+    MIMETYPE_PAGE,
+    coordinates_for_segment,
+    points_from_polygon,
+    )
+
 
 from ocrd_models.ocrd_page import (
     to_xml, 
@@ -136,10 +143,6 @@ class OcrdAnybaseocrTiseg(Processor):
                                    file_grp=self.image_grp
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
-
-        
-        
-        
         
     
     def pixMorphSequence_mask_seed_fill_holes(self, I):

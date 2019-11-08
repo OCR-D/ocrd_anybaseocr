@@ -156,6 +156,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
             print("before_cut :", region_polygon)
             cut_region_polygon = border.intersection(Polygon(region_polygon))
+            if cut_region_polygon.is_empty:
+                continue
             cut_region_polygon = [i for i in zip(list(cut_region_polygon.exterior.coords.xy[0]),list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
             #print(cut_region_polygon)
             print("after_cut :", cut_region_polygon)
