@@ -47,6 +47,8 @@ from ocrd_utils import (
     crop_image,
     concat_padded, 
     MIMETYPE_PAGE, 
+    coordinates_for_segment,
+    points_from_polygon
 )
 from ocrd_models.ocrd_page import (
     CoordsType,
@@ -518,8 +520,10 @@ class OcrdAnybaseocrCropper(Processor):
             min_x, min_y, max_x, max_y = self.select_borderLine(
                 img_array_rr, lineDetectH, lineDetectV)                
 
-        brd = BorderType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (
-            min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
+        border_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
+        border_polygon = coordinates_for_segment(border_polygon, page_image, page_xywh)
+        border_points = points_from_polygon(border_polygon)
+        brd = BorderType(Coords=CoordsType(border_points))
         page.set_Border(brd)
 
         page_image = crop_image(page_image, box=(min_x, min_y, max_x, max_y))

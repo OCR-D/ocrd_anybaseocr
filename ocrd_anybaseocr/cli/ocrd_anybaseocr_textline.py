@@ -17,7 +17,13 @@ from ocrolib import psegutils, morph, sl
 from scipy.ndimage.filters import gaussian_filter, uniform_filter, maximum_filter
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_utils import concat_padded, getLogger, MIMETYPE_PAGE
+from ocrd_utils import (
+    concat_padded, 
+    getLogger, 
+    MIMETYPE_PAGE, 
+    coordinates_for_segment,
+    points_from_polygon
+    )
 
 from ocrd_models.ocrd_page import (
     to_xml, 
@@ -80,16 +86,17 @@ class OcrdAnybaseocrTextline(Processor):
             
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='tiseged')            
             if oplevel == 'page':
-                self._process_segment(page_image, page, None, page_xywh, page_id, input_file, n)
-                LOG.warning("Operation level should not be page.")
+                LOG.warning("Operation level should be region.")
+                break
             else:
-                regions = page.get_TextRegion() + page.get_TableRegion()
+                regions = page.get_TextRegion()
                 if not regions:
                     LOG.warning("Page '%s' contains no text regions", page_id)
+                    continue
                 for (k, region) in enumerate(regions):
                     region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
                     # TODO: not tested on regions
-                    self._process_segment(region_image, page, region, region_xywh, region.id, input_file, n)
+                    self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
@@ -107,16 +114,19 @@ class OcrdAnybaseocrTextline(Processor):
             )
 
     def _process_segment(self, page_image, page, textregion, region_xywh, page_id, input_file, n):
+        #check for existing text lines and whether to overwrite them
+        if textregion.get_TextLine():
+            if self.parameter['overwrite']:
+                LOG.info('removing existing TextLines in region "%s"', page_id)
+                textregion.set_TextLine([])
+            else:
+                LOG.warning('keeping existing TextLines in region "%s"', page_id)
+                return
+
         binary = ocrolib.pil2array(page_image)
         if len(binary.shape) > 2:
             binary = np.mean(binary, 2)
         binary = np.array(1-binary/np.amax(binary),'B')
-
-        if textregion is None:
-            min_x, max_x = (0, binary.shape[0])
-            min_y, max_y = (0, binary.shape[1])
-            textregion = TextRegionType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
-            page.add_TextRegion(textregion)
         
         #ocrolib.write_image_binary("test.bin.png", binary)
         if self.parameter['scale'] == 0:
@@ -145,12 +155,15 @@ class OcrdAnybaseocrTextline(Processor):
         
         lines = [lines[i] for i in lsort]
         cleaned = ocrolib.remove_noise(binary, self.parameter['noise'])
-        region_xywh['features'] += ",textline"
+
         for i, l in enumerate(lines):
-            ocrolib.write_image_binary("test.bin.png",binary[l.bounds[0],l.bounds[1]])
             min_x, max_x = (l.bounds[0].start, l.bounds[0].stop)
             min_y, max_y = (l.bounds[1].start, l.bounds[1].stop)
+            line_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
+            line_polygon = coordinates_for_segment(line_polygon, page_image, region_xywh)
+            line_points = points_from_polygon(line_polygon)
             
+
             img = binary[l.bounds[0],l.bounds[1]]
             img = np.array(255*(img>ocrolib.midrange(img)),'B')
             img = ocrolib.array2pil(img)
@@ -165,7 +178,8 @@ class OcrdAnybaseocrTextline(Processor):
                                    file_grp=self.image_grp
                 )
             ai = AlternativeImageType(filename=file_path, comments=region_xywh['features'])
-            line = TextLineType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
+            line_id = '%s_line%04d' % (page_id, i)
+            line = TextLineType(id=line_id, Coords=CoordsType(line_points))
             line.add_AlternativeImage(ai)
             textregion.add_TextLine(line)
             

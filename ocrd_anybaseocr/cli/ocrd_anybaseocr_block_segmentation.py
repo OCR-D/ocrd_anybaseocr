@@ -7,7 +7,14 @@ from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
+from ocrd_utils import (
+    getLogger, 
+    concat_padded, 
+    MIMETYPE_PAGE,
+    coordinates_for_segment,
+    points_from_polygon,
+    polygon_from_points
+    )
 
 import warnings
 import ocrolib
@@ -15,6 +22,8 @@ warnings.filterwarnings('ignore',category=FutureWarning)
 import tensorflow as tf
 from pathlib import Path
 import numpy as np
+import matplotlib.path as pltPath
+from shapely.geometry import Polygon
 
 from ocrd_anybaseocr.mrcnn import model
 #from ocrd_anybaseocr.mrcnn import visualize
@@ -89,7 +98,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             page = pcgts.get_Page()
             page_id = input_file.pageId or input_file.ID 
 
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id) 
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='binarized,deskewed,cropped') 
             
             #Display Warning If image segment results already exist or not in StructMap?
             regions = page.get_TextRegion() + page.get_TableRegion()
@@ -97,7 +106,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 LOG.warning("Image already has text segments!")
             
             if oplevel=="page":
-                self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model,class_names)
+                self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names)
             else:
                 LOG.warning('Operation level %s, but should be "page".', oplevel)
                 break
@@ -117,13 +126,25 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, mrcnn_model,class_names):
+    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names):
+        #check for existing text regions and whether to overwrite them
+        if page.get_TextRegion():
+            if self.parameter['overwrite']:
+                LOG.info('removing existing TextRegions in page "%s"', page_id)
+                textregion.set_TextRegion([])
+            else:
+                LOG.warning('keeping existing TextRegions in page "%s"', page_id)
+                return
         
+        border_coords = page.get_Border().get_Coords()
+        border_points = polygon_from_points(border_coords.get_points())
+        print("Border :", border_points)
+        border = Polygon(border_points)
         img_array = ocrolib.pil2array(page_image)
+        if len(img_array.shape) <= 2:
+            img_array = np.stack((img_array,)*3, axis=-1)
         results = mrcnn_model.detect([img_array], verbose=1)    
         r = results[0]        
-        
-        page_xywh['features'] += ',blksegmented'
         
         for i in range(len(r['rois'])):                
             
@@ -132,6 +153,15 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             min_y = r['rois'][i][1]
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
+            region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
+            print("before_cut :", region_polygon)
+            cut_region_polygon = border.intersection(Polygon(region_polygon))
+            cut_region_polygon = [i for i in zip(list(cut_region_polygon.exterior.coords.xy[0]),list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
+            #print(cut_region_polygon)
+            print("after_cut :", cut_region_polygon)
+            region_polygon = coordinates_for_segment(cut_region_polygon, page_image, page_xywh)
+            region_points = points_from_polygon(region_polygon)
+            print("after_seg :", region_points)
             
             #small post-processing incase of paragrapgh to not cut last alphabets
             if (min_x - 5) > width and r['class_ids'][i] == 2:
@@ -154,8 +184,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                                    file_grp=self.image_grp)
             
             ai = AlternativeImageType(filename=file_path, comments=page_xywh['features'])
-            coords = CoordsType("%i,%i %i,%i %i,%i %i,%i" % (
-            min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y))
-            textregion = TextRegionType(Coords=coords, type_=class_names[r['class_ids'][i]])
+            region_id = '%s_region%04d' % (page_id, i)
+            coords = CoordsType(region_points)
+            textregion = TextRegionType(id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
             textregion.add_AlternativeImage(ai)
             page.add_TextRegion(textregion)
