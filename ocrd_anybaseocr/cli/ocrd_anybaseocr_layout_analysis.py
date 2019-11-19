@@ -13,7 +13,7 @@ from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import to_xml
 from ocrd_utils import getLogger
-
+from ocrd_models import ocrd_mets
 
 from pathlib import Path
 import ocrolib
@@ -48,10 +48,14 @@ LOG = getLogger('OcrdAnybaseocrLayoutAnalyser')
 class OcrdAnybaseocrLayoutAnalyser(Processor):
 
     def __init__(self, *args, **kwargs):
+        
         self.last_result = [] 
         self.logID = 0 # counter for new key
         self.logIDs = defaultdict(int) # dict to keep track of previous keys for labels other then chapter or section
         self.log_id = 0 # var to keep the current ongoing key
+        self.log_links = {}
+        self.first = None
+        
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrLayoutAnalyser, self).__init__(*args, **kwargs)
@@ -74,7 +78,6 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             pred = np.squeeze(pred)
             pred = pred.T
 
-        predictions = []
         preds = (pred>=0.5)
         predictions = []
         for index, cls in enumerate(preds):
@@ -82,8 +85,10 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
                 predictions.append(labels[index])
         
         if len(predictions) == 0:
-            predictions.append('page') # default label
-        #predictions.append(",".join(temp))       
+            # if no prediction get the maximum one
+            predictions.append(labels[np.argmax(pred)])
+            #predictions.append('page') # default label
+     
         return predictions
 
     def img_resize(self, image_path):
@@ -93,14 +98,13 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
     
     def write_to_mets(self, result, pageID):  
         
-        #log_id = self.logID
-        
         for i in result:   
             create_new_logical = False
             # check if label is page skip 
             if i !="page":
             
             # if not page, chapter and section then its something old
+                
                 if i!="chapter" and i!="section":
         
                     if i in self.last_result:
@@ -108,19 +112,47 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
                     else:
                         create_new_logical = True
 
+                    if i =='binding':
+                        parent_node = self.log_map
+                    
+                    if i=='cover' or i=='endsheet' or i=='paste_down':
+
+                        # get the link for master node
+                        parent_node = self.log_links['binding']
+
+                    else:
+                        
+                        if self.first is not None and i!='title_page':
+                            parent_node = self.log_links[self.first]
+                        else:
+                            parent_node = self.log_map
+                            
                 else:
                     create_new_logical = True
-
+                    
+                    if self.first is None:
+                        self.first = i
+                        parent_node = self.log_map
+                            
+                    else:
+                        if self.first == i:
+                            parent_node = self.log_map
+                        else:
+                            parent_node = self.log_links[self.first]
+                            
+                    
                 if create_new_logical:
-
-                    log_div = ET.SubElement(self.log_map, TAG_METS_DIV)
+        
+                    log_div = ET.SubElement(parent_node, TAG_METS_DIV)
                     log_div.set('TYPE', str(i))            
                     log_div.set('ID', "LOG_"+str(self.logID))
-      
+                      
+                    self.log_links[i] = log_div # store the link 
                     #if i!='chapter' and i!='section':
                     self.logIDs[i] = self.logID
                     self.log_id = self.logID
                     self.logID += 1
+                                        
             
             else:
                 if self.logIDs['chapter'] > self.logIDs['section']:
@@ -165,6 +197,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
                 """ % model_path)
             sys.exit(1)
         else:
+            
             LOG.info('Loading model from file ', model_path)
             model = self.create_model(str(model_path))
             # load the mapping
@@ -175,7 +208,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             # print("INPUT FILE HERE",self.input_files)
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            fname = pcgts.get_Page().imageFilename
+            fname = pcgts.get_Page().imageFilename            
             LOG.info("INPUT FILE %s", fname)
             size = 600, 500
             img = Image.open(fname)
