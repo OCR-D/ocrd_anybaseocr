@@ -12,7 +12,8 @@ try:
     os.system("wget https://cloud.dfki.de/owncloud/index.php/s/SGJC8TrNWsH4gtC/download")
     os.rename("download", "test.tiff")
     #os.system("wget https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download")
-    os.mkdir("test_ws/models")
+    if not os.path.exists("test_ws/models"): 
+    	os.mkdir("test_ws/models")
     #os.rename("download", "test_ws/models/latest_net_G.pth")
     os.system("wget https://cloud.dfki.de/owncloud/index.php/s/dgACCYzytxnb7Ey/download")
     os.rename("download", "test_ws/models/block_segmentation_weights.h5")
