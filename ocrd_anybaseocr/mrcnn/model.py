@@ -16,8 +16,11 @@ import logging
 from collections import OrderedDict
 import multiprocessing
 import numpy as np
-import tensorflow as tf
-import keras
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+
+import tensorflow.keras as keras
 import keras.backend as K
 import keras.layers as KL
 import keras.engine as KE
@@ -337,8 +340,9 @@ class ProposalLayer(KE.Layer):
 ############################################################
 
 def log2_graph(x):
+    
     """Implementation of Log2. TF doesn't have a native implementation."""
-    return tf.log(x) / tf.log(2.0)
+    return tf.math.log(x) / tf.math.log(2.0)
 
 
 class PyramidROIAlign(KE.Layer):

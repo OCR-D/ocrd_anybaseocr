@@ -19,7 +19,9 @@ from ocrd_utils import (
 import warnings
 import ocrolib
 warnings.filterwarnings('ignore',category=FutureWarning) 
-import tensorflow as tf
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 from pathlib import Path
 import numpy as np
 import matplotlib.path as pltPath

@@ -14,6 +14,9 @@ https://github.com/fchollet/keras/blob/master/keras/utils/training_utils.py
 """
 
 import tensorflow as tf
+#import tensorflow.compat.v1 as tf
+#tf.disable_v2_behavior()
+import tensorflow.keras as keras
 import keras.backend as K
 import keras.layers as KL
 import keras.models as KM
