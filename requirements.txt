@@ -1,5 +1,5 @@
 numpy >= 1.15.4
-opencv-python >= 3.4
+opencv-python-headless
 ocrd-fork-ocropy >= 1.4.0a3
 ocrd-fork-pylsd >= 0.0.3
 click
