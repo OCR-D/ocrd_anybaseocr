@@ -10,4 +10,5 @@ dominate>=2.3.5
 pandas
 shapely
 scikit-image
+keras
 tensorflow-gpu
