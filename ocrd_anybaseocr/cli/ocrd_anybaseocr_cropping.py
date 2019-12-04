@@ -45,6 +45,7 @@ from ocrd_utils import (
     getLogger,
     crop_image,
     concat_padded,
+    bbox_from_points,
     MIMETYPE_PAGE,
 )
 from ocrd_models.ocrd_page import (
