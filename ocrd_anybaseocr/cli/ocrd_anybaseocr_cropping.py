@@ -471,7 +471,7 @@ class OcrdAnybaseocrCropper(Processor):
                 file_id = concat_padded(self.page_grp, n)
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=page_grp,
+                file_grp=self.page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.page_grp,
