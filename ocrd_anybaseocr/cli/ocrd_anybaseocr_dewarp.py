@@ -77,9 +77,9 @@ class OcrdAnybaseocrDewarper(Processor):
         
     def process(self):
         try:
-            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+            page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
-            self.page_grp = self.output_file_grp
+            page_grp = self.output_file_grp
             self.image_grp = FALLBACK_IMAGE_GRP
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         if not torch.cuda.is_available():
@@ -139,7 +139,7 @@ class OcrdAnybaseocrDewarper(Processor):
                 file_id = concat_padded(self.output_file_grp, n)                
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=self.output_file_grp,
+                file_grp=page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,

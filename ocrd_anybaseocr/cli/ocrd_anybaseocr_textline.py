@@ -8,7 +8,7 @@ from re import split
 import os.path
 import json
 import numpy as np
-
+import cv2
 from ..constants import OCRD_TOOL
 
 import subprocess
@@ -56,13 +56,13 @@ class OcrdAnybaseocrTextline(Processor):
         F = open(file, "w")
         for d in D:
             d += " 0 0 0 0\n"
-            F.write(d)
-
+            F.write(d)    
+    
     def process(self):
         try:
-            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+            page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
-            self.page_grp = self.output_file_grp
+            page_grp = self.output_file_grp
             self.image_grp = FALLBACK_IMAGE_GRP
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
@@ -84,7 +84,8 @@ class OcrdAnybaseocrTextline(Processor):
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='tiseged')            
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='tiseged')
+            
             if oplevel == 'page':
                 LOG.warning("Operation level should be region.")
                 break
@@ -94,9 +95,27 @@ class OcrdAnybaseocrTextline(Processor):
                     LOG.warning("Page '%s' contains no text regions", page_id)
                     continue
                 for (k, region) in enumerate(regions):
-                    region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
+                    
+                    points = region.Coords.get_points()
+                    points = points.split(" ")
+                    
+                    x_min = min(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
+                    x_max = max(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
+                    y_min = min(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
+                    y_max = max(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
+
+                    if x_max>page_image.size[0]:
+                        x_max = page_image.size[0]-1
+                    if y_max>page_image.size[1]:
+                        y_max = page_image.size[1]-1
+                    
+                    page_image = page_image.crop((x_min,y_min,x_max,y_max))
+                    
+                    region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)
+                    #region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
                     # TODO: not tested on regions
-                    self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
+                    #self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
+                    self._process_segment(page_image, page, region, region_xywh, region.id, input_file, k)
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
@@ -105,7 +124,7 @@ class OcrdAnybaseocrTextline(Processor):
                 file_id = concat_padded(self.output_file_grp, n)                
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=self.output_file_grp,
+                file_grp=page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,
@@ -122,17 +141,18 @@ class OcrdAnybaseocrTextline(Processor):
             else:
                 LOG.warning('keeping existing TextLines in region "%s"', page_id)
                 return
-
+        
         binary = ocrolib.pil2array(page_image)
+        
         if len(binary.shape) > 2:
             binary = np.mean(binary, 2)
         binary = np.array(1-binary/np.amax(binary),'B')
         
-        #ocrolib.write_image_binary("test.bin.png", binary)
         if self.parameter['scale'] == 0:
             scale = psegutils.estimate_scale(binary)
         else:
             scale = self.parameter['scale']
+            
         if np.isnan(scale) or scale > 1000.0 or scale < self.parameter['minscale']:
             LOG.warning(str(scale)+": bad scale; skipping!\n" )
             return

@@ -83,7 +83,7 @@ class OcrdAnybaseocrCropper(Processor):
     def remove_rular(self, arg):
         #base = arg.split(".")[0]
         #img = cv2.cvtColor(arg, cv2.COLOR_RGB2BGR)
-        gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)            
+        gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)    
         contours, _ = cv2.findContours(
             gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         
@@ -420,9 +420,9 @@ class OcrdAnybaseocrCropper(Processor):
         """Performs border detection on the workspace. """
         try:
             print("OUTPUT FILE ", self.output_file_grp)
-            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+            page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
-            self.page_grp = self.output_file_grp
+            page_grp = self.output_file_grp
             self.image_grp = FALLBACK_IMAGE_GRP
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
@@ -468,7 +468,7 @@ class OcrdAnybaseocrCropper(Processor):
                 file_id = concat_padded(self.output_file_grp, n)
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=self.output_file_grp,
+                file_grp=page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,
