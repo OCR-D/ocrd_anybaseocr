@@ -60,7 +60,9 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrBlockSegmenter, self).__init__(*args, **kwargs) 
-
+        #self.reading_order = []
+        self.order = 0
+        
     def process(self):
         
         if not tf.test.is_gpu_available():
@@ -148,6 +150,17 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         results = mrcnn_model.detect([img_array], verbose=1)    
         r = results[0]        
         
+        
+        # define reading order on basis of coordinates
+        reading_order = []
+        for i in range(len(r['rois'])):                
+            
+            width,height,_ = img_array.shape
+            min_x = r['rois'][i][0]
+            min_y = r['rois'][i][1]
+            reading_order.append((min_y, min_x))
+        reading_order = sorted(reading_order, key=lambda reading_order:(reading_order[0], reading_order[1]))
+        
         for i in range(len(r['rois'])):                
             
             width,height,_ = img_array.shape
@@ -167,6 +180,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             region_points = points_from_polygon(region_polygon)
             print("after_seg :", region_points)
             
+            read_order = reading_order.index((min_y, min_x))
+            
             #small post-processing incase of paragrapgh to not cut last alphabets
             if (min_x - 5) > width and r['class_ids'][i] == 2:
                 min_x-=5
@@ -174,14 +189,12 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 min_x+=10
             
             # this can be tested, provided whether we need previous comments or not?
-            
             region_img = img_array[min_x:max_x,min_y:max_y] #extract from points and img_array
             region_img = ocrolib.array2pil(region_img)
             file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.image_grp, n)
                 
-            
             file_path = self.workspace.save_image_file(region_img,
                                    file_id+"_"+str(i),
                                    page_id=page_id,
@@ -190,6 +203,11 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             ai = AlternativeImageType(filename=file_path, comments=page_xywh['features'])
             region_id = '%s_region%04d' % (page_id, i)
             coords = CoordsType(region_points)
-            textregion = TextRegionType(id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
+            textregion = TextRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
             textregion.add_AlternativeImage(ai)
+            
+            #border = page.get_Border()
+            #if border:
+            #    border.add_TextRegion(textregion)
+            #else:
             page.add_TextRegion(textregion)

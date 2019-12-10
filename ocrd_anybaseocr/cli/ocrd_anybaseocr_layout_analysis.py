@@ -161,6 +161,23 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
                  
                 if self.logIDs['section'] > self.logIDs['chapter']:
                     self.log_id = self.logIDs['section']
+                    
+                if self.logIDs['chapter']==0 and self.logIDs['section']==0:
+                    
+                    # if both chapter and section dont exist
+                    if self.first is None:
+                        self.first = 'chapter'
+                        parent_node = self.log_map
+                            
+                    log_div = ET.SubElement(parent_node, TAG_METS_DIV)
+                    log_div.set('TYPE', str(i))            
+                    log_div.set('ID', "LOG_"+str(self.logID))
+                      
+                    self.log_links[i] = log_div # store the link 
+                    #if i!='chapter' and i!='section':
+                    self.logIDs[i] = self.logID
+                    self.log_id = self.logID
+                    self.logID += 1                    
                 
                 
             smLink = ET.SubElement(self.link, TAG_METS_SMLINK)
