@@ -109,13 +109,13 @@ class OcrdAnybaseocrTextline(Processor):
                     if y_max>page_image.size[1]:
                         y_max = page_image.size[1]-1
                     
-                    page_image = page_image.crop((x_min,y_min,x_max,y_max))
+                    img__ = page_image.crop((x_min,y_min,x_max,y_max))
                     
                     region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)
                     #region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
                     # TODO: not tested on regions
                     #self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
-                    self._process_segment(page_image, page, region, region_xywh, region.id, input_file, k)
+                    self._process_segment(img__, page, region, region_xywh, region.id, input_file, k)
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
