@@ -183,8 +183,8 @@ class OcrdAnybaseocrTextline(Processor):
             line_polygon = coordinates_for_segment(line_polygon, page_image, region_xywh)
             line_points = points_from_polygon(line_polygon)
             
-
             img = binary[l.bounds[0],l.bounds[1]]
+            img = (1-img) * (-1)
             img = np.array(255*(img>ocrolib.midrange(img)),'B')
             img = ocrolib.array2pil(img)
             
@@ -199,11 +199,11 @@ class OcrdAnybaseocrTextline(Processor):
                 )
             ai = AlternativeImageType(filename=file_path, comments=region_xywh['features'])
             line_id = '%s_line%04d' % (page_id, i)
-            line = TextLineType(id=line_id, Coords=CoordsType(line_points))
+            line = TextLineType(custom='readingOrder {index:'+str(i)+';}', id=line_id, Coords=CoordsType(line_points))
             line.add_AlternativeImage(ai)
             textregion.add_TextLine(line)
-            
-        
+
+
     def B(self, a):
         if a.dtype == dtype('B'):
             return a

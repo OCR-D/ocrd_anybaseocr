@@ -39,6 +39,7 @@ from ocrd_models.ocrd_page import (
     to_xml,
     MetadataItemType,
     LabelsType, LabelType,
+    RegionRefIndexedType, OrderedGroupType, ReadingOrderType
 )
 from ocrd_models.ocrd_page_generateds import CoordsType
 
@@ -80,7 +81,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         
         model_weights = Path(self.parameter['block_segmentation_weights'])
         class_names = ['BG','page-number', 'paragraph', 'catch-word', 'heading', 'drop-capital', 'signature-mark','header',
-                       'marginalia', 'footnote', 'footnote-continued', 'caption', 'endnote', 'footer','keynote']
+                       'marginalia', 'footnote', 'footnote-continued', 'caption', 'endnote', 'footer','keynote',
+                       'image','table', 'graphics']
         '''
         if not Path(model_path).is_dir():
             LOG.error("""\
@@ -142,7 +144,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         
         border_coords = page.get_Border().get_Coords()
         border_points = polygon_from_points(border_coords.get_points())
-        print("Border :", border_points)
+        
         border = Polygon(border_points)
         img_array = ocrolib.pil2array(page_image)
         if len(img_array.shape) <= 2:
@@ -159,26 +161,49 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             min_x = r['rois'][i][0]
             min_y = r['rois'][i][1]
             reading_order.append((min_y, min_x))
+            
         reading_order = sorted(reading_order, key=lambda reading_order:(reading_order[0], reading_order[1]))
         
-        for i in range(len(r['rois'])):                
+        
+        #Creating Reading Order object in PageXML
+        order_group = OrderedGroupType(caption="Regions reading order",id=page_id)
+        reading_order_object = ReadingOrderType()
+        for i in range(len(r['rois'])):
+            min_x = r['rois'][i][0]
+            min_y = r['rois'][i][1]
+            max_x = r['rois'][i][2]
+            max_y = r['rois'][i][3]
+            region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
             
+            cut_region_polygon = border.intersection(Polygon(region_polygon))
+            if cut_region_polygon.is_empty:
+                continue
+                
+            order_index = reading_order.index((min_y, min_x))
+            region_id = '%s_region%04d' % (page_id, order_index)
+            regionRefIndex = RegionRefIndexedType(index=order_index, regionRef=region_id)
+            order_group.add_RegionRefIndexed(regionRefIndex)
+            
+        reading_order_object = ReadingOrderType()
+        reading_order_object.set_OrderedGroup(order_group)
+        page.set_ReadingOrder(reading_order_object)
+        
+        
+        for i in range(len(r['rois'])):                
             width,height,_ = img_array.shape
             min_x = r['rois'][i][0]
             min_y = r['rois'][i][1]
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
             region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
-            print("before_cut :", region_polygon)
+            
             cut_region_polygon = border.intersection(Polygon(region_polygon))
             if cut_region_polygon.is_empty:
                 continue
             cut_region_polygon = [i for i in zip(list(cut_region_polygon.exterior.coords.xy[0]),list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
             #print(cut_region_polygon)
-            print("after_cut :", cut_region_polygon)
             region_polygon = coordinates_for_segment(cut_region_polygon, page_image, page_xywh)
             region_points = points_from_polygon(region_polygon)
-            print("after_seg :", region_points)
             
             read_order = reading_order.index((min_y, min_x))
             
@@ -187,6 +212,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 min_x-=5
             if (max_x + 10) < width and r['class_ids'][i] == 2:
                 min_x+=10
+            
+            
             
             # this can be tested, provided whether we need previous comments or not?
             region_img = img_array[min_x:max_x,min_y:max_y] #extract from points and img_array
@@ -203,6 +230,24 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             ai = AlternativeImageType(filename=file_path, comments=page_xywh['features'])
             region_id = '%s_region%04d' % (page_id, i)
             coords = CoordsType(region_points)
+            
+            #incase of imageRegion
+            if r['class_ids'][i] == 15:
+                image_region = ImageRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
+                image_region.add_AlternativeImage(ai)
+                page.add_TextRegion(image_region)
+                continue
+            if r['class_ids'][i] == 16:
+                table_region = TableRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
+                table_region.add_AlternativeImage(ai)
+                page.add_TextRegion(table_region)
+                continue
+            if r['class_ids'][i] == 17:
+                graphic_region = GraphicRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
+                graphic_region.add_AlternativeImage(ai)
+                page.add_TextRegion(graphic_region)
+                continue
+            
             textregion = TextRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
             textregion.add_AlternativeImage(ai)
             
@@ -211,3 +256,5 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             #    border.add_TextRegion(textregion)
             #else:
             page.add_TextRegion(textregion)
+        
+           
