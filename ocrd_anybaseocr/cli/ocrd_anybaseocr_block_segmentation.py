@@ -240,7 +240,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             if r['class_ids'][i] == 16:
                 table_region = TableRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
                 table_region.add_AlternativeImage(ai)
-                page.add_TextRegion(table_region)
+                page.add_TableRegion(table_region)
                 continue
             if r['class_ids'][i] == 17:
                 graphic_region = GraphicRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
