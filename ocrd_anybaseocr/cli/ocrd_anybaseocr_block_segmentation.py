@@ -245,7 +245,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             if r['class_ids'][i] == 17:
                 graphic_region = GraphicRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
                 graphic_region.add_AlternativeImage(ai)
-                page.add_TextRegion(graphic_region)
+                page.add_GraphicRegion(graphic_region)
                 continue
             
             textregion = TextRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
