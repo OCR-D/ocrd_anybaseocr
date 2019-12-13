@@ -235,7 +235,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             if r['class_ids'][i] == 15:
                 image_region = ImageRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
                 image_region.add_AlternativeImage(ai)
-                page.add_TextRegion(image_region)
+                page.add_ImageRegion(image_region)
                 continue
             if r['class_ids'][i] == 16:
                 table_region = TableRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
