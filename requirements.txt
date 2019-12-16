@@ -8,5 +8,5 @@ torch>=1.1.0
 torchvision
 pandas
 keras
-tensorflow-gpu==1.14.0
+tensorflow-gpu==1.15.0
 scikit-image
