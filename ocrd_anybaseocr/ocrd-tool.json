@@ -122,7 +122,7 @@
         "expand":      {"type": "number", "format": "integer", "default": 3, "description": "expand mask for grayscale extraction"},
         "parallel":    {"type": "number", "format": "integer", "default": 0, "description": "number of CPUs to use"},
         "libpath":     {"type": "string", "default": ".", "description": "Library Path for C Executables"},
-        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "region","description": "PAGE XML hierarchy level to operate on"},
+        "operation_level": {"type": "string", "enum": ["page","region"], "default": "region","description": "PAGE XML hierarchy level to operate on"},
         "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"}
       }
     },
@@ -149,7 +149,7 @@
       "parameters": {        
         "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
         "block_segmentation_weights": { "type": "string","default":"models/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
-        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"},
+        "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"},
         "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"}
       }       
     }
