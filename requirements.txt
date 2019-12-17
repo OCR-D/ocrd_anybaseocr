@@ -1,9 +1,8 @@
-numpy >= 1.15.4
+ocrd >= 2.0.0
 opencv-python-headless >= 3.4
 ocrd-fork-ocropy >= 1.4.0a3
 ocrd-fork-pylsd >= 0.0.3
-click
-ocrd >= 2.0.0
+setuptools >= 41.0.0
 torch>=1.1.0
 torchvision
 pandas

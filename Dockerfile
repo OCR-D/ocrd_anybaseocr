@@ -1,4 +1,4 @@
-FROM ocrd/core:edge
+FROM ocrd/core
 MAINTAINER OCR-D
 ENV DEBIAN_FRONTEND noninteractive
 ENV PYTHONIOENCODING utf8
@@ -9,5 +9,3 @@ COPY requirements.txt .
 COPY README.md .
 COPY ocrd_anybaseocr ./ocrd_anybaseocr
 RUN pip3 install .
-
-ENTRYPOINT ["/bin/sh", "-c"]
