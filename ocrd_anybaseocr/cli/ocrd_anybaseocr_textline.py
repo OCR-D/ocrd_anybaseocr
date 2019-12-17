@@ -84,11 +84,12 @@ class OcrdAnybaseocrTextline(Processor):
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='tiseged')
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed,cropped')
             
             if oplevel == 'page':
                 LOG.warning("Operation level should be region.")
-                break
+                self._process_segment(page_image, page,None, page_xywh, page_id, input_file, n)
+                
             else:
                 regions = page.get_TextRegion()
                 if not regions:
@@ -110,8 +111,11 @@ class OcrdAnybaseocrTextline(Processor):
                         y_max = page_image.size[1]-1
                     
                     img__ = page_image.crop((x_min,y_min,x_max,y_max))
+                    # page_image = page_image.crop((x_min,y_min,x_max,y_max))
                     
+
                     region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)
+                    # region_image = region_image.crop((x_min,y_min,x_max,y_max))
                     #region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
                     # TODO: not tested on regions
                     #self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
@@ -183,9 +187,9 @@ class OcrdAnybaseocrTextline(Processor):
             line_polygon = coordinates_for_segment(line_polygon, page_image, region_xywh)
             line_points = points_from_polygon(line_polygon)
             
-            img = binary[l.bounds[0],l.bounds[1]]
-            img = (1-img) * (-1)
+            img = cleaned[l.bounds[0],l.bounds[1]]
             img = np.array(255*(img>ocrolib.midrange(img)),'B')
+            img = 255-img
             img = ocrolib.array2pil(img)
             
             file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)

@@ -80,7 +80,7 @@ class OcrdAnybaseocrTiseg(Processor):
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='tiseged')            
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed,cropped')            
             if oplevel == 'page':
                 self._process_segment(page_image, page, page_xywh, page_id, input_file, n)
             else:
@@ -129,7 +129,7 @@ class OcrdAnybaseocrTiseg(Processor):
         text_part = array((1-I*(1-Iseedfill)), dtype=int)
         text_part[0, 0] = 0  # only for visualisation purpose
 
-        page_xywh['features'] += ',tiseged'
+        # page_xywh['features'] += ',tiseged'
 
         bin_array = array(255*(text_part>ocrolib.midrange(text_part)),'B')
         bin_image = ocrolib.array2pil(bin_array)                            

@@ -452,7 +452,7 @@ class OcrdAnybaseocrCropper(Processor):
             page = pcgts.get_Page()
             
             
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='cropped') 
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='cropped',feature_selector='binarized,deskewed') 
 
             
             if oplevel=="page":

@@ -122,7 +122,7 @@ class OcrdAnybaseocrBinarizer(Processor):
                                                                for name in self.parameter.keys()])]))
 
             page = pcgts.get_Page()
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter="binarized")
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter="binarized,deskewed,cropped")
             LOG.info("Binarizing on '%s' level in page '%s'", oplevel, page_id)                    
             
             if oplevel=="page":

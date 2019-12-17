@@ -28,7 +28,6 @@ import matplotlib.path as pltPath
 from shapely.geometry import Polygon
 
 from ocrd_anybaseocr.mrcnn import model
-#from ocrd_anybaseocr.mrcnn import visualize
 from ocrd_anybaseocr.mrcnn.config import Config
 from ocrd_models.constants import NAMESPACES as NS
 
@@ -69,7 +68,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         if not tf.test.is_gpu_available():
             LOG.error("Your system has no CUDA installed. No GPU detected.")
             sys.exit(1)
-        
         try:
             page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
@@ -94,7 +92,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             sys.exit(1)
         '''    
         config = InferenceConfig()
-        mrcnn_model = model.MaskRCNN(mode="inference", model_dir="./", config=config)
+        mrcnn_model = model.MaskRCNN(mode="inference", model_dir=str(model_path), config=config)
         mrcnn_model.load_weights(str(model_weights), by_name=True)
 
         oplevel = self.parameter['operation_level']
@@ -104,7 +102,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             page = pcgts.get_Page()
             page_id = input_file.pageId or input_file.ID 
 
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='binarized,deskewed,cropped') 
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter ='binarized,deskewed,cropped') 
             
             #Display Warning If image segment results already exist or not in StructMap?
             regions = page.get_TextRegion() + page.get_TableRegion()
@@ -141,11 +139,13 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             else:
                 LOG.warning('keeping existing TextRegions in page "%s"', page_id)
                 return
-        
-        border_coords = page.get_Border().get_Coords()
-        border_points = polygon_from_points(border_coords.get_points())
-        
-        border = Polygon(border_points)
+        #check if border exists
+        if page.get_Border():
+            border_coords = page.get_Border().get_Coords()
+            border_points = polygon_from_points(border_coords.get_points())
+            
+            border = Polygon(border_points)
+
         img_array = ocrolib.pil2array(page_image)
         if len(img_array.shape) <= 2:
             img_array = np.stack((img_array,)*3, axis=-1)
@@ -160,6 +160,12 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             width,height,_ = img_array.shape
             min_x = r['rois'][i][0]
             min_y = r['rois'][i][1]
+            max_x = r['rois'][i][2]
+            max_y = r['rois'][i][3]
+            if (min_x - 5) > width and r['class_ids'][i] == 2:
+                min_x-=5
+            if (max_x + 10) < width and r['class_ids'][i] == 2:
+                min_x+=10
             reading_order.append((min_y, min_x))
             
         reading_order = sorted(reading_order, key=lambda reading_order:(reading_order[0], reading_order[1]))
@@ -173,11 +179,18 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             min_y = r['rois'][i][1]
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
+            if (min_x - 5) > width and r['class_ids'][i] == 2:
+                min_x-=5
+            if (max_x + 10) < width and r['class_ids'][i] == 2:
+                min_x+=10
             region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
             
-            cut_region_polygon = border.intersection(Polygon(region_polygon))
-            if cut_region_polygon.is_empty:
-                continue
+            if border:
+                cut_region_polygon = border.intersection(Polygon(region_polygon))
+                if cut_region_polygon.is_empty:
+                    continue
+            else:
+                cut_region_polygon = Polygon(region_polygon)
                 
             order_index = reading_order.index((min_y, min_x))
             region_id = '%s_region%04d' % (page_id, order_index)
@@ -195,6 +208,11 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             min_y = r['rois'][i][1]
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
+            
+            if (min_x - 5) > width and r['class_ids'][i] == 2:
+                min_x-=5
+            if (max_x + 10) < width and r['class_ids'][i] == 2:
+                min_x+=10
             region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
             
             cut_region_polygon = border.intersection(Polygon(region_polygon))
@@ -207,11 +225,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             
             read_order = reading_order.index((min_y, min_x))
             
-            #small post-processing incase of paragrapgh to not cut last alphabets
-            if (min_x - 5) > width and r['class_ids'][i] == 2:
-                min_x-=5
-            if (max_x + 10) < width and r['class_ids'][i] == 2:
-                min_x+=10
+
             
             
             

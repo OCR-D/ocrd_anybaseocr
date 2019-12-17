@@ -112,7 +112,7 @@ class OcrdAnybaseocrDeskewer(Processor):
             angle = page.get_orientation()
             if angle:
                 LOG.warning('Overwriting existing deskewing angle: %i', angle)
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='deskewed')
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='deskewed,cropped',feature_selector='binarized')
             
                         
             if oplevel=="page":

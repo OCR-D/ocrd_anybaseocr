@@ -204,7 +204,6 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         if not tf.test.is_gpu_available():
             LOG.error("Your system has no CUDA installed. No GPU detected.")
             sys.exit(1)
-
         model_path = Path(self.parameter['model_path'])
         class_mapper_path = Path(self.parameter['class_mapping_path'])
         if not Path(model_path).is_file():
@@ -229,8 +228,24 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             fname = pcgts.get_Page().imageFilename            
             LOG.info("CURRENT INPUT FILE %s", fname)
             size = 600, 500
-            img = Image.open(fname)
-            img_array = ocrolib.pil2array(img.resize((500, 600), Image.ANTIALIAS))
+            
+            metadata = pcgts.get_Metadata()
+            metadata.add_MetadataItem(
+                    MetadataItemType(type_="processingStep",
+                                     name=self.ocrd_tool['steps'][0],
+                                     value=TOOL,                                     
+                                     Labels=[LabelsType(#externalRef="parameter",
+                                                        Label=[LabelType(type_=name,
+                                                                         value=self.parameter[name])
+                                                               for name in self.parameter.keys()])]))
+
+            page = pcgts.get_Page()
+            LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
+            
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed')
+
+
+            img_array = ocrolib.pil2array(page_image.resize((500, 600), Image.ANTIALIAS))
             img_array = img_array * 1./255.
             img_array = img_array[np.newaxis, :, :, np.newaxis]            
             results = self.start_test(model, img_array, fname, label_mapping)
