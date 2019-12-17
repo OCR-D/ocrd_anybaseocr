@@ -173,7 +173,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         
         #Creating Reading Order object in PageXML
         order_group = OrderedGroupType(caption="Regions reading order",id=page_id)
-        reading_order_object = ReadingOrderType()
         for i in range(len(r['rois'])):
             min_x = r['rois'][i][0]
             min_y = r['rois'][i][1]

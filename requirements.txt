@@ -11,4 +11,4 @@ pandas
 shapely
 scikit-image
 keras
-tensorflow-gpu
+tensorflow>=2.0
