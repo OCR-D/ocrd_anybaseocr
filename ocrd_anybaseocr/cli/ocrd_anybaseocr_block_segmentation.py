@@ -51,7 +51,7 @@ FALLBACK_IMAGE_GRP = 'OCR-D-IMG-BLOCK-SEGMENT'
 class InferenceConfig(Config):
     NAME = "block"    
     IMAGES_PER_GPU = 1  
-    NUM_CLASSES = 1 + 14      
+    NUM_CLASSES = 1 + 17      
     DETECTION_MIN_CONFIDENCE = 0.9
 
 class OcrdAnybaseocrBlockSegmenter(Processor):
