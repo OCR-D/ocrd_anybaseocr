@@ -9,6 +9,7 @@ import os.path
 import json
 import numpy as np
 import cv2
+import imageio
 from ..constants import OCRD_TOOL
 
 import subprocess
@@ -97,29 +98,25 @@ class OcrdAnybaseocrTextline(Processor):
                     continue
                 for (k, region) in enumerate(regions):
                     
-                    points = region.Coords.get_points()
-                    points = points.split(" ")
+#                     points = region.Coords.get_points()
+#                     points = points.split(" ")
                     
-                    x_min = min(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
-                    x_max = max(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
-                    y_min = min(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
-                    y_max = max(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
+#                     x_min = min(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
+#                     x_max = max(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
+#                     y_min = min(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
+#                     y_max = max(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
 
-                    if x_max>page_image.size[0]:
-                        x_max = page_image.size[0]-1
-                    if y_max>page_image.size[1]:
-                        y_max = page_image.size[1]-1
+#                     if x_max>page_image.size[0]:
+#                         x_max = page_image.size[0]-1
+#                     if y_max>page_image.size[1]:
+#                         y_max = page_image.size[1]-1
                     
-                    img__ = page_image.crop((x_min,y_min,x_max,y_max))
-                    # page_image = page_image.crop((x_min,y_min,x_max,y_max))
+#                     img__ = page_image.crop((x_min,y_min,x_max,y_max))
                     
 
                     region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)
-                    # region_image = region_image.crop((x_min,y_min,x_max,y_max))
-                    #region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
-                    # TODO: not tested on regions
-                    #self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
-                    self._process_segment(img__, page, region, region_xywh, region.id, input_file, k)
+        
+                    self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
@@ -147,6 +144,7 @@ class OcrdAnybaseocrTextline(Processor):
                 return
         
         binary = ocrolib.pil2array(page_image)
+
         
         if len(binary.shape) > 2:
             binary = np.mean(binary, 2)
@@ -156,7 +154,7 @@ class OcrdAnybaseocrTextline(Processor):
             scale = psegutils.estimate_scale(binary)
         else:
             scale = self.parameter['scale']
-            
+        
         if np.isnan(scale) or scale > 1000.0 or scale < self.parameter['minscale']:
             LOG.warning(str(scale)+": bad scale; skipping!\n" )
             return

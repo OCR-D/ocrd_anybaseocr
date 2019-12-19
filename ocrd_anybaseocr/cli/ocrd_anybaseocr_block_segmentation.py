@@ -240,29 +240,29 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                                    page_id=page_id,
                                    file_grp=self.image_grp)
             
-            ai = AlternativeImageType(filename=file_path, comments=page_xywh['features'])
+            # ai = AlternativeImageType(filename=file_path, comments=page_xywh['features'])
             region_id = '%s_region%04d' % (page_id, i)
             coords = CoordsType(region_points)
             
             #incase of imageRegion
             if r['class_ids'][i] == 15:
                 image_region = ImageRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
-                image_region.add_AlternativeImage(ai)
+                # image_region.add_AlternativeImage(ai)
                 page.add_ImageRegion(image_region)
                 continue
             if r['class_ids'][i] == 16:
                 table_region = TableRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
-                table_region.add_AlternativeImage(ai)
+                # table_region.add_AlternativeImage(ai)
                 page.add_TableRegion(table_region)
                 continue
             if r['class_ids'][i] == 17:
                 graphic_region = GraphicRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
-                graphic_region.add_AlternativeImage(ai)
+                # graphic_region.add_AlternativeImage(ai)
                 page.add_GraphicRegion(graphic_region)
                 continue
             
             textregion = TextRegionType(custom='readingOrder {index:'+str(read_order)+';}',id=region_id ,Coords=coords, type_=class_names[r['class_ids'][i]])
-            textregion.add_AlternativeImage(ai)
+            # textregion.add_AlternativeImage(ai)
             
             #border = page.get_Border()
             #if border:
