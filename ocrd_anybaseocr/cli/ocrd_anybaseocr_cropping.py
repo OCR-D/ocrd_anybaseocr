@@ -338,17 +338,16 @@ class OcrdAnybaseocrCropper(Processor):
                 tmp.append(area)
         return tmp
 
-    def marge_columns(self, textarea):
+    def marge_columns(self, textarea, colSeparator):
         tmp = []
         marge = []
         #  height, _ = binImg.shape        
         textarea.sort(key=lambda x: (x[0]))
-        # print self.parameter['colSeparator']
         for i in range(len(textarea)-1):
             st = False
             x11, y11, x12, y12 = textarea[i]
             x21, y21, x22, y22 = textarea[i+1]
-            if x21-x12 <= self.parameter['colSeparator']:
+            if x21-x12 <= colSeparator:
                 if len(marge) > 0:
                     # print "marge ", marge[0]
                     x31, y31, x32, y32 = marge[0]
@@ -366,7 +365,7 @@ class OcrdAnybaseocrCropper(Processor):
 
         return tmp+marge
 
-    def crop_area(self, textarea, binImg, rgb):
+    def crop_area(self, textarea, binImg, rgb, colSeparator):
         height, width, _ = binImg.shape
 
         textarea = np.unique(textarea, axis=0)
@@ -399,7 +398,7 @@ class OcrdAnybaseocrCropper(Processor):
         if len(textarea) > 0:
             textarea = self.filter_area(textarea, binImg)
         if len(textarea) > 1:
-            textarea = self.marge_columns(textarea)
+            textarea = self.marge_columns(textarea, colSeparator)
             # print textarea
 
         if len(textarea) > 0:
@@ -497,11 +496,11 @@ class OcrdAnybaseocrCropper(Processor):
 
         textarea, img_array_rr_ta, height, width = self.detect_textarea(
             img_array_rr)
-        self.parameter['colSeparator'] = int(
+        colSeparator = int(
             width * self.parameter['colSeparator'])
         if len(textarea) > 1:
             textarea = self.crop_area(
-                textarea, img_array_bin, img_array_rr_ta)
+                textarea, img_array_bin, img_array_rr_ta, colSeparator)
 
             if len(textarea) == 0:
                 min_x, min_y, max_x, max_y = self.select_borderLine(

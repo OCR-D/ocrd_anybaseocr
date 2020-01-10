@@ -43,7 +43,7 @@ class OcrdAnybaseocrDewarper(Processor):
         opt.serial_batches = True  # no shuffle
         opt.no_flip = True  # no flip
         opt.rood_dir = self.input_file_grp # make into proper path
-        opt.checkpoints_dir = self.parameter['checkpoint_dir']
+        opt.checkpoints_dir = self.parameter['checkpoint_dir'] 
         opt.dataroot = self.input_file_grp
         opt.name = self.parameter['model_name']
         opt.label_nc = 0
@@ -95,8 +95,12 @@ class OcrdAnybaseocrDewarper(Processor):
                 pix2pixHD can be downloaded from https://github.com/NVIDIA/pix2pixHD
                 """ % path)
             sys.exit(1)
-
+        
+        # Add check whether file exists or not self.parameter['checkpoint_dir']self.parameter['model_name']
+        
         opt, model = self.prepare_options(path)
+        
+        
         oplevel = self.parameter['operation_level']
         for (n, input_file) in enumerate(self.input_files):
             page_id = input_file.pageId or input_file.ID
