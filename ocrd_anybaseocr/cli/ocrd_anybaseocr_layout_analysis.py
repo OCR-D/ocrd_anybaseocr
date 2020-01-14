@@ -226,7 +226,6 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
             fname = pcgts.get_Page().imageFilename            
-            LOG.info("CURRENT INPUT FILE %s", fname)
             size = 600, 500
             
             metadata = pcgts.get_Metadata()

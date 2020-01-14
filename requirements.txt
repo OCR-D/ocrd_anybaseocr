@@ -1,12 +1,11 @@
 numpy >= 1.15.4
-opencv-python-headless
+opencv-python-headless >= 3.4
 ocrd-fork-ocropy >= 1.4.0a3
 ocrd-fork-pylsd >= 0.0.3
 click
-ocrd >= 2.0.0a1
+ocrd >= 2.0.0
 torch>=1.1.0
 torchvision
-dominate>=2.3.5
 pandas
 shapely
 scikit-image

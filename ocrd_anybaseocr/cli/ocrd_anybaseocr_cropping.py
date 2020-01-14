@@ -39,11 +39,10 @@ from PIL import Image
 
 
 from ..constants import OCRD_TOOL
-from pylab import array
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_utils import (
-    getLogger, 
+    getLogger,
     crop_image,
     concat_padded, 
     MIMETYPE_PAGE, 
@@ -64,10 +63,11 @@ TOOL = 'ocrd-anybaseocr-crop'
 LOG = getLogger('OcrdAnybaseocrCropper')
 FALLBACK_IMAGE_GRP = 'OCR-D-IMG-CROP'
 
+
 class OcrdAnybaseocrCropper(Processor):
 
     def __init__(self, *args, **kwargs):
-        
+
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrCropper, self).__init__(*args, **kwargs)
@@ -76,17 +76,17 @@ class OcrdAnybaseocrCropper(Processor):
         x1, y1, x2, y2 = coordinate
         with open(base + '-frame-pf.dat', 'w') as fp:
             fp.write(str(x1)+"\t"+str(y1)+"\t"+str(x2-x1)+"\t"+str(y2-y1))
-    
-    def rotate_image(self, orientation, image):  
+
+    def rotate_image(self, orientation, image):
         return image.rotate(orientation)
 
     def remove_rular(self, arg):
         #base = arg.split(".")[0]
         #img = cv2.cvtColor(arg, cv2.COLOR_RGB2BGR)
-        gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)    
+        gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)
         contours, _ = cv2.findContours(
             gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        
+
         height, width, _ = arg.shape
         imgArea = height*width
 
@@ -124,7 +124,7 @@ class OcrdAnybaseocrCropper(Processor):
             x, y, w, h, _ = predictRular[0]
             cv2.rectangle(arg, (x-15, y-15), (x+w+20, y+h+20),
                           (255, 255, 255), cv2.FILLED)
-        
+
         return arg
 
     def BorderLine(self, MaxBoundary, lines, index, flag, lineDetectH, lineDetectV):
@@ -341,7 +341,7 @@ class OcrdAnybaseocrCropper(Processor):
     def marge_columns(self, textarea, colSeparator):
         tmp = []
         marge = []
-        #  height, _ = binImg.shape        
+        #  height, _ = binImg.shape
         textarea.sort(key=lambda x: (x[0]))
         for i in range(len(textarea)-1):
             st = False
@@ -423,68 +423,74 @@ class OcrdAnybaseocrCropper(Processor):
         except ValueError:
             page_grp = self.output_file_grp
             self.image_grp = FALLBACK_IMAGE_GRP
-            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
+            LOG.info(
+                "No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
         for (n, input_file) in enumerate(self.input_files):
-            page_id = input_file.pageId or input_file.ID 
-            
+            page_id = input_file.pageId or input_file.ID
+
             LOG.info("INPUT FILE %i / %s", n, page_id)
-            
+
             pcgts = page_from_file(self.workspace.download_file(input_file))
             page = pcgts.get_Page()
             # Check for existing Border --> already cropped
             border = page.get_Border()
             if border:
-                left, top, right, bottom = bbox_from_points(border.get_Coords().points)
+                left, top, right, bottom = bbox_from_points(
+                    border.get_Coords().points)
                 LOG.warning('Overwriting existing Border: %i:%i,%i:%i',
                             left, top, right, bottom)
 
             metadata = pcgts.get_Metadata()
             metadata.add_MetadataItem(
-                    MetadataItemType(type_="processingStep",
-                                     name=self.ocrd_tool['steps'][0],
-                                     value=TOOL,                                     
-                                     Labels=[LabelsType(#externalRef="parameters",
-                                                        Label=[LabelType(type_=name,
-                                                                         value=self.parameter[name])
-                                                               for name in self.parameter.keys()])]))
+                MetadataItemType(type_="processingStep",
+                                 name=self.ocrd_tool['steps'][0],
+                                 value=TOOL,
+                                 Labels=[LabelsType(  # externalRef="parameters",
+                                         Label=[LabelType(type_=name,
+                                                          value=self.parameter[name])
+                                                for name in self.parameter.keys()])]))
             page = pcgts.get_Page()
-            
-            
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='cropped',feature_selector='binarized,deskewed') 
 
-            
-            if oplevel=="page":
-                self._process_segment(page_image, page, page_xywh, page_id, input_file, n)
+            #page_image, page_xywh, page_image_info = self.workspace.image_from_page(
+            #    page, page_id, feature_filter='cropped')
+
+            if oplevel == "page":
+                self._process_segment(
+                    page_image, page, page_xywh, page_id, input_file, n)
             else:
-                LOG.warning('Operation level %s, but should be "page".', oplevel)
+                LOG.warning(
+                    'Operation level %s, but should be "page".', oplevel)
                 break
-            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
+            file_id = input_file.ID.replace(
+                self.input_file_grp, self.page_grp)
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
             if file_id == input_file.ID:
-                file_id = concat_padded(self.output_file_grp, n)
+                file_id = concat_padded(self.page_grp, n)
             self.workspace.add_file(
                 ID=file_id,
                 file_grp=page_grp,
+                #file_grp=self.page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(self.output_file_grp,
+                local_filename=os.path.join(self.page_grp,
                                             file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n):
+    def _process_segment(self, page_image, page, page_xywh, page_id, input_file, n):
         # Get image orientation
-        #orientation = page.get_orientation() # This function is not working 
-#         rotated_image = self.rotate_image(orientation, page_image)
-#         img_array = ocrolib.pil2array(rotated_image)
+        # orientation = page.get_orientation() # This function is not working
+        #         rotated_image = self.rotate_image(orientation, page_image)
+        #         img_array = ocrolib.pil2array(rotated_image)
 
         img_array = ocrolib.pil2array(page_image)
 
-        #Check if image is RGB or not #FIXME: check not needed anymore?
-        if len(img_array.shape)==2:
+        # Check if image is RGB or not #FIXME: check not needed anymore?
+        if len(img_array.shape) == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
 
         img_array_bin = np.array(
@@ -492,7 +498,7 @@ class OcrdAnybaseocrCropper(Processor):
 
         lineDetectH = []
         lineDetectV = []
-        img_array_rr = self.remove_rular(img_array)        
+        img_array_rr = self.remove_rular(img_array)
 
         textarea, img_array_rr_ta, height, width = self.detect_textarea(
             img_array_rr)
@@ -506,7 +512,7 @@ class OcrdAnybaseocrCropper(Processor):
                 min_x, min_y, max_x, max_y = self.select_borderLine(
                     img_array_rr, lineDetectH, lineDetectV)
             else:
-                min_x, min_y, max_x, max_y = textarea[0]                    
+                min_x, min_y, max_x, max_y = textarea[0]
         elif len(textarea) == 1 and (height*width*0.5 < (abs(textarea[0][2]-textarea[0][0]) * abs(textarea[0][3]-textarea[0][1]))):
             x1, y1, x2, y2 = textarea[0]
             x1 = x1-20 if x1 > 20 else 0
@@ -517,7 +523,7 @@ class OcrdAnybaseocrCropper(Processor):
             min_x, min_y, max_x, max_y = textarea[0]
         else:
             min_x, min_y, max_x, max_y = self.select_borderLine(
-                img_array_rr, lineDetectH, lineDetectV)                
+                img_array_rr, lineDetectH, lineDetectV)
 
         border_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
         border_polygon = coordinates_for_segment(border_polygon, page_image, page_xywh)
@@ -527,15 +533,15 @@ class OcrdAnybaseocrCropper(Processor):
 
         page_image = crop_image(page_image, box=(min_x, min_y, max_x, max_y))
         page_xywh['features'] += ',cropped'
-        
+
         file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
         if file_id == input_file.ID:
             file_id = concat_padded(self.image_grp, n)
-            
-        file_path = self.workspace.save_image_file(page_image,
-                               file_id,
-                               page_id=page_id,
-                               file_grp=self.image_grp
-        )        
-        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
 
+        file_path = self.workspace.save_image_file(page_image,
+                                                   file_id,
+                                                   page_id=page_id,
+                                                   file_grp=self.image_grp
+                                                   )
+        page.add_AlternativeImage(AlternativeImageType(
+            filename=file_path, comments=page_xywh['features']))
