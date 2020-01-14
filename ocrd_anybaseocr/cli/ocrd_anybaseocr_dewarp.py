@@ -95,9 +95,13 @@ class OcrdAnybaseocrDewarper(Processor):
                 pix2pixHD can be downloaded from https://github.com/NVIDIA/pix2pixHD
                 """ % path)
             sys.exit(1)
-        
-        # Add check whether file exists or not self.parameter['checkpoint_dir']self.parameter['model_name']
-        
+        model_file_path = os.path.join(path, 'checkpoints/latest_net_G.pth')    
+        if not Path(model_file_path).is_file():
+            LOG.error("""\
+                pix2pixHD model file was not found at '%s'. Make sure the this file exists.
+                """ % model_file_path)
+            sys.exit(1)
+                
         opt, model = self.prepare_options(path)
         
         

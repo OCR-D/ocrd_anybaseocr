@@ -81,16 +81,14 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         class_names = ['BG','page-number', 'paragraph', 'catch-word', 'heading', 'drop-capital', 'signature-mark','header',
                        'marginalia', 'footnote', 'footnote-continued', 'caption', 'endnote', 'footer','keynote',
                        'image','table', 'graphics']
-        '''
-        if not Path(model_path).is_dir():
+        
+        if not Path(model_weights).is_file():
             LOG.error("""\
-                Block Segmentation model was not found at '%s'. Make sure the `model_path` parameter
-                points to the local model path.
-
-                model can be downloaded from http://url
-                """ % model_path)
+                Block Segmentation model weights file was not found at '%s'. Make sure the `model_weights` parameter
+                points to the local model weights path.
+                """ % model_weights)
             sys.exit(1)
-        '''    
+            
         config = InferenceConfig()
         mrcnn_model = model.MaskRCNN(mode="inference", model_dir=str(model_path), config=config)
         mrcnn_model.load_weights(str(model_weights), by_name=True)
@@ -269,5 +267,3 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             #    border.add_TextRegion(textregion)
             #else:
             page.add_TextRegion(textregion)
-        
-           

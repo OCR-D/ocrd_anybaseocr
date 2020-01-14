@@ -464,19 +464,18 @@ class OcrdAnybaseocrCropper(Processor):
                     'Operation level %s, but should be "page".', oplevel)
                 break
             file_id = input_file.ID.replace(
-                self.input_file_grp, self.page_grp)
+                self.input_file_grp, page_grp)
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
             if file_id == input_file.ID:
-                file_id = concat_padded(self.page_grp, n)
+                file_id = concat_padded(page_grp, n)
             self.workspace.add_file(
                 ID=file_id,
                 file_grp=page_grp,
-                #file_grp=self.page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(self.page_grp,
+                local_filename=os.path.join(page_grp,
                                             file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
