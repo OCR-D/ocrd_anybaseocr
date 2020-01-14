@@ -99,9 +99,9 @@ class OcrdAnybaseocrBinarizer(Processor):
 
     def process(self):
         try:
-            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+            page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
-            self.page_grp = self.output_file_grp
+            page_grp = self.output_file_grp
             self.image_grp = FALLBACK_IMAGE_GRP
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
@@ -122,7 +122,7 @@ class OcrdAnybaseocrBinarizer(Processor):
                                                                for name in self.parameter.keys()])]))
 
             page = pcgts.get_Page()
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter="binarized")
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter="binarized,deskewed,cropped")
             LOG.info("Binarizing on '%s' level in page '%s'", oplevel, page_id)                    
             
             if oplevel=="page":
@@ -143,7 +143,7 @@ class OcrdAnybaseocrBinarizer(Processor):
                 file_id = concat_padded(self.output_file_grp, n)                
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=self.output_file_grp,
+                file_grp=page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,

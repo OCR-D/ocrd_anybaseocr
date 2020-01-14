@@ -8,7 +8,8 @@ from re import split
 import os.path
 import json
 import numpy as np
-
+import cv2
+import imageio
 from ..constants import OCRD_TOOL
 
 import subprocess
@@ -17,7 +18,13 @@ from ocrolib import psegutils, morph, sl
 from scipy.ndimage.filters import gaussian_filter, uniform_filter, maximum_filter
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_utils import concat_padded, getLogger, MIMETYPE_PAGE
+from ocrd_utils import (
+    concat_padded, 
+    getLogger, 
+    MIMETYPE_PAGE, 
+    coordinates_for_segment,
+    points_from_polygon
+    )
 
 from ocrd_models.ocrd_page import (
     to_xml, 
@@ -50,13 +57,13 @@ class OcrdAnybaseocrTextline(Processor):
         F = open(file, "w")
         for d in D:
             d += " 0 0 0 0\n"
-            F.write(d)
-
+            F.write(d)    
+    
     def process(self):
         try:
-            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+            page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
-            self.page_grp = self.output_file_grp
+            page_grp = self.output_file_grp
             self.image_grp = FALLBACK_IMAGE_GRP
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
@@ -78,18 +85,38 @@ class OcrdAnybaseocrTextline(Processor):
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='tiseged')            
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed,cropped')
+            
             if oplevel == 'page':
-                self._process_segment(page_image, page, page_xywh, page_id, input_file, n)
-                LOG.warning("Operation level should not be page.")
+                LOG.warning("Operation level should be region.")
+                self._process_segment(page_image, page,None, page_xywh, page_id, input_file, n)
+                
             else:
-                regions = page.get_TextRegion() + page.get_TableRegion()
+                regions = page.get_TextRegion()
                 if not regions:
                     LOG.warning("Page '%s' contains no text regions", page_id)
+                    continue
                 for (k, region) in enumerate(regions):
-                    region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)            
-                    # TODO: not tested on regions
-                    self._process_segment(region_image, page, region_xywh, region.id, input_file, str(n)+"_"+str(k))
+                    
+#                     points = region.Coords.get_points()
+#                     points = points.split(" ")
+                    
+#                     x_min = min(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
+#                     x_max = max(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
+#                     y_min = min(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
+#                     y_max = max(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
+
+#                     if x_max>page_image.size[0]:
+#                         x_max = page_image.size[0]-1
+#                     if y_max>page_image.size[1]:
+#                         y_max = page_image.size[1]-1
+                    
+#                     img__ = page_image.crop((x_min,y_min,x_max,y_max))
+                    
+
+                    region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)
+        
+                    self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
@@ -98,7 +125,7 @@ class OcrdAnybaseocrTextline(Processor):
                 file_id = concat_padded(self.output_file_grp, n)                
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=self.output_file_grp,
+                file_grp=page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,
@@ -106,28 +133,35 @@ class OcrdAnybaseocrTextline(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-    def _process_segment(self, page_image, page, region_xywh, page_id, input_file, n):
+    def _process_segment(self, page_image, page, textregion, region_xywh, page_id, input_file, n):
+        #check for existing text lines and whether to overwrite them
+        if textregion.get_TextLine():
+            if self.parameter['overwrite']:
+                LOG.info('removing existing TextLines in region "%s"', page_id)
+                textregion.set_TextLine([])
+            else:
+                LOG.warning('keeping existing TextLines in region "%s"', page_id)
+                return
+        
         binary = ocrolib.pil2array(page_image)
+
+        
+        if len(binary.shape) > 2:
+            binary = np.mean(binary, 2)
         binary = np.array(1-binary/np.amax(binary),'B')
-        if page.get_TextRegion() is None or len(page.get_TextRegion()) <1:
-            min_x, max_x = (0, binary.shape[0])
-            min_y, max_y = (0, binary.shape[1])
-            textregion = TextRegionType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
-            page.add_TextRegion(textregion)
-        else: 
-            textregion = page.get_TextRegion()[-1]
-        ocrolib.write_image_binary("test.bin.png", binary)
+        
         if self.parameter['scale'] == 0:
             scale = psegutils.estimate_scale(binary)
         else:
             scale = self.parameter['scale']
+        
         if np.isnan(scale) or scale > 1000.0 or scale < self.parameter['minscale']:
-            LOG.warning("%s: bad scale (%g); skipping\n" % (fname, scale))
+            LOG.warning(str(scale)+": bad scale; skipping!\n" )
             return
         
         segmentation = self.compute_segmentation(binary, scale)
         if np.amax(segmentation) > self.parameter['maxlines']:
-            LOG.warning("%s: too many lines %i", (fname, np.amax(segmentation)))
+            LOG.warning("too many lines %i; skipping!\n", (np.amax(segmentation)))
             return
         lines = psegutils.compute_lines(segmentation, scale)
         order = psegutils.reading_order([l.bounds for l in lines])
@@ -143,14 +177,17 @@ class OcrdAnybaseocrTextline(Processor):
         
         lines = [lines[i] for i in lsort]
         cleaned = ocrolib.remove_noise(binary, self.parameter['noise'])
-        region_xywh['features'] += ",textline"
+
         for i, l in enumerate(lines):
-            ocrolib.write_image_binary("test.bin.png",binary[l.bounds[0],l.bounds[1]])
             min_x, max_x = (l.bounds[0].start, l.bounds[0].stop)
             min_y, max_y = (l.bounds[1].start, l.bounds[1].stop)
+            line_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
+            line_polygon = coordinates_for_segment(line_polygon, page_image, region_xywh)
+            line_points = points_from_polygon(line_polygon)
             
-            img = binary[l.bounds[0],l.bounds[1]]
+            img = cleaned[l.bounds[0],l.bounds[1]]
             img = np.array(255*(img>ocrolib.midrange(img)),'B')
+            img = 255-img
             img = ocrolib.array2pil(img)
             
             file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
@@ -158,16 +195,17 @@ class OcrdAnybaseocrTextline(Processor):
                 file_id = concat_padded(self.image_grp, n)
         
             file_path = self.workspace.save_image_file(img,
-                                   file_id+"_"+str(i),
+                                   file_id+"_"+str(n)+"_"+str(i),
                                    page_id=page_id,
                                    file_grp=self.image_grp
                 )
             ai = AlternativeImageType(filename=file_path, comments=region_xywh['features'])
-            line = TextLineType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
+            line_id = '%s_line%04d' % (page_id, i)
+            line = TextLineType(custom='readingOrder {index:'+str(i)+';}', id=line_id, Coords=CoordsType(line_points))
             line.add_AlternativeImage(ai)
             textregion.add_TextLine(line)
-            
-        
+
+
     def B(self, a):
         if a.dtype == dtype('B'):
             return a

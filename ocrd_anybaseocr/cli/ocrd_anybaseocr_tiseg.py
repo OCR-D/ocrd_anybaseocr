@@ -16,13 +16,20 @@ import json
 from PIL import Image
 import os
 import numpy as np
-
-
+import shapely
+import math
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_utils import concat_padded, getLogger, MIMETYPE_PAGE
+from ocrd_utils import (
+    getLogger, 
+    concat_padded, 
+    MIMETYPE_PAGE,
+    coordinates_for_segment,
+    points_from_polygon,
+    )
+
 
 from ocrd_models.ocrd_page import (
     to_xml, 
@@ -49,9 +56,9 @@ class OcrdAnybaseocrTiseg(Processor):
 
     def process(self):
         try:
-            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+            page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
-            self.page_grp = self.output_file_grp
+            page_grp = self.output_file_grp
             self.image_grp = FALLBACK_IMAGE_GRP
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
@@ -73,7 +80,7 @@ class OcrdAnybaseocrTiseg(Processor):
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='tiseged')            
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed,cropped')            
             if oplevel == 'page':
                 self._process_segment(page_image, page, page_xywh, page_id, input_file, n)
             else:
@@ -87,7 +94,7 @@ class OcrdAnybaseocrTiseg(Processor):
                 file_id = concat_padded(self.output_file_grp, n)                
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=self.output_file_grp,
+                file_grp=page_grp, #self.output_file_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,
@@ -118,11 +125,29 @@ class OcrdAnybaseocrTiseg(Processor):
 
         # Write Text and Non-Text images
         image_part = array((1-I*Iseedfill), dtype=int)
-        image_part[0, 0] = 0  # only for visualisation purpose
+#         image_part[0, 0] = 0  # only for visualisation purpose
         text_part = array((1-I*(1-Iseedfill)), dtype=int)
-        text_part[0, 0] = 0  # only for visualisation purpose
+#         text_part[0, 0] = 0  # only for visualisation purpose
 
-        page_xywh['features'] += ',tiseged'
+        # page_xywh['features'] += ',tiseged'
+        
+        
+        #POC to perform polygon from image mask
+#         coords = np.where(text_part[0:2000:5,0:1000:5]!=0)
+#         print(coords)
+#         print(np.array([point for point in zip(coords[0],coords[1])]))
+#         concave_hull, edge = self.alpha_shape(np.array([point for point in zip(coords[0],coords[1])]),1.25)
+#         print("CONCAVE :",concave_hull)
+#         from PIL import Image, ImageDraw
+#         import cv2
+
+#         img = Image.new('L', (int(I.shape[0]/5),int(I.shape[1]/5)), 0)
+#         for poly in concave_hull:
+#             ImageDraw.Draw(img).polygon(poly.exterior.coords, outline=1, fill=1)
+#         mask = np.array(img)
+#         mask*=255
+#         cv2.imwrite("test_check.png", mask)
+
 
         bin_array = array(255*(text_part>ocrolib.midrange(text_part)),'B')
         bin_image = ocrolib.array2pil(bin_array)                            
@@ -136,10 +161,6 @@ class OcrdAnybaseocrTiseg(Processor):
                                    file_grp=self.image_grp
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
-
-        
-        
-        
         
     
     def pixMorphSequence_mask_seed_fill_holes(self, I):
@@ -203,3 +224,62 @@ class OcrdAnybaseocrTiseg(Processor):
         A[:, 2:4*c:4] = A[:, 0:4*c:4]
         A[:, 3:4*c:4] = A[:, 0:4*c:4]
         return A
+    
+    def alpha_shape(self, coords, alpha):
+        import shapely.geometry as geometry
+        from shapely.ops import cascaded_union, polygonize
+        from scipy.spatial import Delaunay
+        """
+        Compute the alpha shape (concave hull) of a set
+        of points.
+        @param points: Iterable container of points.
+        @param alpha: alpha value to influence the
+            gooeyness of the border. Smaller numbers
+            don't fall inward as much as larger numbers.
+            Too large, and you lose everything!
+        """
+#         if len(points) < 4:
+#             # When you have a triangle, there is no sense
+#             # in computing an alpha shape.
+#             return geometry.MultiPoint(list(points))
+#                    .convex_hull
+        def add_edge(edges, edge_points, coords, i, j):
+            """
+            Add a line between the i-th and j-th points,
+            if not in the list already
+            """
+            if (i, j) in edges or (j, i) in edges:
+                # already added
+                return
+            edges.add( (i, j) )
+            edge_points.append(coords[ [i, j] ])
+        
+        tri = Delaunay(coords)
+        edges = set()
+        edge_points = []
+        # loop over triangles:
+        # ia, ib, ic = indices of corner points of the
+        # triangle
+        for ia, ib, ic in tri.vertices:
+            pa = coords[ia]
+            pb = coords[ib]
+            pc = coords[ic]
+            # Lengths of sides of triangle
+            a = math.sqrt((pa[0]-pb[0])**2 + (pa[1]-pb[1])**2)
+            b = math.sqrt((pb[0]-pc[0])**2 + (pb[1]-pc[1])**2)
+            c = math.sqrt((pc[0]-pa[0])**2 + (pc[1]-pa[1])**2)
+            # Semiperimeter of triangle
+            s = (a + b + c)/2.0
+            # Area of triangle by Heron's formula
+            area = math.sqrt(s*(s-a)*(s-b)*(s-c))
+            circum_r = a*b*c/(4.0*area)
+            # Here's the radius filter.
+            #print circum_r
+            if circum_r < 1.0/alpha:
+                add_edge(edges, edge_points, coords, ia, ib)
+                add_edge(edges, edge_points, coords, ib, ic)
+                add_edge(edges, edge_points, coords, ic, ia)
+        m = geometry.MultiLineString(edge_points)
+        triangles = list(polygonize(m))
+        return cascaded_union(triangles), edge_points
+

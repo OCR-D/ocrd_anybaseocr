@@ -7,6 +7,7 @@ ocrd >= 2.0.0
 torch>=1.1.0
 torchvision
 pandas
-keras
-tensorflow-gpu==1.14.0
+shapely
 scikit-image
+keras
+tensorflow>=2.0

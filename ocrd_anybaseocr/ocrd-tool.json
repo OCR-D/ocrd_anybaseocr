@@ -76,7 +76,7 @@
       "output_file_grp": ["OCR-D-IMG-DEWARP"],
       "parameters": {
         "imgresize":    { "type": "string",                      "default": "resize_and_crop", "description": "run on original size image"},
-        "pix2pixHD":    { "type": "string", "default":"/home/ahmed/project/pix2pixHD", "description": "Path to pix2pixHD library"},
+        "pix2pixHD":    { "type": "string", "default":"", "description": "Path to pix2pixHD library"},
         "model_name":	{ "type": "string", "default":"models", "description": "name of dir with trained pix2pixHD model (latest_net_G.pth)"},
         "checkpoint_dir":   { "type": "string", "default":"./", "description": "Path to where to look for dir with model name"},
         "gpu_id":       { "type": "number", "format": "integer", "default": 0,    "description": "gpu id"},
@@ -122,7 +122,8 @@
         "expand":      {"type": "number", "format": "integer", "default": 3, "description": "expand mask for grayscale extraction"},
         "parallel":    {"type": "number", "format": "integer", "default": 0, "description": "number of CPUs to use"},
         "libpath":     {"type": "string", "default": ".", "description": "Library Path for C Executables"},
-        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
+        "operation_level": {"type": "string", "enum": ["page","region"], "default": "region","description": "PAGE XML hierarchy level to operate on"},
+        "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"}
       }
     },
     "ocrd-anybaseocr-layout-analysis": {
@@ -135,7 +136,7 @@
       "parameters": {
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
         "model_path":         { "type": "string", "default":"models/structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
-        "class_mapping_path": { "type": "string", "default":"models/mapping_DenseNet.pickle","required": false, "description": "Path to Layout Structure Classes"}
+        "class_mapping_path": { "type": "string", "default":"models/mapping_densenet.pickle","required": false, "description": "Path to Layout Structure Classes"}
       }
     },
     "ocrd-anybaseocr-block-segmentation": {
@@ -147,8 +148,9 @@
       "description": "Analysis of the input document",
       "parameters": {        
         "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
-        "block_segmentation_weights": { "type": "string","default":"mrcnn/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
-        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
+        "block_segmentation_weights": { "type": "string","default":"models/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
+        "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"},
+        "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"}
       }       
     }
   }

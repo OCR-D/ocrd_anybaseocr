@@ -44,9 +44,10 @@ from ocrd_modelfactory import page_from_file
 from ocrd_utils import (
     getLogger,
     crop_image,
-    concat_padded,
-    bbox_from_points,
-    MIMETYPE_PAGE,
+    concat_padded, 
+    MIMETYPE_PAGE, 
+    coordinates_for_segment,
+    points_from_polygon
 )
 from ocrd_models.ocrd_page import (
     CoordsType,
@@ -337,17 +338,16 @@ class OcrdAnybaseocrCropper(Processor):
                 tmp.append(area)
         return tmp
 
-    def marge_columns(self, textarea):
+    def marge_columns(self, textarea, colSeparator):
         tmp = []
         marge = []
         #  height, _ = binImg.shape
         textarea.sort(key=lambda x: (x[0]))
-        # print self.parameter['colSeparator']
         for i in range(len(textarea)-1):
             st = False
             x11, y11, x12, y12 = textarea[i]
             x21, y21, x22, y22 = textarea[i+1]
-            if x21-x12 <= self.parameter['colSeparator']:
+            if x21-x12 <= colSeparator:
                 if len(marge) > 0:
                     # print "marge ", marge[0]
                     x31, y31, x32, y32 = marge[0]
@@ -365,7 +365,7 @@ class OcrdAnybaseocrCropper(Processor):
 
         return tmp+marge
 
-    def crop_area(self, textarea, binImg, rgb):
+    def crop_area(self, textarea, binImg, rgb, colSeparator):
         height, width, _ = binImg.shape
 
         textarea = np.unique(textarea, axis=0)
@@ -398,7 +398,7 @@ class OcrdAnybaseocrCropper(Processor):
         if len(textarea) > 0:
             textarea = self.filter_area(textarea, binImg)
         if len(textarea) > 1:
-            textarea = self.marge_columns(textarea)
+            textarea = self.marge_columns(textarea, colSeparator)
             # print textarea
 
         if len(textarea) > 0:
@@ -419,9 +419,9 @@ class OcrdAnybaseocrCropper(Processor):
         """Performs border detection on the workspace. """
         try:
             print("OUTPUT FILE ", self.output_file_grp)
-            self.page_grp, self.image_grp = self.output_file_grp.split(',')
+            page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
-            self.page_grp = self.output_file_grp
+            page_grp = self.output_file_grp
             self.image_grp = FALLBACK_IMAGE_GRP
             LOG.info(
                 "No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
@@ -451,9 +451,10 @@ class OcrdAnybaseocrCropper(Processor):
                                                           value=self.parameter[name])
                                                 for name in self.parameter.keys()])]))
             page = pcgts.get_Page()
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='cropped',feature_selector='binarized,deskewed') 
 
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(
-                page, page_id, feature_filter='cropped')
+            #page_image, page_xywh, page_image_info = self.workspace.image_from_page(
+            #    page, page_id, feature_filter='cropped')
 
             if oplevel == "page":
                 self._process_segment(
@@ -471,7 +472,8 @@ class OcrdAnybaseocrCropper(Processor):
                 file_id = concat_padded(self.page_grp, n)
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=self.page_grp,
+                file_grp=page_grp,
+                #file_grp=self.page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.page_grp,
@@ -500,11 +502,11 @@ class OcrdAnybaseocrCropper(Processor):
 
         textarea, img_array_rr_ta, height, width = self.detect_textarea(
             img_array_rr)
-        self.parameter['colSeparator'] = int(
+        colSeparator = int(
             width * self.parameter['colSeparator'])
         if len(textarea) > 1:
             textarea = self.crop_area(
-                textarea, img_array_bin, img_array_rr_ta)
+                textarea, img_array_bin, img_array_rr_ta, colSeparator)
 
             if len(textarea) == 0:
                 min_x, min_y, max_x, max_y = self.select_borderLine(
@@ -523,8 +525,10 @@ class OcrdAnybaseocrCropper(Processor):
             min_x, min_y, max_x, max_y = self.select_borderLine(
                 img_array_rr, lineDetectH, lineDetectV)
 
-        brd = BorderType(Coords=CoordsType("%i,%i %i,%i %i,%i %i,%i" % (
-            min_x, min_y, max_x, min_y, max_x, max_y, min_x, max_y)))
+        border_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
+        border_polygon = coordinates_for_segment(border_polygon, page_image, page_xywh)
+        border_points = points_from_polygon(border_polygon)
+        brd = BorderType(Coords=CoordsType(border_points))
         page.set_Border(brd)
 
         page_image = crop_image(page_image, box=(min_x, min_y, max_x, max_y))
