@@ -51,7 +51,7 @@ FALLBACK_IMAGE_GRP = 'OCR-D-IMG-BLOCK-SEGMENT'
 class InferenceConfig(Config):
     NAME = "block"    
     IMAGES_PER_GPU = 1  
-    NUM_CLASSES = 1 + 17      
+    NUM_CLASSES = 1 + 14      
     DETECTION_MIN_CONFIDENCE = 0.9
 
 class OcrdAnybaseocrBlockSegmenter(Processor):
@@ -101,7 +101,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             page_id = input_file.pageId or input_file.ID 
 
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter ='binarized,deskewed,cropped') 
-            
+            LOG.info('page_image: ',type(page_image))
             #Display Warning If image segment results already exist or not in StructMap?
             regions = page.get_TextRegion() + page.get_TableRegion()
             if regions:
@@ -153,22 +153,32 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         
         # define reading order on basis of coordinates
         reading_order = []
+        LOG.info('Results: ', len(r['rois']))
         for i in range(len(r['rois'])):                
-            
             width,height,_ = img_array.shape
             min_x = r['rois'][i][0]
             min_y = r['rois'][i][1]
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
-            if (min_x - 5) > width and r['class_ids'][i] == 2:
-                min_x-=5
-            if (max_x + 10) < width and r['class_ids'][i] == 2:
-                min_x+=10
-            reading_order.append((min_y, min_x))
-            
-        reading_order = sorted(reading_order, key=lambda reading_order:(reading_order[0], reading_order[1]))
-        
-        
+            if (min_y - 5) > width and r['class_ids'][i] == 2:
+                min_y-=5
+            if (max_y + 10) < width and r['class_ids'][i] == 2:
+                min_y+=10
+            reading_order.append((min_y, min_x, max_y, max_x))
+
+        reading_order = sorted(reading_order, key=lambda reading_order:(reading_order[1], reading_order[0]))
+        for i in range(len(reading_order)):
+            min_y, min_x, max_y, max_x = reading_order[i]
+            min_y = 0
+            i_poly = Polygon([[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]])
+            for j in range(i+1,len(reading_order)):
+                min_y, min_x, max_y, max_x = reading_order[j]
+                j_poly = Polygon([[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]])
+                inter = i_poly.intersection(j_poly)
+                if inter:
+                    reading_order.insert(j+1,reading_order[i])
+                    del reading_order[i]
+                
         #Creating Reading Order object in PageXML
         order_group = OrderedGroupType(caption="Regions reading order",id=page_id)
         for i in range(len(r['rois'])):
@@ -176,10 +186,10 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             min_y = r['rois'][i][1]
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
-            if (min_x - 5) > width and r['class_ids'][i] == 2:
-                min_x-=5
-            if (max_x + 10) < width and r['class_ids'][i] == 2:
-                min_x+=10
+            if (min_y - 5) > width and r['class_ids'][i] == 2:
+                min_y-=5
+            if (max_y + 10) < width and r['class_ids'][i] == 2:
+                min_y+=10
             region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
             
             if border:
@@ -189,7 +199,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             else:
                 cut_region_polygon = Polygon(region_polygon)
                 
-            order_index = reading_order.index((min_y, min_x))
+            order_index = reading_order.index((min_y, min_x, max_y, max_x))
             region_id = '%s_region%04d' % (page_id, order_index)
             regionRefIndex = RegionRefIndexedType(index=order_index, regionRef=region_id)
             order_group.add_RegionRefIndexed(regionRefIndex)
@@ -199,6 +209,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         page.set_ReadingOrder(reading_order_object)
         
         
+        
+        
         for i in range(len(r['rois'])):                
             width,height,_ = img_array.shape
             min_x = r['rois'][i][0]
@@ -206,10 +218,10 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
             
-            if (min_x - 5) > width and r['class_ids'][i] == 2:
-                min_x-=5
-            if (max_x + 10) < width and r['class_ids'][i] == 2:
-                min_x+=10
+            if (min_y - 5) > width and r['class_ids'][i] == 2:
+                min_y-=5
+            if (max_y + 10) < width and r['class_ids'][i] == 2:
+                min_y+=10
             region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
             
             cut_region_polygon = border.intersection(Polygon(region_polygon))
@@ -220,7 +232,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             region_polygon = coordinates_for_segment(cut_region_polygon, page_image, page_xywh)
             region_points = points_from_polygon(region_polygon)
             
-            read_order = reading_order.index((min_y, min_x))
+            read_order = reading_order.index((min_y, min_x, max_y, max_x))
             
 
             
