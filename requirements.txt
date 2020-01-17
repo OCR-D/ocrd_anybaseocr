@@ -5,9 +5,8 @@ ocrd-fork-pylsd >= 0.0.3
 click
 ocrd >= 2.0.0
 torch>=1.1.0
-torchvision
-pandas
 shapely
+pandas
 scikit-image
 keras
 tensorflow>=2.0
