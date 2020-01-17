@@ -39,7 +39,7 @@ ocrd-anybaseocr-binarize \
 ## Deskewer
 
 ### Method Behaviour 
- This function takes a document image as input and do the skew correction of that document.
+ This function takes a document image as input and do the skew correction of that document. The input images have to be binarized for this module to work.
  
  #### Usage:
 ```sh
@@ -57,7 +57,7 @@ ocrd-anybaseocr-deskew \
 ## Cropper
 
 ### Method Behaviour 
- This function takes a document image as input and crops/selects the page content area only (that's mean remove textual noise as well as any other noise around page content area)
+ This function takes a document image as input and crops/selects the page content area only (that's mean remove textual noise as well as any other noise around page content area). The input image has to be binarized and should be deskewed for the module to work. 
  
  #### Usage:
 ```sh
@@ -76,7 +76,7 @@ ocrd-anybaseocr-crop \
 ## Dewarper
 
 ### Method Behaviour 
- This function takes a document image as input and make the text line straight if its curved.
+ This function takes a document image as input and make the text line straight if its curved. The input image has to be binarized for the module to work.
  
  #### Usage:
 ```sh
@@ -113,7 +113,7 @@ ocrd-anybaseocr-tiseg \
 ## Textline Segmenter
 
 ### Method Behaviour 
- This function takes a cropped document image as an input and segment the image into textline images.
+ This function takes a cropped document image as an input and segment the image into textline images. The input image should be binarized and deskewed for the module to work. 
  
  #### Usage:
 ```sh
@@ -149,7 +149,7 @@ ocrd-anybaseocr-block-segmenter \
 ## Document Analyser
 
 ### Method Behaviour 
- This function takes all the cropped document images of a single book and its corresponding text regions as input and generates the logical structure on the book level.
+ This function takes all the cropped document images of a single book and its corresponding text regions as input and generates the logical structure on the book level. The input image should be binarized for this module to work.
  
  #### Usage:
 ```sh
