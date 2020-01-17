@@ -122,7 +122,7 @@ class OcrdAnybaseocrBinarizer(Processor):
                                                                for name in self.parameter.keys()])]))
 
             page = pcgts.get_Page()
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter="binarized,deskewed,cropped")
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter="binarized")
             LOG.info("Binarizing on '%s' level in page '%s'", oplevel, page_id)                    
             
             if oplevel=="page":
@@ -140,7 +140,8 @@ class OcrdAnybaseocrBinarizer(Processor):
             # this way the files retain the same basenames:
             file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)            
             if file_id == input_file.ID:
-                file_id = concat_padded(self.output_file_grp, n)                
+                file_id = concat_padded(self.output_file_grp, n)          
+            #LOG.info('Adding force option to False')
             self.workspace.add_file(
                 ID=file_id,
                 file_grp=page_grp,
@@ -148,7 +149,8 @@ class OcrdAnybaseocrBinarizer(Processor):
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,
                                         file_id + '.xml'),
-                content=to_xml(pcgts).encode('utf-8')
+                content=to_xml(pcgts).encode('utf-8')#,
+                #force=False
             )
 
     def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n):

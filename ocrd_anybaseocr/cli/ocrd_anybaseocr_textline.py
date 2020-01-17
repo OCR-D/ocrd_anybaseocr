@@ -85,7 +85,7 @@ class OcrdAnybaseocrTextline(Processor):
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed,cropped')
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed')
             
             if oplevel == 'page':
                 LOG.warning("Operation level should be region.")
@@ -177,8 +177,10 @@ class OcrdAnybaseocrTextline(Processor):
         
         lines = [lines[i] for i in lsort]
         cleaned = ocrolib.remove_noise(binary, self.parameter['noise'])
-
+        
         for i, l in enumerate(lines):
+            LOG.info('check this: ') 
+            print(l.bounds)
             min_x, max_x = (l.bounds[0].start, l.bounds[0].stop)
             min_y, max_y = (l.bounds[1].start, l.bounds[1].stop)
             line_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]

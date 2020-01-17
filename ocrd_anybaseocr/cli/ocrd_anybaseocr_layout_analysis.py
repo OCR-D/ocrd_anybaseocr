@@ -241,7 +241,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed')
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
 
 
             img_array = ocrolib.pil2array(page_image.resize((500, 600), Image.ANTIALIAS))
