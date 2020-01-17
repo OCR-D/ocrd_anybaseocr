@@ -101,7 +101,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             page_id = input_file.pageId or input_file.ID 
 
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter ='binarized,deskewed,cropped') 
-            LOG.info('page_image: ',type(page_image))
             #Display Warning If image segment results already exist or not in StructMap?
             regions = page.get_TextRegion() + page.get_TableRegion()
             if regions:
@@ -153,7 +152,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         
         # define reading order on basis of coordinates
         reading_order = []
-        LOG.info('Results: ', len(r['rois']))
         for i in range(len(r['rois'])):                
             width,height,_ = img_array.shape
             min_x = r['rois'][i][0]
