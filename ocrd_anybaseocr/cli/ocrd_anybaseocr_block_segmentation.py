@@ -129,6 +129,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
     def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names):
         #check for existing text regions and whether to overwrite them
+        border = None
         if page.get_TextRegion():
             if self.parameter['overwrite']:
                 LOG.info('removing existing TextRegions in page "%s"', page_id)
@@ -140,7 +141,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         if page.get_Border():
             border_coords = page.get_Border().get_Coords()
             border_points = polygon_from_points(border_coords.get_points())
-            
             border = Polygon(border_points)
 
         img_array = ocrolib.pil2array(page_image)
