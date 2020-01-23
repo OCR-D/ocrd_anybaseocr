@@ -126,29 +126,7 @@ class OcrdAnybaseocrTiseg(Processor):
 
         # Write Text and Non-Text images
         image_part = array((1-I*Iseedfill), dtype=int)
-#         image_part[0, 0] = 0  # only for visualisation purpose
         text_part = array((1-I*(1-Iseedfill)), dtype=int)
-#         text_part[0, 0] = 0  # only for visualisation purpose
-
-        # page_xywh['features'] += ',tiseged'
-        
-        
-        #POC to perform polygon from image mask
-#         coords = np.where(text_part[0:2000:5,0:1000:5]!=0)
-#         print(coords)
-#         print(np.array([point for point in zip(coords[0],coords[1])]))
-#         concave_hull, edge = self.alpha_shape(np.array([point for point in zip(coords[0],coords[1])]),1.25)
-#         print("CONCAVE :",concave_hull)
-#         from PIL import Image, ImageDraw
-#         import cv2
-
-#         img = Image.new('L', (int(I.shape[0]/5),int(I.shape[1]/5)), 0)
-#         for poly in concave_hull:
-#             ImageDraw.Draw(img).polygon(poly.exterior.coords, outline=1, fill=1)
-#         mask = np.array(img)
-#         mask*=255
-#         cv2.imwrite("test_check.png", mask)
-
 
         bin_array = array(255*(text_part>ocrolib.midrange(text_part)),'B')
         bin_image = ocrolib.array2pil(bin_array)                            
@@ -157,7 +135,21 @@ class OcrdAnybaseocrTiseg(Processor):
         if file_id == input_file.ID:
             file_id = concat_padded(self.image_grp, n)
         file_path = self.workspace.save_image_file(bin_image,
-                                   file_id,
+                                   file_id+"_txt",
+                                   page_id=page_id,
+                                   file_grp=self.image_grp,
+                                   force=self.parameter['force']
+            )     
+        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))    
+    
+        bin_array = array(255*(text_part>ocrolib.midrange(img_part)),'B')
+        bin_image = ocrolib.array2pil(bin_array)                            
+        
+        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+        if file_id == input_file.ID:
+            file_id = concat_padded(self.image_grp, n)
+        file_path = self.workspace.save_image_file(bin_image,
+                                   file_id+"_img",
                                    page_id=page_id,
                                    file_grp=self.image_grp,
                                    force=self.parameter['force']
