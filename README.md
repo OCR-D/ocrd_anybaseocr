@@ -95,7 +95,8 @@ CUDA_VISIBLE_DEVICES=0 ocrd-anybaseocr-dewarp \
 ## Text/Non-Text Segmenter
 
 ### Method Behaviour 
- This function takes a document image as an input and separates the text and non-text part from the input document image.
+ This function takes a document image as an input and separates the text and non-text part from the input document image. 
+ The module outputs 2 pixel masks instead of a region, one pixel mask for background and text and one for background and image. 
  
  #### Usage:
 ```sh
