@@ -127,6 +127,8 @@ class OcrdAnybaseocrTiseg(Processor):
         # Write Text and Non-Text images
         image_part = array((1-I*Iseedfill), dtype=int)
         text_part = array((1-I*(1-Iseedfill)), dtype=int)
+        
+        page_xywh['features'] += ',clipped' # TODO: We probably should indicate what is clipped. Text or Image.
 
         bin_array = array(255*(text_part>ocrolib.midrange(text_part)),'B')
         bin_image = ocrolib.array2pil(bin_array)                            
