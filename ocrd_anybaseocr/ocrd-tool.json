@@ -10,6 +10,7 @@
       "input_file_grp": ["OCR-D-IMG"],
       "output_file_grp": ["OCR-D-IMG-BIN"],
       "parameters": {
+        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "nocheck":         {"type": "boolean",                     "default": false, "description": "disable error checking on inputs"},
         "show":            {"type": "boolean",                     "default": false, "description": "display final results"},
         "raw_copy":        {"type": "boolean",                     "default": false, "description": "also copy the raw image"},
@@ -34,6 +35,7 @@
       "input_file_grp": ["OCR-D-IMG-BIN"],
       "output_file_grp": ["OCR-D-IMG-DESKEW"],
       "parameters": {
+        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "escale":    {"type": "number", "format": "float",   "default": 1.0, "description": "scale for estimating a mask over the text region"},
         "bignore":   {"type": "number", "format": "float",   "default": 0.1, "description": "ignore this much of the border for threshold estimation"},
         "threshold": {"type": "number", "format": "float",   "default": 0.5, "description": "threshold, determines lightness"},
@@ -54,6 +56,7 @@
       "input_file_grp": ["OCR-D-IMG-DESKEW"],
       "output_file_grp": ["OCR-D-IMG-CROP"],
       "parameters": {
+        "force"       :  {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "colSeparator":  {"type": "number", "format": "float", "default": 0.04, "description": "consider space between column. 25% of width"},
         "maxRularArea":  {"type": "number", "format": "float", "default": 0.3, "description": "Consider maximum rular area"},
         "minArea":       {"type": "number", "format": "float", "default": 0.05, "description": "rular position in below"},
@@ -75,7 +78,8 @@
       "input_file_grp": ["OCR-D-IMG-CROP"],
       "output_file_grp": ["OCR-D-IMG-DEWARP"],
       "parameters": {
-        "imgresize":    { "type": "string",                      "default": "resize_and_crop", "description": "run on original size image"},
+        "force":        {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
+        "imgresize":    { "type": "string",                     "default": "resize_and_crop", "description": "run on original size image"},
         "pix2pixHD":    { "type": "string", "default":"", "description": "Path to pix2pixHD library"},
         "model_name":	{ "type": "string", "default":"models", "description": "name of dir with trained pix2pixHD model (latest_net_G.pth)"},
         "checkpoint_dir":   { "type": "string", "default":"./", "description": "Path to where to look for dir with model name"},
@@ -93,6 +97,7 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "separate text and non-text part with anyBaseOCR",
       "parameters": {
+        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
@@ -104,6 +109,7 @@
       "steps": ["layout/segmentation/line"],
       "description": "separate each text line",
       "parameters": {
+        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "minscale":    {"type": "number", "format": "float", "default": 12.0, "description": "minimum scale permitted"},
         "maxlines":    {"type": "number", "format": "float", "default": 300, "description": "non-standard scaling of horizontal parameters"},
         "scale":       {"type": "number", "format": "float", "default": 0.0, "description": "the basic scale of the document (roughly, xheight) 0=automatic"},
@@ -134,6 +140,7 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Analysis of the input document",
       "parameters": {
+        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
         "model_path":         { "type": "string", "default":"models/structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
         "class_mapping_path": { "type": "string", "default":"models/mapping_densenet.pickle","required": false, "description": "Path to Layout Structure Classes"}
@@ -146,7 +153,8 @@
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/text-image"],
       "description": "Analysis of the input document",
-      "parameters": {        
+      "parameters": {     
+        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
         "block_segmentation_weights": { "type": "string","default":"models/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
         "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"},

@@ -149,8 +149,8 @@ class OcrdAnybaseocrBinarizer(Processor):
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,
                                         file_id + '.xml'),
-                content=to_xml(pcgts).encode('utf-8')#,
-                #force=False
+                content=to_xml(pcgts).encode('utf-8'),
+                force = self.parameter['force']
             )
 
     def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n):
@@ -250,7 +250,8 @@ class OcrdAnybaseocrBinarizer(Processor):
         file_path = self.workspace.save_image_file(bin_image,
                                    file_id,
                                    page_id=page_id,
-                                   file_grp=self.image_grp
+                                   file_grp=self.image_grp,
+                                   force=self.parameter['force']
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
 
