@@ -101,13 +101,18 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             page_id = input_file.pageId or input_file.ID 
 
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter ='binarized,deskewed,cropped') 
+            # try to load pixel masks
+            try:
+                mask_image, mask_xywh, mask_image_info = self.workspace.image_from_page(page, page_id, feature_selector ='clipped')
+            except:
+                mask_image=None
             #Display Warning If image segment results already exist or not in StructMap?
             regions = page.get_TextRegion() + page.get_TableRegion()
             if regions:
                 LOG.warning("Image already has text segments!")
             
             if oplevel=="page":
-                self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names)
+                self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names, mask_image)
             else:
                 LOG.warning('Operation level %s, but should be "page".', oplevel)
                 break
@@ -128,7 +133,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 force=self.parameter['force']
             )
 
-    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names):
+    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names, mask):
         #check for existing text regions and whether to overwrite them
         border = None
         if page.get_TextRegion():
@@ -150,7 +155,50 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         results = mrcnn_model.detect([img_array], verbose=1)    
         r = results[0]        
         
-        
+        th=5
+        # check for existing semgentation mask 
+        if mask:
+            # multiply all the bounding box part with 2 
+            for i in range(len(r['rois'])):                
+
+                min_x = r['rois'][i][0]
+                min_y = r['rois'][i][1]
+                max_x = r['rois'][i][2]
+                max_y = r['rois'][i][3]
+                mask[min_x:max_x, min_y:max_y] *= i+2
+            
+            # check for left over pixels and add them to the bounding boxes
+            pixel_added = True
+            while pixel_added:
+                pixel_added = False
+                left_over = np.where(mask==1)
+                for x,y in zip(left_over[0], left_over[1]):
+                    local_mask = mask[x-th:x+th,y-th:y+th]
+                    candidates = np.where(local_mask>1)
+                    candidates = [x for x in zip(candidates[0], candiates[1])]
+                    if len(candidates)>0:
+                        pixel_added = True
+                        #find closest pixel with x>1
+                        candidates.sort(key= lambda x: np.sqrt((x[0]-th)**2+(x[1]-th)**2))
+                        index = local_mask[candidates[0]]-2
+                        
+                        #add pixel to mask/bbox
+                        #x,y to bbox with index
+                        if x < r['rois'][index][0]:
+                            r['rois'][index][0] = x
+                        
+                        elif x > r['rois'][index][2]:
+                            r['rois'][index][2] = x
+                        
+                        if y < r['rois'][index][1]:
+                            r['rois'][index][1] = y
+                        
+                        elif y > r['rois'][index][3]:
+                            r['rois'][index][3] = y
+                            
+                        # update the mask
+                        mask[x,y] = index + 2
+             
         # define reading order on basis of coordinates
         reading_order = []
         for i in range(len(r['rois'])):                
