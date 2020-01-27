@@ -96,7 +96,7 @@ CUDA_VISIBLE_DEVICES=0 ocrd-anybaseocr-dewarp \
 
 ### Method Behaviour 
  This function takes a document image as an input and separates the text and non-text part from the input document image. 
- The module outputs 2 pixel masks instead of a region, one pixel mask for background and text and one for background and image. 
+ The module outputs 2 AlternativeImages instead of document regions, which are clipped (binarized) versions of the input image, containing either only text or only non-text components.
  
  #### Usage:
 ```sh

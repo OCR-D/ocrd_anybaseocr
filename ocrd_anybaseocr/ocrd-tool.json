@@ -4,7 +4,7 @@
   "tools": {
     "ocrd-anybaseocr-binarize": {
       "executable": "ocrd-anybaseocr-binarize",
-      "description": "Binarize images with the algorithm from ocropy",
+      "description": "Binarizes images with the algorithm from ocropy and outputs it as an AlternativeImage.",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/binarization"],
       "input_file_grp": ["OCR-D-IMG"],
@@ -29,7 +29,7 @@
     },
     "ocrd-anybaseocr-deskew": {
       "executable": "ocrd-anybaseocr-deskew",
-      "description": "Deskew images with the algorithm from ocropy",
+      "description": "Deskews images with the algorithm from ocropy and outputs a deskew angle.",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/deskewing"],
       "input_file_grp": ["OCR-D-IMG-BIN"],
@@ -50,7 +50,7 @@
     },
     "ocrd-anybaseocr-crop": {
       "executable": "ocrd-anybaseocr-crop",
-      "description": "Image crop using non-linear processing",
+      "description": "Crops the input image to the page frame using non-linear processing and outputs a border polygon",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/cropping"],
       "input_file_grp": ["OCR-D-IMG-DESKEW"],
@@ -72,7 +72,7 @@
     },
     "ocrd-anybaseocr-dewarp": {
       "executable": "ocrd-anybaseocr-dewarp",
-      "description": "dewarp image with anyBaseOCR",
+      "description": "Dewarps the input image with anyBaseOCR and outputs it as an AlternativeImage.",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/dewarping"],
       "input_file_grp": ["OCR-D-IMG-CROP"],
@@ -95,7 +95,7 @@
       "output_file_grp": ["OCR-D-SEG-TISEG"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/text-image"],
-      "description": "separate text and non-text part with anyBaseOCR",
+      "description": "Separates the text and non-text elements with anyBaseOCR. Outputs clipped versions of the input image as AlternativeImage containing either only text or non-text elements.",
       "parameters": {
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "use_deeplr":      {"type":"boolean",                      "default":false, "description": "use deep learning model"},
@@ -109,7 +109,7 @@
       "output_file_grp": ["OCR-D-SEG-LINE-ANY"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/line"],
-      "description": "separate each text line",
+      "description": "Finds region polygons for each text line in the input image.",
       "parameters": {
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "minscale":    {"type": "number", "format": "float", "default": 12.0, "description": "minimum scale permitted"},
@@ -140,7 +140,7 @@
       "output_file_grp": ["OCR-D-SEG-LAYOUT"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/text-image"],
-      "description": "Analysis of the input document",
+      "description": "Generates a table-of-content like document structure of the whole document.",
       "parameters": {
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
@@ -154,7 +154,7 @@
       "output_file_grp": ["OCR-D-BLOCK-SEGMENT"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/text-image"],
-      "description": "Analysis of the input document",
+      "description": "Segments and classifies document segments in a single page and outputs the the region polygons and classes.",
       "parameters": {     
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
