@@ -11,6 +11,7 @@ import numpy as np
 import cv2
 import imageio
 from ..constants import OCRD_TOOL
+from shapely.geometry import MultiPoint
 
 import subprocess
 
@@ -23,7 +24,8 @@ from ocrd_utils import (
     getLogger, 
     MIMETYPE_PAGE, 
     coordinates_for_segment,
-    points_from_polygon
+    points_from_polygon,
+    polygon_from_points
     )
 
 from ocrd_models.ocrd_page import (
@@ -97,23 +99,7 @@ class OcrdAnybaseocrTextline(Processor):
                     LOG.warning("Page '%s' contains no text regions", page_id)
                     continue
                 for (k, region) in enumerate(regions):
-                    
-#                     points = region.Coords.get_points()
-#                     points = points.split(" ")
-                    
-#                     x_min = min(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
-#                     x_max = max(int(points[0].split(",")[0]), int(points[1].split(",")[0]), int(points[2].split(",")[0]), int(points[3].split(",")[0]))
-#                     y_min = min(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
-#                     y_max = max(int(points[0].split(",")[1]), int(points[1].split(",")[1]), int(points[2].split(",")[1]), int(points[3].split(",")[1]))
-
-#                     if x_max>page_image.size[0]:
-#                         x_max = page_image.size[0]-1
-#                     if y_max>page_image.size[1]:
-#                         y_max = page_image.size[1]-1
-                    
-#                     img__ = page_image.crop((x_min,y_min,x_max,y_max))
-                    
-
+                                       
                     region_image, region_xywh = self.workspace.image_from_segment(region, page_image, page_xywh)
         
                     self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
@@ -180,11 +166,23 @@ class OcrdAnybaseocrTextline(Processor):
         cleaned = ocrolib.remove_noise(binary, self.parameter['noise'])
         
         for i, l in enumerate(lines):
-            LOG.info('check this: ') 
-            print(l.bounds)
-            min_x, max_x = (l.bounds[0].start, l.bounds[0].stop)
-            min_y, max_y = (l.bounds[1].start, l.bounds[1].stop)
-            line_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
+            #LOG.info('check this: ') 
+            #LOG.info(type(l.bounds))
+            #LOG.info(l.bounds)
+            line_points = np.where(l.mask==1)
+            hull = MultiPoint([x for x in zip(line_points[0],line_points[1])]).convex_hull
+            x,y = hull.exterior.coords.xy
+            #LOG.info('hull coords x: ',x)
+            #LOG.info('hull coords y: ',y)
+            
+            
+            
+            #min_x, max_x = (l.bounds[0].start, l.bounds[0].stop)
+            #min_y, max_y = (l.bounds[1].start, l.bounds[1].stop)
+            
+            #line_polygon1 = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
+            
+            line_polygon = [x for x in zip(y, x)]
             line_polygon = coordinates_for_segment(line_polygon, page_image, region_xywh)
             line_points = points_from_polygon(line_polygon)
             
@@ -192,22 +190,27 @@ class OcrdAnybaseocrTextline(Processor):
             img = np.array(255*(img>ocrolib.midrange(img)),'B')
             img = 255-img
             img = ocrolib.array2pil(img)
-            
+            img.save('original.png')
             file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.image_grp, n)
         
-            file_path = self.workspace.save_image_file(img,
-                                   file_id+"_"+str(n)+"_"+str(i),
-                                   page_id=page_id,
-                                   file_grp=self.image_grp,
-                                   force=self.parameter['force']
-                )
-            ai = AlternativeImageType(filename=file_path, comments=region_xywh['features'])
+            #file_path = self.workspace.save_image_file(img,
+             #                      file_id+"_"+str(n)+"_"+str(i),
+             #                      page_id=page_id,
+             #                      file_grp=self.image_grp,
+             #                      force=self.parameter['force']
+             #   )
+            #ai = AlternativeImageType(filename=file_path, comments=region_xywh['features'])
             line_id = '%s_line%04d' % (page_id, i)
             line = TextLineType(custom='readingOrder {index:'+str(i)+';}', id=line_id, Coords=CoordsType(line_points))
-            line.add_AlternativeImage(ai)
+            #line.add_AlternativeImage(ai)
             textregion.add_TextLine(line)
+            
+            line_test = textregion.get_TextLine()[-1]
+            region_img, region_xy = self.workspace.image_from_segment(line_test, page_image, region_xywh)
+            region_img.save('checkthis.png')
+            #cv2.imwrite('checkthis.jpg', region_img)
 
 
     def B(self, a):
