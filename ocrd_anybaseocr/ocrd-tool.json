@@ -98,6 +98,8 @@
       "description": "separate text and non-text part with anyBaseOCR",
       "parameters": {
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
+        "use_deeplr":      {"type":"boolean",                      "default":false, "description": "use deep learning model"},
+        "seg_weights":     {"type":"string",                       "default":"models/seg_weights.h5", "description":"path to weights file", "required":false},
         "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
