@@ -4,7 +4,7 @@
   "tools": {
     "ocrd-anybaseocr-binarize": {
       "executable": "ocrd-anybaseocr-binarize",
-      "description": "Binarizes images with the algorithm from ocropy and outputs it as an AlternativeImage.",
+      "description": "Binarize images with the algorithm from ocropy",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/binarization"],
       "input_file_grp": ["OCR-D-IMG"],
@@ -29,7 +29,7 @@
     },
     "ocrd-anybaseocr-deskew": {
       "executable": "ocrd-anybaseocr-deskew",
-      "description": "Deskews images with the algorithm from ocropy and outputs a deskew angle.",
+      "description": "Deskew images with the algorithm from ocropy",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/deskewing"],
       "input_file_grp": ["OCR-D-IMG-BIN"],
@@ -50,7 +50,7 @@
     },
     "ocrd-anybaseocr-crop": {
       "executable": "ocrd-anybaseocr-crop",
-      "description": "Crops the input image to the page frame using non-linear processing and outputs a border polygon",
+      "description": "Image crop using non-linear processing",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/cropping"],
       "input_file_grp": ["OCR-D-IMG-DESKEW"],
@@ -72,7 +72,7 @@
     },
     "ocrd-anybaseocr-dewarp": {
       "executable": "ocrd-anybaseocr-dewarp",
-      "description": "Dewarps the input image with anyBaseOCR and outputs it as an AlternativeImage.",
+      "description": "dewarp image with anyBaseOCR",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/dewarping"],
       "input_file_grp": ["OCR-D-IMG-CROP"],
@@ -95,11 +95,14 @@
       "output_file_grp": ["OCR-D-SEG-TISEG"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/text-image"],
-      "description": "Separates the text and non-text elements with anyBaseOCR. Outputs clipped versions of the input image as AlternativeImage containing either only text or non-text elements.",
+      "description": "separate text and non-text part with anyBaseOCR",
       "parameters": {
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
-        "use_deeplr":      {"type":"boolean",                      "default":false, "description": "use deep learning model"},
+        "use_deeplr":      {"type":"boolean",                      "default":true, "description": "use deep learning model"},
         "seg_weights":     {"type":"string",                       "default":"models/seg_weights.h5", "description":"path to weights file", "required":false},
+         "classes":        {"type":"integer",                      "default":3, "description":"number of classes" },
+         "width"  :        {"type":"integer",                      "default":1024, "description":"input image height"},
+         "height" :        {"type":"integer",                      "default":800, "description":"input image width"},
         "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
@@ -109,7 +112,7 @@
       "output_file_grp": ["OCR-D-SEG-LINE-ANY"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/line"],
-      "description": "Finds region polygons for each text line in the input image.",
+      "description": "separate each text line",
       "parameters": {
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "minscale":    {"type": "number", "format": "float", "default": 12.0, "description": "minimum scale permitted"},
@@ -140,7 +143,7 @@
       "output_file_grp": ["OCR-D-SEG-LAYOUT"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/text-image"],
-      "description": "Generates a table-of-content like document structure of the whole document.",
+      "description": "Analysis of the input document",
       "parameters": {
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
@@ -154,13 +157,14 @@
       "output_file_grp": ["OCR-D-BLOCK-SEGMENT"],
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/text-image"],
-      "description": "Segments and classifies document segments in a single page and outputs the the region polygons and classes.",
+      "description": "Analysis of the input document",
       "parameters": {     
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
         "block_segmentation_weights": { "type": "string","default":"models/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
         "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"},
-        "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"}
+        "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"},
+        "th"       :   {"type": "integer", "default": 15, "descrption": "num of pixels to include in the area region"}
       }       
     }
   }
