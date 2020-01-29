@@ -17,9 +17,10 @@ from PIL import Image
 import os
 import numpy as np
 import shapely
+import cv2
 import math
 from ..constants import OCRD_TOOL
-
+from pathlib import Path
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_utils import (
@@ -30,6 +31,7 @@ from ocrd_utils import (
     points_from_polygon,
     )
 
+from keras_segmentation.models.unet import resnet50_unet
 
 from ocrd_models.ocrd_page import (
     to_xml, 
@@ -63,6 +65,21 @@ class OcrdAnybaseocrTiseg(Processor):
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         oplevel = self.parameter['operation_level']
         
+        model = None
+        if self.parameter['use_deeplr']:
+            
+            model_weights = self.parameter['seg_weights']
+            if not Path(model_weights).is_file():
+                LOG.error("""\
+                    Segementation model weights file was not found at '%s'. Make sure the `seg_weights` parameter
+                    points to the local model weights path.
+                    """ % model_weights)
+                sys.exit(1)
+
+            model = resnet50_unet(n_classes=self.parameter['classes'], input_height=self.parameter['height'], input_width=self.parameter['width'])
+            model.load_weights(model_weights)
+            LOG.info('Segmentation Model loaded')
+                    
         for (n, input_file) in enumerate(self.input_files):
             page_id = input_file.pageId or input_file.ID
             
@@ -80,9 +97,13 @@ class OcrdAnybaseocrTiseg(Processor):
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed,cropped')            
+            if self.parameter['use_deeplr']:
+                page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='binarized,deskewed,cropped')
+            else:
+                page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed,cropped')            
+            
             if oplevel == 'page':
-                self._process_segment(page_image, page, page_xywh, page_id, input_file, n)
+                self._process_segment(page_image, page, page_xywh, page_id, input_file, n, model)
             else:
                 LOG.warning('Operation level %s, but should be "page".', oplevel)
                 break
@@ -103,61 +124,90 @@ class OcrdAnybaseocrTiseg(Processor):
                 force=self.parameter['force']
             )
                     
-    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n):
+    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, model):
     
         I = ocrolib.pil2array(page_image)
-        if len(I.shape) > 2:
-            I = np.mean(I, 2)
-        I = 1-I/I.max()
-        rows, cols = I.shape
-
-        # Generate Mask and Seed Images
-        Imask, Iseed = self.pixMorphSequence_mask_seed_fill_holes(I)
-
-        # Iseedfill: Union of Mask and Seed Images
-        Iseedfill = self.pixSeedfillBinary(Imask, Iseed)
-
-        # Dilation of Iseedfill
-        mask = ones((3, 3))
-        Iseedfill = ndimage.binary_dilation(Iseedfill, mask)
-
-        # Expansion of Iseedfill to become equal in size of I
-        Iseedfill = self.expansion(Iseedfill, (rows, cols))
-
-        # Write Text and Non-Text images
-        image_part = array((1-I*Iseedfill), dtype=int)
-        text_part = array((1-I*(1-Iseedfill)), dtype=int)
+        LOG.info('image size: %s', page_image.size)
         
-        page_xywh['features'] += ',clipped' # TODO: We probably should indicate what is clipped. Text or Image.
+        if model:
+            
+            if len(I.shape)<3:
+                print('Wrong input shape. Image should have 3 channel')
+            
+            # get prediction
+            out = model.predict_segmentation(
+                inp=I,
+                out_fname="/tmp/out.png"
+            )
+            cv2.imwrite('out_image.png', out*(255/2))
+            text_part = np.ones(out.shape)
+            text_part[np.where(out==1)] = 0
+            
+            image_part = np.ones(out.shape)
+            image_part[np.where(out==2)] = 0
+            
+            image_part = array(255*(image_part), 'B')
+            image_part = ocrolib.array2pil(image_part)  
 
-        bin_array = array(255*(text_part>ocrolib.midrange(text_part)),'B')
-        bin_image = ocrolib.array2pil(bin_array)                            
+            text_part = array(255*(text_part), 'B')
+            text_part = ocrolib.array2pil(text_part)
+            
+            text_part = text_part.resize(page_image.size, Image.BICUBIC)
+            image_part = image_part.resize(page_image.size, Image.BICUBIC)
+            
+        else:
+            
+            if len(I.shape) > 2:
+                I = np.mean(I, 2)
+            I = 1-I/I.max()
+            rows, cols = I.shape
+
+            # Generate Mask and Seed Images
+            Imask, Iseed = self.pixMorphSequence_mask_seed_fill_holes(I)
+
+            # Iseedfill: Union of Mask and Seed Images
+            Iseedfill = self.pixSeedfillBinary(Imask, Iseed)
+
+            # Dilation of Iseedfill
+            mask = ones((3, 3))
+            Iseedfill = ndimage.binary_dilation(Iseedfill, mask)
+
+            # Expansion of Iseedfill to become equal in size of I
+            Iseedfill = self.expansion(Iseedfill, (rows, cols))
+
+            # Write Text and Non-Text images
+            image_part = array((1-I*Iseedfill), dtype=int)
+            text_part = array((1-I*(1-Iseedfill)), dtype=int)   
+
+            bin_array = array(255*(text_part>ocrolib.midrange(img_part)),'B')
+            text_part = ocrolib.array2pil(bin_array)                            
+            
+            bin_array = array(255*(text_part>ocrolib.midrange(text_part)),'B')
+            image_part = ocrolib.array2pil(bin_array)                            
+        
         
         file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
         if file_id == input_file.ID:
             file_id = concat_padded(self.image_grp, n)
-        file_path = self.workspace.save_image_file(bin_image,
-                                   file_id+"_txt",
-                                   page_id=page_id,
-                                   file_grp=self.image_grp,
-                                   force=self.parameter['force']
-            )     
-        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))    
-    
-        bin_array = array(255*(text_part>ocrolib.midrange(img_part)),'B')
-        bin_image = ocrolib.array2pil(bin_array)                            
-        
-        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
-        if file_id == input_file.ID:
-            file_id = concat_padded(self.image_grp, n)
-        file_path = self.workspace.save_image_file(bin_image,
+        file_path = self.workspace.save_image_file(image_part,
                                    file_id+"_img",
                                    page_id=page_id,
                                    file_grp=self.image_grp,
                                    force=self.parameter['force']
             )     
-        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
+        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']+',non_text'))
         
+        page_xywh['features'] += ',clipped'
+        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
+        if file_id == input_file.ID:
+            file_id = concat_padded(self.image_grp, n)
+        file_path = self.workspace.save_image_file(text_part,
+                                   file_id+"_txt",
+                                   page_id=page_id,
+                                   file_grp=self.image_grp,
+                                   force=self.parameter['force']
+            )     
+        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features'])) 
     
     def pixMorphSequence_mask_seed_fill_holes(self, I):
         Imask = self.reduction_T_1(I)
