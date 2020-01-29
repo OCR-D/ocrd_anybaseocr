@@ -169,20 +169,18 @@ class OcrdAnybaseocrTextline(Processor):
             #LOG.info('check this: ') 
             #LOG.info(type(l.bounds))
             #LOG.info(l.bounds)
-            line_points = np.where(l.mask==1)
-            hull = MultiPoint([x for x in zip(line_points[0],line_points[1])]).convex_hull
-            x,y = hull.exterior.coords.xy
+            #line_points = np.where(l.mask==1)
+            #hull = MultiPoint([x for x in zip(line_points[0],line_points[1])]).convex_hull
+            #x,y = hull.exterior.coords.xy
             #LOG.info('hull coords x: ',x)
             #LOG.info('hull coords y: ',y)
             
+            min_x, max_x = (l.bounds[0].start, l.bounds[0].stop)
+            min_y, max_y = (l.bounds[1].start, l.bounds[1].stop)
             
+            line_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
             
-            #min_x, max_x = (l.bounds[0].start, l.bounds[0].stop)
-            #min_y, max_y = (l.bounds[1].start, l.bounds[1].stop)
-            
-            #line_polygon1 = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
-            
-            line_polygon = [x for x in zip(y, x)]
+            #line_polygon = [x for x in zip(y, x)]
             line_polygon = coordinates_for_segment(line_polygon, page_image, region_xywh)
             line_points = points_from_polygon(line_polygon)
             
@@ -190,26 +188,26 @@ class OcrdAnybaseocrTextline(Processor):
             img = np.array(255*(img>ocrolib.midrange(img)),'B')
             img = 255-img
             img = ocrolib.array2pil(img)
-            img.save('original.png')
+           
             file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.image_grp, n)
         
-            #file_path = self.workspace.save_image_file(img,
-             #                      file_id+"_"+str(n)+"_"+str(i),
-             #                      page_id=page_id,
-             #                      file_grp=self.image_grp,
-             #                      force=self.parameter['force']
-             #   )
-            #ai = AlternativeImageType(filename=file_path, comments=region_xywh['features'])
+            file_path = self.workspace.save_image_file(img,
+                                   file_id+"_"+str(n)+"_"+str(i),
+                                   page_id=page_id,
+                                   file_grp=self.image_grp,
+                                   force=self.parameter['force']
+            )
+            ai = AlternativeImageType(filename=file_path, comments=region_xywh['features'])
             line_id = '%s_line%04d' % (page_id, i)
             line = TextLineType(custom='readingOrder {index:'+str(i)+';}', id=line_id, Coords=CoordsType(line_points))
-            #line.add_AlternativeImage(ai)
+            line.add_AlternativeImage(ai)
             textregion.add_TextLine(line)
             
-            line_test = textregion.get_TextLine()[-1]
-            region_img, region_xy = self.workspace.image_from_segment(line_test, page_image, region_xywh)
-            region_img.save('checkthis.png')
+            #line_test = textregion.get_TextLine()[-1]
+            #region_img, region_xy = self.workspace.image_from_segment(line_test, page_image, region_xywh)
+            #region_img.save('checkthis.png')
             #cv2.imwrite('checkthis.jpg', region_img)
 
 
