@@ -123,7 +123,7 @@ class OcrdAnybaseocrDeskewer(Processor):
             
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
-            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
+            file_id = input_file.ID.replace(self.input_file_grp, page_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.output_file_grp, n)
             
