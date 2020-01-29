@@ -15,7 +15,7 @@ from ocrd_utils import (
     points_from_polygon,
     polygon_from_points
     )
-
+import cv2
 import warnings
 import ocrolib
 warnings.filterwarnings('ignore',category=FutureWarning) 
@@ -100,10 +100,20 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             page = pcgts.get_Page()
             page_id = input_file.pageId or input_file.ID 
 
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter ='binarized,deskewed,cropped') 
+            metadata = pcgts.get_Metadata()
+            metadata.add_MetadataItem(
+                    MetadataItemType(type_="processingStep",
+                                     name=self.ocrd_tool['steps'][0],
+                                     value=TOOL,                                     
+                                     Labels=[LabelsType(#externalRef="parameter",
+                                                        Label=[LabelType(type_=name,
+                                                                         value=self.parameter[name])
+                                                               for name in self.parameter.keys()])]))       
+            
+            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter ='binarized,deskewed,cropped,clipped,non_text') 
             # try to load pixel masks
             try:
-                mask_image, mask_xywh, mask_image_info = self.workspace.image_from_page(page, page_id, feature_selector ='clipped')
+                mask_image, mask_xywh, mask_image_info = self.workspace.image_from_page(page, page_id, feature_selector ='clipped', feature_filter='binarized,deskewed,cropped,non_text')
             except:
                 mask_image=None
             #Display Warning If image segment results already exist or not in StructMap?
@@ -148,16 +158,22 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             border_coords = page.get_Border().get_Coords()
             border_points = polygon_from_points(border_coords.get_points())
             border = Polygon(border_points)
-
+#            page_image, page_xy = self.workspace.image_from_segment(page.get_Border(), page_image, page_xywh)
+                
+          
         img_array = ocrolib.pil2array(page_image)
+        page_image.save('./checkthis.png')
         if len(img_array.shape) <= 2:
             img_array = np.stack((img_array,)*3, axis=-1)
         results = mrcnn_model.detect([img_array], verbose=1)    
         r = results[0]        
         
-        th=5
+        th=self.parameter['th']
         # check for existing semgentation mask 
         if mask:
+            mask = ocrolib.pil2array(mask)
+            mask = mask//255
+            mask = 1-mask
             # multiply all the bounding box part with 2 
             for i in range(len(r['rois'])):                
 
@@ -166,20 +182,22 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 max_x = r['rois'][i][2]
                 max_y = r['rois'][i][3]
                 mask[min_x:max_x, min_y:max_y] *= i+2
-            
+            cv2.imwrite('mask_check.png', mask*(255/(len(r['rois'])+2)))
             # check for left over pixels and add them to the bounding boxes
             pixel_added = True
+           
             while pixel_added:
+                
                 pixel_added = False
                 left_over = np.where(mask==1)
                 for x,y in zip(left_over[0], left_over[1]):
                     local_mask = mask[x-th:x+th,y-th:y+th]
                     candidates = np.where(local_mask>1)
-                    candidates = [x for x in zip(candidates[0], candiates[1])]
+                    candidates = [k for k in zip(candidates[0], candidates[1])]
                     if len(candidates)>0:
                         pixel_added = True
                         #find closest pixel with x>1
-                        candidates.sort(key= lambda x: np.sqrt((x[0]-th)**2+(x[1]-th)**2))
+                        candidates.sort(key= lambda j: np.sqrt((j[0]-th)**2+(j[1]-th)**2))
                         index = local_mask[candidates[0]]-2
                         
                         #add pixel to mask/bbox
@@ -198,6 +216,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                             
                         # update the mask
                         mask[x,y] = index + 2
+                
              
         # define reading order on basis of coordinates
         reading_order = []
@@ -247,7 +266,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 cut_region_polygon = Polygon(region_polygon)
                 
             order_index = reading_order.index((min_y, min_x, max_y, max_x))
-            region_id = '%s_region%04d' % (page_id, order_index)
+            region_id = '%s_region%04d' % (page_id, i)
             regionRefIndex = RegionRefIndexedType(index=order_index, regionRef=region_id)
             order_group.add_RegionRefIndexed(regionRefIndex)
             
@@ -274,20 +293,17 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             cut_region_polygon = border.intersection(Polygon(region_polygon))
             if cut_region_polygon.is_empty:
                 continue
-            cut_region_polygon = [i for i in zip(list(cut_region_polygon.exterior.coords.xy[0]),list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
+            cut_region_polygon = [j for j in zip(list(cut_region_polygon.exterior.coords.xy[0]),list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
             #print(cut_region_polygon)
             region_polygon = coordinates_for_segment(cut_region_polygon, page_image, page_xywh)
             region_points = points_from_polygon(region_polygon)
             
             read_order = reading_order.index((min_y, min_x, max_y, max_x))
-            
 
-            
-            
-            
             # this can be tested, provided whether we need previous comments or not?
             region_img = img_array[min_x:max_x,min_y:max_y] #extract from points and img_array
             region_img = ocrolib.array2pil(region_img)
+            
             file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(self.image_grp, n)
