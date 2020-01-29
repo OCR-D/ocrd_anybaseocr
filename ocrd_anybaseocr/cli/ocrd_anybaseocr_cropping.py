@@ -418,7 +418,7 @@ class OcrdAnybaseocrCropper(Processor):
     def process(self):
         """Performs border detection on the workspace. """
         try:
-            print("OUTPUT FILE ", self.output_file_grp)
+            LOG.info("OUTPUT FILE %s", self.output_file_grp)
             page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
             page_grp = self.output_file_grp
