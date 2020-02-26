@@ -55,9 +55,24 @@ install:
 
 # Download sample model TODO Add other models here
 model: ocrd_anybaseocr/models/latest_net_G.pth
-
 ocrd_anybaseocr/models/latest_net_G.pth:
 	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download"
+	
+model: ocrd_anybaseocr/models/block_segmentation_weights.h5
+ocrd_anybaseocr/models/block_segmentation_weights.h5:
+	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/dgACCYzytxnb7Ey/download"
+
+model: ocrd_anybaseocr/models/structure_analysis.h5
+ocrd_anybaseocr/models/structure_analysis.h5:
+	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/E85PL48Cjs8ZkJL/download"
+
+model: ocrd_anybaseocr/models/mapping_densenet.pickle
+ocrd_anybaseocr/models/mapping_densenet.pickle:
+	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/skWCsWwq7ffM7aq/download"
+	
+model: ocrd_anybaseocr/models/seg_weights.h5
+ocrd_anybaseocr/models/seg_weights.h5:
+	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/gWBwib5adxLYpoH/download"
 
 docker:
 	docker build -t '$(DOCKER_TAG)' .
@@ -78,13 +93,8 @@ assets: repo/assets
 
 #
 # Tests
-#
-
 # Run all tests
-#test: test-binarize test-deskew test-crop test-tiseg test-textline test-block-segmentation test-layout-analysis
-
-# Run minimum sample
-test: test-binarize
+test: test-binarize test-deskew test-crop test-tiseg test-block-segmentation test-textline test-layout-analysis
 
 # Test binarization
 test-binarize: assets-clean assets
@@ -102,15 +112,14 @@ test-crop: assets-clean assets
 test-tiseg: assets-clean assets
 	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-tiseg -m mets.xml -I OCR-D-IMG-CROP-TEST -O OCR-D-IMG-TISEG-TEST
 
-# Test textline extraction
-test-textline: assets-clean assets
-	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-textline -m mets.xml -I OCR-D-IMG-TISEG-TEST -O OCR-D-IMG-TL-TEST
-
-
 # Test block segmentation
 test-block-segmentation:
-	cd $(testdir)/ocrd_anybaseocr && CUDA_VISIBLE_DEVICES=0 && $(exec_name_prefix)-block-segmentation -m mets_block.xml -I OCR-D-BLOCK -O OCR-D-BLOCK-SEGMENT -p params.json
+	cd $(testdir)/ocrd_anybaseocr && CUDA_VISIBLE_DEVICES=0 && $(exec_name_prefix)-block-segmentation -m mets_block.xml -I OCR-D-IMG-TISEG-TEST -O OCR-D-BLOCK-SEGMENT -p params.json
+
+# Test textline extraction
+test-textline: assets-clean assets
+	cd $(testdir)/ocrd_anybaseocr && $(exec_name_prefix)-textline -m mets.xml -I OCR-D-BLOCK-SEGMENT -O OCR-D-IMG-TL-TEST
 
 # Test document structure analysis
 test-layout-analysis:
-	cd $(testdir)/ocrd_anybaseocr && CUDA_VISIBLE_DEVICES=0 && $(exec_name_prefix)-layout-analysis -m mets_docanalysis.xml -I OCR-D-DOC -O OCR-D-IMG-LAYOUT -p params.json
+	cd $(testdir)/ocrd_anybaseocr && CUDA_VISIBLE_DEVICES=0 && $(exec_name_prefix)-layout-analysis -m mets_docanalysis.xml -I OCR-D-IMG-BIN-TEST -O OCR-D-IMG-LAYOUT -p params.json
