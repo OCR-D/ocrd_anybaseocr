@@ -77,8 +77,9 @@ class OcrdAnybaseocrTiseg(Processor):
                     """ % os.getcwd())
                 sys.exit(1)
 
-            model = resnet50_unet(n_classes=self.parameter['classes'], input_height=self.parameter['height'], input_width=self.parameter['width'])
-            model.load_weights(model_weights)
+            #model = resnet50_unet(n_classes=self.parameter['classes'], input_height=self.parameter['height'], input_width=self.parameter['width'])
+            #model.load_weights(model_weights)
+            model = load_model(model_weights)
             LOG.info('Segmentation Model loaded')
                     
         for (n, input_file) in enumerate(self.input_files):
@@ -127,20 +128,21 @@ class OcrdAnybaseocrTiseg(Processor):
                     
     def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, model):
     
-        I = ocrolib.pil2array(page_image)
-        LOG.info('image size: %s', page_image.size)
-        
         if model:
+            
+            I = ocrolib.pil2array(page_image.resize((800, 1024), Image.ANTIALIAS))
+            I = I[np.newaxis, :, :, :]
             
             if len(I.shape)<3:
                 print('Wrong input shape. Image should have 3 channel')
             
             # get prediction
-            out = model.predict_segmentation(
-                inp=I,
-                out_fname="/tmp/out.png"
-            )
-            cv2.imwrite('out_image.png', out*(255/2))
+            #out = model.predict_segmentation(
+            #    inp=I,
+            #    out_fname="/tmp/out.png"
+            #)
+            out = model.predict(I)
+            out = out.reshape((2408, 1600, 3)).argmax(axis=2)
             text_part = np.ones(out.shape)
             text_part[np.where(out==1)] = 0
             
@@ -157,6 +159,7 @@ class OcrdAnybaseocrTiseg(Processor):
             image_part = image_part.resize(page_image.size, Image.BICUBIC)
             
         else:
+            I = ocrolib.pil2array(page_image)
             
             if len(I.shape) > 2:
                 I = np.mean(I, 2)
