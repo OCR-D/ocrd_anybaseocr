@@ -12,7 +12,11 @@ from ..constants import OCRD_TOOL
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_models.ocrd_page import to_xml
+from ocrd_models.ocrd_page import (
+    to_xml,
+    MetadataItemType,
+    LabelsType, LabelType
+)
 from ocrd_utils import getLogger
 from ocrd_models import ocrd_mets
 
@@ -215,7 +219,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             sys.exit(1)
         else:
             
-            LOG.info('Loading model from file ', model_path)
+            LOG.info('Loading model from file %s', model_path)
             model = self.create_model(str(model_path))
             # load the mapping
             pickle_in = open(str(class_mapper_path), "rb")
@@ -225,7 +229,8 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             # print("INPUT FILE HERE",self.input_files)
         for (n, input_file) in enumerate(self.input_files):
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            fname = pcgts.get_Page().imageFilename            
+            fname = pcgts.get_Page().imageFilename
+            page_id = input_file.pageId or input_file.ID
             size = 600, 500
             
             metadata = pcgts.get_Metadata()

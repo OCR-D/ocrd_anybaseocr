@@ -14,6 +14,7 @@ from pylab import unique
 import ocrolib
 import json
 from PIL import Image
+import sys
 import os
 import numpy as np
 import shapely
@@ -73,7 +74,7 @@ class OcrdAnybaseocrTiseg(Processor):
                 LOG.error("""\
                     Segementation model weights file was not found at '%s'. Make sure the `seg_weights` parameter
                     points to the local model weights path.
-                    """ % model_weights)
+                    """ % os.getcwd())
                 sys.exit(1)
 
             model = resnet50_unet(n_classes=self.parameter['classes'], input_height=self.parameter['height'], input_width=self.parameter['width'])
