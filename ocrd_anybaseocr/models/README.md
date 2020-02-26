@@ -7,7 +7,7 @@ Download model "block_segmentation_weights.h5" from https://cloud.dfki.de/ownclo
 
 # Layout Analysis trained model
 Download model "structure_analysis.h5" from https://cloud.dfki.de/owncloud/index.php/s/E85PL48Cjs8ZkJL/download
-Download model "mapping_densenet.pickle" from https://cloud.dfki.de/owncloud/index.php/s/skWCsWwq7ffM7aq/download
+Download model "mapping_densenet.pickle" from https://cloud.dfki.de/owncloud/index.php/s/2kpMxnMSSqS8z3X/download
 
 # Tiseg trained model for deep learning approach
-Download model "seg_weights.h5" from https://cloud.dfki.de/owncloud/index.php/s/gWBwib5adxLYpoH
+Download model "seg_weights.h5" from https://cloud.dfki.de/owncloud/index.php/s/BzW3cPsFjD8QM35/download
