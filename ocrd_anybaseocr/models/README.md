@@ -10,4 +10,4 @@ Download model "structure_analysis.h5" from https://cloud.dfki.de/owncloud/index
 Download model "mapping_densenet.pickle" from https://cloud.dfki.de/owncloud/index.php/s/2kpMxnMSSqS8z3X/download
 
 # Tiseg trained model for deep learning approach
-Download model "seg_weights.h5" from https://cloud.dfki.de/owncloud/index.php/s/BzW3cPsFjD8QM35/download
+Download model "seg_model.hdf5" from https://cloud.dfki.de/owncloud/index.php/s/Qxm8baqq9Zf8brQ/download

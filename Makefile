@@ -68,11 +68,11 @@ models/structure_analysis.h5:
 
 model: models/mapping_densenet.pickle
 models/mapping_densenet.pickle:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/skWCsWwq7ffM7aq/download"
+	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/2kpMxnMSSqS8z3X/download"
 	
-model: models/seg_weights.h5
-models/seg_weights.h5:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/gWBwib5adxLYpoH/download"
+model: models/seg_model.hdf5
+models/seg_model.hdf5:
+	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/Qxm8baqq9Zf8brQ/download"
 
 docker:
 	docker build -t '$(DOCKER_TAG)' .
