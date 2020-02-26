@@ -99,7 +99,7 @@
       "parameters": {
         "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "use_deeplr":      {"type":"boolean",                      "default":true, "description": "use deep learning model"},
-        "seg_weights":     {"type":"string",                       "default":"models/seg_weights.h5", "description":"path to weights file", "required":false},
+        "seg_weights":     {"type":"string",                       "default":"models/seg_model.hdf5", "description":"path to weights file", "required":false},
          "classes":        {"type":"integer",                      "default":3, "description":"number of classes" },
          "width"  :        {"type":"integer",                      "default":1024, "description":"input image height"},
          "height" :        {"type":"integer",                      "default":800, "description":"input image width"},
