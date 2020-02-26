@@ -32,7 +32,8 @@ from ocrd_utils import (
     points_from_polygon,
     )
 
-from keras_segmentation.models.unet import resnet50_unet
+from keras.models import load_model
+#from keras_segmentation.models.unet import resnet50_unet
 
 from ocrd_models.ocrd_page import (
     to_xml, 
@@ -70,11 +71,12 @@ class OcrdAnybaseocrTiseg(Processor):
         if self.parameter['use_deeplr']:
             
             model_weights = self.parameter['seg_weights']
+            
             if not Path(model_weights).is_file():
                 LOG.error("""\
                     Segementation model weights file was not found at '%s'. Make sure the `seg_weights` parameter
                     points to the local model weights path.
-                    """ % os.getcwd())
+                    """ % model_weights)
                 sys.exit(1)
 
             #model = resnet50_unet(n_classes=self.parameter['classes'], input_height=self.parameter['height'], input_width=self.parameter['width'])
@@ -131,8 +133,8 @@ class OcrdAnybaseocrTiseg(Processor):
         if model:
             
             I = ocrolib.pil2array(page_image.resize((800, 1024), Image.ANTIALIAS))
-            I = I[np.newaxis, :, :, :]
-            
+            I = np.array(I)[np.newaxis, :, :, :]
+            LOG.info('I shape %s', I.shape)
             if len(I.shape)<3:
                 print('Wrong input shape. Image should have 3 channel')
             
@@ -142,7 +144,8 @@ class OcrdAnybaseocrTiseg(Processor):
             #    out_fname="/tmp/out.png"
             #)
             out = model.predict(I)
-            out = out.reshape((2408, 1600, 3)).argmax(axis=2)
+            out = out.reshape((2048, 1600, 3)).argmax(axis=2)
+
             text_part = np.ones(out.shape)
             text_part[np.where(out==1)] = 0
             
@@ -150,7 +153,7 @@ class OcrdAnybaseocrTiseg(Processor):
             image_part[np.where(out==2)] = 0
             
             image_part = array(255*(image_part), 'B')
-            image_part = ocrolib.array2pil(image_part)  
+            image_part = ocrolib.array2pil(image_part)
 
             text_part = array(255*(text_part), 'B')
             text_part = ocrolib.array2pil(text_part)
