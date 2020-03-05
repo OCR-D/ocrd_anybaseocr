@@ -164,7 +164,8 @@
         "block_segmentation_weights": { "type": "string","default":"models/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
         "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"},
         "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"},
-        "th"       :   {"type": "integer", "default": 15, "descrption": "num of pixels to include in the area region"}
+        "th"       :   {"type": "integer", "default": 15, "descrption": "num of pixels to include in the area region"},
+        "DETECTION_MIN_CONFIDENCE"       :   {"type": "number", "default": 0.9, "descrption": "Confidence value for a model to detect bounding box"}
       }       
     }
   }
