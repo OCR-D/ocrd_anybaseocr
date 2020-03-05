@@ -47,17 +47,26 @@ from ocrd_models.ocrd_page_generateds import CoordsType
 TOOL = 'ocrd-anybaseocr-block-segmentation'
 LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
 FALLBACK_IMAGE_GRP = 'OCR-D-IMG-BLOCK-SEGMENT'
-
+    
 class InferenceConfig(Config):
+
+    def __init__(self,confidence):
+        Config.__init__(self, confidence)
+
     NAME = "block"    
     IMAGES_PER_GPU = 1  
-    NUM_CLASSES = 1 + 14      
-    DETECTION_MIN_CONFIDENCE = 0.9
+    NUM_CLASSES = 1 + 14
+        
+#     NAME = "block"    
+#     IMAGES_PER_GPU = 1  
+#     NUM_CLASSES = 1 + 14
+#     DETECTION_MIN_CONFIDENCE = 0.9 # needs to be changed back to parameter
+    #     DETECTION_MIN_CONFIDENCE = DETECTION_MIN_CONFIDENCE #taken as a parameter from tools.json
 
 class OcrdAnybaseocrBlockSegmenter(Processor):
 
     def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
+        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]   
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrBlockSegmenter, self).__init__(*args, **kwargs) 
         #self.reading_order = []
@@ -76,8 +85,11 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
             
         model_path = Path(self.parameter['block_segmentation_model'])
-        
         model_weights = Path(self.parameter['block_segmentation_weights'])
+
+        confidence = self.parameter['DETECTION_MIN_CONFIDENCE']
+#         DETECTION_MIN_CONFIDENCE = Path(self.parameter['DETECTION_MIN_CONFIDENCE'])
+
         class_names = ['BG','page-number', 'paragraph', 'catch-word', 'heading', 'drop-capital', 'signature-mark','header',
                        'marginalia', 'footnote', 'footnote-continued', 'caption', 'endnote', 'footer','keynote',
                        'image','table', 'graphics']
@@ -89,7 +101,10 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 """ % model_weights)
             sys.exit(1)
             
-        config = InferenceConfig()
+#         config = InferenceConfig(Config,DETECTION_MIN_CONFIDENCE)
+        
+        config = InferenceConfig(confidence)
+#         config = InferenceConfig()
         mrcnn_model = model.MaskRCNN(mode="inference", model_dir=str(model_path), config=config)
         mrcnn_model.load_weights(str(model_weights), by_name=True)
 
@@ -126,12 +141,12 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             else:
                 LOG.warning('Operation level %s, but should be "page".', oplevel)
                 break
-            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
+            file_id = input_file.ID.replace(self.input_file_grp, page_grp)
             
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
             if file_id == input_file.ID:
-                file_id = concat_padded(self.output_file_grp, n)
+                file_id = concat_padded(page_grp, n)
             self.workspace.add_file(
                 ID=file_id,
                 file_grp=page_grp,
@@ -170,6 +185,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         
         th=self.parameter['th']
         # check for existing semgentation mask 
+        #this code executes only when use_deeplr is set to True in ocrd-tool.json file
         if mask:
             mask = ocrolib.pil2array(mask)
             mask = mask//255
@@ -183,6 +199,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 max_y = r['rois'][i][3]
                 mask[min_x:max_x, min_y:max_y] *= i+2
             cv2.imwrite('mask_check.png', mask*(255/(len(r['rois'])+2)))
+            
             # check for left over pixels and add them to the bounding boxes
             pixel_added = True
            
@@ -216,22 +233,70 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                             
                         # update the mask
                         mask[x,y] = index + 2
+        
+        
+        
+        #resolving overlapping problem
+        bbox_dict = {} #to check any overlapping bbox
+        class_id_check = []
+
+        for i in range(len(r['rois'])):                
+            min_x = r['rois'][i][0]
+            min_y = r['rois'][i][1]
+            max_x = r['rois'][i][2]
+            max_y = r['rois'][i][3]
+
+            region_bbox = [min_y, min_x, max_y, max_x]
+
+
+            for key in bbox_dict:
+                for bbox in bbox_dict[key]:
+
+                    #checking for ymax case with vertical overlapping
+                    #along with y, check both for xmax and xmin
+                    if (region_bbox[3] <= bbox[3] and region_bbox[3] >= bbox[1] and 
+                        ((region_bbox[0] >= bbox[0] and region_bbox[0] <= bbox[2]) or (region_bbox[2] >= bbox[0] 
+                        and region_bbox[2] <= bbox[2]) or (region_bbox[0] <= bbox[0] and region_bbox[2] >= bbox[2]))
+                        and r['class_ids'][i] != 5 ):
+                        
+                        r['rois'][i][2] = bbox[1] -1
+                        
+                    #checking for ymin now 
+                    #along with y, check both for xmax and xmin
+                    if (region_bbox[1] <= bbox[3] and region_bbox[1] >= bbox[1] and 
+                        ((region_bbox[0] >= bbox[0] and region_bbox[0] <= bbox[2]) or (region_bbox[2] >= bbox[0] 
+                        and region_bbox[2] <= bbox[2]) or (region_bbox[0] <= bbox[0] and region_bbox[2] >= bbox[2]))
+                        and r['class_ids'][i] != 5 ):
+                        
+                        r['rois'][i][0] = bbox[3] + 1
+                        
+                        
+            if r['class_ids'][i] not in class_id_check:
+                bbox_dict[r['class_ids'][i]] = []
+                class_id_check.append(r['class_ids'][i])    
                 
+            bbox_dict[r['class_ids'][i]].append(region_bbox)
+            
+        #resolving overlapping problem code
+        
              
         # define reading order on basis of coordinates
         reading_order = []
+
         for i in range(len(r['rois'])):                
             width,height,_ = img_array.shape
             min_x = r['rois'][i][0]
             min_y = r['rois'][i][1]
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
+            
+                
             if (min_y - 5) > width and r['class_ids'][i] == 2:
                 min_y-=5
             if (max_y + 10) < width and r['class_ids'][i] == 2:
                 min_y+=10
             reading_order.append((min_y, min_x, max_y, max_x))
-
+        
         reading_order = sorted(reading_order, key=lambda reading_order:(reading_order[1], reading_order[0]))
         for i in range(len(reading_order)):
             min_y, min_x, max_y, max_x = reading_order[i]
@@ -247,6 +312,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 
         #Creating Reading Order object in PageXML
         order_group = OrderedGroupType(caption="Regions reading order",id=page_id)
+        
+
         for i in range(len(r['rois'])):
             min_x = r['rois'][i][0]
             min_y = r['rois'][i][1]
@@ -256,6 +323,9 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 min_y-=5
             if (max_y + 10) < width and r['class_ids'][i] == 2:
                 min_y+=10
+
+            
+            
             region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
             
             if border:
@@ -274,9 +344,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         reading_order_object.set_OrderedGroup(order_group)
         page.set_ReadingOrder(reading_order_object)
         
-        
-        
-        
+
         for i in range(len(r['rois'])):                
             width,height,_ = img_array.shape
             min_x = r['rois'][i][0]
@@ -288,20 +356,32 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 min_y-=5
             if (max_y + 10) < width and r['class_ids'][i] == 2:
                 min_y+=10
-            region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
+                    
+
+            #one change here to resolve flipped coordinates
+            region_polygon = [[min_y, min_x], [max_y, min_x], [max_y, max_x], [min_y, max_x]]
             
+      
             cut_region_polygon = border.intersection(Polygon(region_polygon))
+            
+            
             if cut_region_polygon.is_empty:
                 continue
             cut_region_polygon = [j for j in zip(list(cut_region_polygon.exterior.coords.xy[0]),list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
-            #print(cut_region_polygon)
+            
+            #checking whether coordinates are flipped
+            
             region_polygon = coordinates_for_segment(cut_region_polygon, page_image, page_xywh)
             region_points = points_from_polygon(region_polygon)
             
             read_order = reading_order.index((min_y, min_x, max_y, max_x))
 
             # this can be tested, provided whether we need previous comments or not?
+            #resolving overlapping problem
+            
             region_img = img_array[min_x:max_x,min_y:max_y] #extract from points and img_array
+            
+            
             region_img = ocrolib.array2pil(region_img)
             
             file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
