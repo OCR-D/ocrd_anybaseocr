@@ -210,7 +210,8 @@ class Config(object):
     # Gradient norm clipping
     GRADIENT_CLIP_NORM = 5.0
 
-    def __init__(self):
+    
+    def __init__(self, conf):
         """Set values of computed attributes."""
         # Effective batch size
         self.BATCH_SIZE = self.IMAGES_PER_GPU * self.GPU_COUNT
@@ -226,7 +227,8 @@ class Config(object):
         # Image meta data length
         # See compose_image_meta() for details
         self.IMAGE_META_SIZE = 1 + 3 + 3 + 4 + 1 + self.NUM_CLASSES
-
+        self.DETECTION_MIN_CONFIDENCE = conf
+        
     def display(self):
         """Display Configuration values."""
         print("\nConfigurations:")
