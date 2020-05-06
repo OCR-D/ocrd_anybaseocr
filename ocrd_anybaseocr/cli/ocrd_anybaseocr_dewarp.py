@@ -83,8 +83,8 @@ class OcrdAnybaseocrDewarper(Processor):
             self.image_grp = FALLBACK_IMAGE_GRP
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         if not torch.cuda.is_available():
-            LOG.error("Your system has no CUDA installed. No GPU detected.")
-            sys.exit(1)
+            LOG.warning("torch cannot detect CUDA installation.")
+            self.parameter['gpu_id'] = 'cpu'
 
         path = self.parameter['pix2pixHD']
         if not Path(path).is_dir():
