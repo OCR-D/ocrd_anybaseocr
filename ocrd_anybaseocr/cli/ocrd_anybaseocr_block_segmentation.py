@@ -75,8 +75,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
     def process(self):
         
         if not tf.test.is_gpu_available():
-            LOG.error("Your system has no CUDA installed. No GPU detected.")
-            sys.exit(1)
+            LOG.warning("Tensorflow cannot detect CUDA installation. Running without GPU will be slow.")
         try:
             page_grp, self.image_grp = self.output_file_grp.split(',')
         except ValueError:
