@@ -1,0 +1,3 @@
+[submodule "ocrd_anybaseocr/pix2pixHD"]
+	path = pix2pixHD
+	url = https://github.com/NVIDIA/pix2pixHD

@@ -1,7 +1,9 @@
 # pix2pixHD trained model for dewarping process
-Download model "latest_net_G.pth" from https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy
+
+Download model `latest_net_G.pth` from https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download
 
 The following files have to be stored in models folder, the current directory.
+
 # Block Segmentation trained model
 Download model "block_segmentation_weights.h5" from https://cloud.dfki.de/owncloud/index.php/s/dgACCYzytxnb7Ey/download
 

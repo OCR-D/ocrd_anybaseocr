@@ -22,7 +22,6 @@ lib64
 **/ocrd_anybaseocr/work_dir
 **/ocrd_anybaseocr/OCR-D-*
 **/ocrd_anybaseocr/models/latest_net_G.pth
-**/ocrd_anybaseocr/pix2pixHD
 *.h5
 *.hdf5
 *.pickle
