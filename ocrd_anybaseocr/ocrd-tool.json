@@ -83,7 +83,7 @@
         "pix2pixHD":    { "type": "string", "default":"", "description": "Path to pix2pixHD library"},
         "model_name":	{ "type": "string", "default":"models", "description": "name of dir with trained pix2pixHD model (latest_net_G.pth)"},
         "checkpoint_dir":   { "type": "string", "default":"./", "description": "Path to where to look for dir with model name"},
-        "gpu_id":       { "type": "number", "format": "integer", "default": 0,    "description": "gpu id"},
+        "gpu_id":       { "type": "number", "format": "integer", "default": 0,    "description": "device ID of CUDA GPU to use. Set -1 to use CPU only."},
         "resizeHeight": { "type": "number", "format": "integer", "default": 1024, "description": "resized image height"},
         "resizeWidth":  { "type": "number", "format": "integer", "default": 1024, "description": "resized image width"},
         "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}

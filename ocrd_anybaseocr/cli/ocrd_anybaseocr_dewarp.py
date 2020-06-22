@@ -36,7 +36,8 @@ class OcrdAnybaseocrDewarper(Processor):
         from options.test_options import TestOptions
         from models.models import create_model
         sys.argv = [sys.argv[0]]
-        os.mkdir(self.input_file_grp+"/test_A/")
+        # pix2pixHD BaseOptions.parse already uses gpu_ids
+        sys.argv.extend(['--gpu_ids', str(self.parameter['gpu_id'])])
         opt = TestOptions().parse(save=False)
         opt.nThreads = 1   # test code only supports nThreads = 1
         opt.batchSize = 1  # test code only supports batchSize = 1
@@ -51,7 +52,6 @@ class OcrdAnybaseocrDewarper(Processor):
         opt.resize_or_crop = self.parameter['imgresize']
         opt.n_blocks_global = 10
         opt.n_local_enhancers = 2
-        opt.gpu_ids = [self.parameter['gpu_id']]
         opt.loadSize = self.parameter['resizeHeight']
         opt.fineSize = self.parameter['resizeWidth']
         
@@ -84,7 +84,7 @@ class OcrdAnybaseocrDewarper(Processor):
             LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
         if not torch.cuda.is_available():
             LOG.warning("torch cannot detect CUDA installation.")
-            self.parameter['gpu_id'] = 'cpu'
+            self.parameter['gpu_id'] = -1
 
         path = self.parameter['pix2pixHD']
         if not Path(path).is_dir():
@@ -155,7 +155,6 @@ class OcrdAnybaseocrDewarper(Processor):
                 content=to_xml(pcgts).encode('utf-8'),
                 force=self.parameter['force']
             )
-        os.rmdir(self.input_file_grp+"/test_A/") #FIXME: better way of deleting a temp_dir?
         
 
     def _process_segment(self, model, dataset, page, page_xywh, page_id, input_file, orig_img_size, n):
