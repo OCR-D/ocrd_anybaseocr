@@ -451,18 +451,17 @@ class OcrdAnybaseocrCropper(Processor):
                                                           value=self.parameter[name])
                                                 for name in self.parameter.keys()])]))
             page = pcgts.get_Page()
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='cropped',feature_selector='binarized') # should also be deskewed
-
-            #page_image, page_xywh, page_image_info = self.workspace.image_from_page(
-            #    page, page_id, feature_filter='cropped')
+            page_image, page_coords, page_image_info = self.workspace.image_from_page(
+                page, page_id,
+                feature_filter='cropped',
+                feature_selector='binarized') # should also be deskewed
 
             if oplevel == "page":
                 self._process_segment(
-                    page_image, page, page_xywh, page_id, input_file, n)
+                    page_image, page, page_coords, page_id, input_file, n)
             else:
-                LOG.warning(
+                raise Exception(
                     'Operation level %s, but should be "page".', oplevel)
-                break
             file_id = input_file.ID.replace(
                 self.input_file_grp, page_grp)
 
@@ -482,11 +481,6 @@ class OcrdAnybaseocrCropper(Processor):
             )
 
     def _process_segment(self, page_image, page, page_xywh, page_id, input_file, n):
-        # Get image orientation
-        # orientation = page.get_orientation() # This function is not working
-        #         rotated_image = self.rotate_image(orientation, page_image)
-        #         img_array = ocrolib.pil2array(rotated_image)
-
         img_array = ocrolib.pil2array(page_image)
 
         # Check if image is RGB or not #FIXME: check not needed anymore?
