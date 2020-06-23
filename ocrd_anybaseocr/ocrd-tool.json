@@ -67,7 +67,7 @@
         "rularRatioMax": {"type": "number", "format": "float", "default": 10.0, "description": "rular position in below"},
         "rularRatioMin": {"type": "number", "format": "float", "default": 3.0, "description": "rular position in below"},
         "rularWidth":    {"type": "number", "format": "float", "default": 0.95, "description": "maximum rular width"},
-        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
+        "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
       }
     },
     "ocrd-anybaseocr-dewarp": {
