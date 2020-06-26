@@ -52,7 +52,7 @@ install: patch-pix2pixhd
 
 # Patch pix2pixhd to trick it into thinking it was part of this mess
 patch-pix2pixhd: pix2pixhd
-	sed -i 's,from utils import utils,from ..util import util,' ocrd_anybaseocr/pix2pixhd/options/base_options.py
+	sed -i 's,from util import util,from ..util import util,' ocrd_anybaseocr/pix2pixhd/options/base_options.py
 
 pix2pixhd:
 	git submodule update --init
