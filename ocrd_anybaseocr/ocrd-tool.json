@@ -80,10 +80,9 @@
       "parameters": {
         "force":        {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "imgresize":    { "type": "string",                     "default": "resize_and_crop", "description": "run on original size image"},
-        "pix2pixHD":    { "type": "string", "default":"", "description": "Path to pix2pixHD library"},
-        "model_name":	{ "type": "string", "default":"models", "description": "name of dir with trained pix2pixHD model (latest_net_G.pth)"},
+        "model_path":	{ "type": "string", "description": "name of dir with trained pix2pixHD model (latest_net_G.pth)", "required": true},
         "checkpoint_dir":   { "type": "string", "default":"./", "description": "Path to where to look for dir with model name"},
-        "gpu_id":       { "type": "number", "format": "integer", "default": 0,    "description": "device ID of CUDA GPU to use. Set -1 to use CPU only."},
+        "gpu_id":       { "type": "number", "format": "integer", "default": -1,    "description": "device ID of CUDA GPU to use. Set -1 to use CPU only."},
         "resizeHeight": { "type": "number", "format": "integer", "default": 1024, "description": "resized image height"},
         "resizeWidth":  { "type": "number", "format": "integer", "default": 1024, "description": "resized image width"},
         "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
