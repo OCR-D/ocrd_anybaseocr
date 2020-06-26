@@ -43,24 +43,28 @@ def prepare_data(opt, page_img):
 
 def prepare_options(gpu_id, dataroot, model_path, resize_or_crop, loadSize, fineSize):
     # TODO oh boy
-    sys.argv = [sys.argv[0]]
-    # pix2pixHD BaseOptions.parse already uses gpu_ids
+    sys.argv = ['python']
     sys.argv.extend(['--gpu_ids', str(gpu_id)])
-    opt = TestOptions().parse(save=False)
-    opt.nThreads = 1   # test code only supports nThreads = 1
-    opt.batchSize = 1  # test code only supports batchSize = 1
-    opt.serial_batches = True  # no shuffle
-    opt.no_flip = True  # no flip
-    opt.checkpoints_dir = model_path.parents[0]
-    opt.dataroot = dataroot
-    opt.name = model_path.name
-    opt.label_nc = 0
-    opt.no_instance = True
-    opt.resize_or_crop = resize_or_crop
-    opt.n_blocks_global = 10
-    opt.n_local_enhancers = 2
-    opt.loadSize = loadSize
-    opt.fineSize = fineSize
+    sys.argv.extend(['--nThreads', str(1)])   # test code only supports nThreads = 1
+    sys.argv.extend(['--batchSize', str(1)])  # test code only supports batchSize = 1
+    sys.argv.extend(['--serial_batches'])  # no shuffle
+    sys.argv.extend(['--no_flip'])  # no flip
+    sys.argv.extend(['--dataroot', dataroot])
+    sys.argv.extend(['--checkpoints_dir', str(model_path.parents[1])])
+    sys.argv.extend(['--name', model_path.parents[0].name])
+    sys.argv.extend(['--label_nc', str(0)])
+    sys.argv.extend(['--no_instance'])
+    sys.argv.extend(['--resize_or_crop', resize_or_crop])
+    sys.argv.extend(['--n_blocks_global', str(10)])
+    sys.argv.extend(['--n_local_enhancers', str(2)])
+    sys.argv.extend(['--loadSize', str(loadSize)])
+    sys.argv.extend(['--fineSize', str(fineSize)])
+    sys.argv.extend(['--model', 'pix2pixHD'])
+    sys.argv.extend(['--verbose'])
+    LOG.info("Options passed to pix2pixHD: %s", sys.argv)
+    opt = TestOptions()
+    opt.initialize()
+    opt = opt.parse(save=False)
 
     model = create_model(opt)
 
@@ -150,8 +154,7 @@ class OcrdAnybaseocrDewarper(Processor):
                 file_grp=page_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(page_grp,
-                                            file_id + '.xml'),
+                local_filename=os.path.join(page_grp, file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8'),
                 force=self.parameter['force']
             )
