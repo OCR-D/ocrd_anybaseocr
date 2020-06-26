@@ -57,7 +57,7 @@ patch-pix2pixhd: pix2pixhd
 	sed -i 's,^from util,from ..util,' $(PIX2PIX_FILES)
 	sed -i 's,^import util,import ..util,' $(PIX2PIX_FILES)
 	# string exceptions, srsly y
-	sed -i "s,raise('\([^']*\),raise(Exception('\1)," $(PIX2PIX_FILES)
+	sed -i "s,raise('\([^']*\)',raise(Exception('\1')," $(PIX2PIX_FILES)
 
 pix2pixhd:
 	git submodule update --init
