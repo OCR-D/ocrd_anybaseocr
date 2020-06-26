@@ -1,24 +1,28 @@
-import torch
+# pylint: disable=wrong-import-order, import-error
+
 import sys
 import os
-import shutil
 
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
+from ocrd_models.ocrd_page import (
+    to_xml,
+    AlternativeImageType,
+    MetadataItemType,
+    LabelsType, LabelType)
 
 from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
 from ocrd_modelfactory import page_from_file
 from pylab import array
 from pathlib import Path
-from PIL import Image
+
+import torch
 import ocrolib
-from ocrd_models.ocrd_page import (
-    to_xml,
-    AlternativeImageType,
-    MetadataItemType,
-    LabelsType, LabelType
-)
+
+from ..pix2pixhd.options.test_options import TestOptions
+from ..pix2pixhd.models.models import create_model
+from ..pix2pixhd.data.data_loader import CreateDataLoader
 
 TOOL = 'ocrd-anybaseocr-dewarp'
 LOG = getLogger('OcrdAnybaseocrDewarper')
@@ -34,8 +38,6 @@ class OcrdAnybaseocrDewarper(Processor):
 
     def prepare_options(self, path):
         sys.path.append(path)
-        from options.test_options import TestOptions
-        from models.models import create_model
         sys.argv = [sys.argv[0]]
         # pix2pixHD BaseOptions.parse already uses gpu_ids
         sys.argv.extend(['--gpu_ids', str(self.parameter['gpu_id'])])
@@ -63,7 +65,6 @@ class OcrdAnybaseocrDewarper(Processor):
     def prepare_data(self, opt, page_img, path):
 
         sys.path.append(path)
-        from data.data_loader import CreateDataLoader
 
         data_loader = CreateDataLoader(opt)
         data_loader.dataset.A_paths = [page_img.filename]
@@ -88,15 +89,6 @@ class OcrdAnybaseocrDewarper(Processor):
             LOG.warning("torch cannot detect CUDA installation.")
             self.parameter['gpu_id'] = -1
 
-        path = self.parameter['pix2pixHD']
-        if not Path(path).is_dir():
-            LOG.error("""\
-                    NVIDIA's pix2pixHD was not found at '%s'. Make sure the `pix2pixHD` parameter
-                in ocrd-tools.json points to the local path to the cloned pix2pixHD repository.
-
-                pix2pixHD can be downloaded from https://github.com/NVIDIA/pix2pixHD
-                """ % path)
-            sys.exit(1)
         model_file_path = os.path.join(path, 'checkpoints/latest_net_G.pth')
         if not Path(model_file_path).is_file():
             LOG.error("""\
