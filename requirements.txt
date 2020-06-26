@@ -12,3 +12,4 @@ setuptools >= 41.0.0
 scikit-image >= 0.17.2
 scipy == 1.4.1
 keras-preprocessing == 1.1.0
+torchvision >= 0.6.1
