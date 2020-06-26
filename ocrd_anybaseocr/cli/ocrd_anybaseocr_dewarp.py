@@ -28,7 +28,6 @@ from ..pix2pixhd.data.data_loader import CreateDataLoader
 
 TOOL = 'ocrd-anybaseocr-dewarp'
 LOG = getLogger('OcrdAnybaseocrDewarper')
-FALLBACK_IMAGE_GRP = 'OCR-D-IMG-DEWARP'
 
 def prepare_data(opt, page_img):
 
@@ -76,14 +75,12 @@ class OcrdAnybaseocrDewarper(Processor):
 
 
     def process(self):
-        try:
-            page_grp, self.image_grp = self.output_file_grp.split(',')
-        except ValueError:
-            page_grp = self.output_file_grp
-            self.image_grp = FALLBACK_IMAGE_GRP
-            LOG.info(
-                "No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
-        if not torch.cuda.is_available():
+
+        if len(self.output_file_grp.split(',')) > 1:
+            LOG.error("Expects exactly one output file group, not %s", len(self.output_file_grp.split(',')))
+            sys.exit(1)
+
+        if self.parameter['gpu_id'] > -1 and not torch.cuda.is_available():
             LOG.warning("torch cannot detect CUDA installation.")
             self.parameter['gpu_id'] = -1
 
@@ -144,6 +141,7 @@ class OcrdAnybaseocrDewarper(Processor):
 
             # Use input_file's basename for the new file -
             # this way the files retain the same basenames:
+            page_grp = self.output_file_grp
             file_id = input_file.ID.replace(self.input_file_grp, page_grp)
             if file_id == input_file.ID:
                 file_id = concat_padded(page_grp, n)
@@ -170,15 +168,14 @@ class OcrdAnybaseocrDewarper(Processor):
 
             page_xywh['features'] += ',dewarped'
 
-            file_id = input_file.ID.replace(
-                self.input_file_grp, self.image_grp)
+            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
             if file_id == input_file.ID:
-                file_id = concat_padded(self.image_grp, n)
+                file_id = concat_padded(self.output_file_grp, n)
 
             file_path = self.workspace.save_image_file(dewarped,
                                                        file_id,
                                                        page_id=page_id,
-                                                       file_grp=self.image_grp,
+                                                       file_grp=self.output_file_grp,
                                                        force=self.parameter['force']
                                                       )
             page.add_AlternativeImage(AlternativeImageType(
