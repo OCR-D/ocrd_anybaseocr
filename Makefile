@@ -26,7 +26,8 @@ help:
 	@echo "    repo/assets                           Clone OCR-D/assets to ./repo/assets"
 	@echo "    assets-clean                          Remove assets"
 	@echo "    assets                                Setup test assets"
-	@echo "    test                                  Run all tests"
+	@echo "    test                                  Run unit tests"
+	@echo "    cli-test                              Run CLI tests"
 	@echo "    test-binarize                         Test binarization"
 	@echo "    test-deskew                           Test deskewing"
 	@echo "    test-crop                             Test cropping"
@@ -99,14 +100,16 @@ assets-clean:
 assets: repo/assets
 	mkdir -p $(testdir)/assets
 	cp -r -t $(testdir)/assets repo/assets/data/*
-	mkdir -p models
-	make model
-	cp -r  models/ $(testdir)/assets/dfki-testdata/data/
 #
 # Tests
+#
 
-# Run all tests
-test: test-binarize test-deskew test-crop test-tiseg test-block-segmentation test-textline test-layout-analysis
+# Run unit tests
+test: assets-clean assets models/latest_net_G.pth
+	$(PYTHON) -m pytest --continue-on-collection-errors tests
+
+# Run CLI tests
+cli-test: test-binarize test-deskew test-crop test-tiseg test-block-segmentation test-textline test-layout-analysis
 
 # Test binarization
 test-binarize: assets-clean assets
