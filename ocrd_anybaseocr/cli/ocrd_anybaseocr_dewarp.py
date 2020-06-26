@@ -1,4 +1,4 @@
-# pylint: disable=wrong-import-order, import-error
+# pylint: disable=wrong-import-order, import-error, too-few-public-methods
 # pylint: disable=too-many-locals, line-too-long, invalid-name, too-many-arguments
 # pylint: disable=missing-docstring
 
@@ -30,9 +30,7 @@ TOOL = 'ocrd-anybaseocr-dewarp'
 LOG = getLogger('OcrdAnybaseocrDewarper')
 FALLBACK_IMAGE_GRP = 'OCR-D-IMG-DEWARP'
 
-def prepare_data(opt, page_img, path):
-
-    sys.path.append(path)
+def prepare_data(opt, page_img):
 
     data_loader = CreateDataLoader(opt)
     data_loader.dataset.A_paths = [page_img.filename]
@@ -44,38 +42,37 @@ def prepare_data(opt, page_img, path):
     dataset = data_loader.load_data()
     return dataset
 
+def prepare_options(gpu_id, dataroot, model_path, resize_or_crop, loadSize, fineSize):
+    # TODO oh boy
+    sys.argv = [sys.argv[0]]
+    # pix2pixHD BaseOptions.parse already uses gpu_ids
+    sys.argv.extend(['--gpu_ids', str(gpu_id)])
+    opt = TestOptions().parse(save=False)
+    opt.nThreads = 1   # test code only supports nThreads = 1
+    opt.batchSize = 1  # test code only supports batchSize = 1
+    opt.serial_batches = True  # no shuffle
+    opt.no_flip = True  # no flip
+    opt.checkpoints_dir = model_path.parents[0]
+    opt.dataroot = dataroot
+    opt.name = model_path.name
+    opt.label_nc = 0
+    opt.no_instance = True
+    opt.resize_or_crop = resize_or_crop
+    opt.n_blocks_global = 10
+    opt.n_local_enhancers = 2
+    opt.loadSize = loadSize
+    opt.fineSize = fineSize
+
+    model = create_model(opt)
+
+    return opt, model
+
 class OcrdAnybaseocrDewarper(Processor):
 
     def __init__(self, *args, **kwargs):
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrDewarper, self).__init__(*args, **kwargs)
-
-    def prepare_options(self, path):
-        sys.path.append(path)
-        sys.argv = [sys.argv[0]]
-        # pix2pixHD BaseOptions.parse already uses gpu_ids
-        sys.argv.extend(['--gpu_ids', str(self.parameter['gpu_id'])])
-        opt = TestOptions().parse(save=False)
-        opt.nThreads = 1   # test code only supports nThreads = 1
-        opt.batchSize = 1  # test code only supports batchSize = 1
-        opt.serial_batches = True  # no shuffle
-        opt.no_flip = True  # no flip
-        opt.rood_dir = self.input_file_grp  # make into proper path
-        opt.checkpoints_dir = self.parameter['checkpoint_dir']
-        opt.dataroot = self.input_file_grp
-        opt.name = self.parameter['model_name']
-        opt.label_nc = 0
-        opt.no_instance = True
-        opt.resize_or_crop = self.parameter['imgresize']
-        opt.n_blocks_global = 10
-        opt.n_local_enhancers = 2
-        opt.loadSize = self.parameter['resizeHeight']
-        opt.fineSize = self.parameter['resizeWidth']
-
-        model = create_model(opt)
-
-        return opt, model
 
 
     def process(self):
@@ -90,14 +87,21 @@ class OcrdAnybaseocrDewarper(Processor):
             LOG.warning("torch cannot detect CUDA installation.")
             self.parameter['gpu_id'] = -1
 
-        model_file_path = os.path.join(path, 'checkpoints/latest_net_G.pth')
-        if not Path(model_file_path).is_file():
+        model_path = Path(self.parameter['model_path'])
+        if not model_path.is_file():
             LOG.error("""\
                     pix2pixHD model file was not found at '%s'. Make sure the this file exists.
-                """ % model_file_path)
+                """ % model_path)
             sys.exit(1)
 
-        opt, model = self.prepare_options(path)
+        opt, model = prepare_options(
+            gpu_id=self.parameter['gpu_id'],
+            dataroot=self.input_file_grp,
+            model_path=model_path,
+            resize_or_crop=self.parameter['imgresize'],
+            loadSize=self.parameter['resizeHeight'],
+            fineSize=self.parameter['resizeWidth'],
+        )
 
         oplevel = self.parameter['operation_level']
         for (n, input_file) in enumerate(self.input_files):
@@ -120,7 +124,7 @@ class OcrdAnybaseocrDewarper(Processor):
             page_image, page_xywh, _ = self.workspace.image_from_page(
                 page, page_id, feature_filter='dewarped', feature_selector='binarized')  # images should be deskewed and cropped
             if oplevel == 'page':
-                dataset = self.prepare_data(opt, page_image, path)
+                dataset = self.prepare_data(opt, page_image)
                 orig_img_size = page_image.size
                 self._process_segment(
                     model, dataset, page, page_xywh, page_id, input_file, orig_img_size, n)
@@ -128,12 +132,12 @@ class OcrdAnybaseocrDewarper(Processor):
                 regions = page.get_TextRegion() + page.get_TableRegion()  # get all regions?
                 if not regions:
                     LOG.warning("Page '%s' contains no text regions", page_id)
-                for (k, region) in enumerate(regions):
+                for _, region in enumerate(regions):
                     region_image, region_xywh = self.workspace.image_from_segment(
                         region, page_image, page_xywh)
                     # TODO: not tested on regions
                     # TODO: region has to exist as a physical file to be processed by pix2pixHD
-                    dataset = self.prepare_data(opt, region_image, path)
+                    dataset = self.prepare_data(opt, region_image)
                     orig_img_size = region_image.size
                     self._process_segment(
                         model, dataset, page, region_xywh, region.id, input_file, orig_img_size, n)
