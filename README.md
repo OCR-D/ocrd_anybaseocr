@@ -6,15 +6,17 @@
 
 # Installing
 
-To install anyBaseOCR dependencies system-wide:
+- 1. Create a new `venv` unless you already have one
 
-    $ sudo pip install .
+    $ python3 -m venv venv
 
-Alternatively, dependencies can be installed into a Virtual Environment:
+* 2. Activate the `venv`
 
-    $ virtualenv venv
     $ source venv/bin/activate
-    $ pip install -e .
+
+* 3. Install with `make`
+
+    $ make install
 
 #Tools
 
