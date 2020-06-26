@@ -1,4 +1,6 @@
 # pylint: disable=wrong-import-order, import-error
+# pylint: disable=too-many-locals, line-too-long, invalid-name, too-many-arguments
+# pylint: disable=missing-docstring
 
 import sys
 import os
@@ -28,6 +30,19 @@ TOOL = 'ocrd-anybaseocr-dewarp'
 LOG = getLogger('OcrdAnybaseocrDewarper')
 FALLBACK_IMAGE_GRP = 'OCR-D-IMG-DEWARP'
 
+def prepare_data(opt, page_img, path):
+
+    sys.path.append(path)
+
+    data_loader = CreateDataLoader(opt)
+    data_loader.dataset.A_paths = [page_img.filename]
+    data_loader.dataset.dataset_size = len(data_loader.dataset.A_paths)
+    data_loader.dataloader = torch.utils.data.DataLoader(data_loader.dataset,
+                                                         batch_size=opt.batchSize,
+                                                         shuffle=not opt.serial_batches,
+                                                         num_workers=int(opt.nThreads))
+    dataset = data_loader.load_data()
+    return dataset
 
 class OcrdAnybaseocrDewarper(Processor):
 
@@ -62,20 +77,6 @@ class OcrdAnybaseocrDewarper(Processor):
 
         return opt, model
 
-    def prepare_data(self, opt, page_img, path):
-
-        sys.path.append(path)
-
-        data_loader = CreateDataLoader(opt)
-        data_loader.dataset.A_paths = [page_img.filename]
-        data_loader.dataset.dataset_size = len(data_loader.dataset.A_paths)
-        data_loader.dataloader = torch.utils.data.DataLoader(data_loader.dataset,
-                                                             batch_size=opt.batchSize,
-                                                             shuffle=not opt.serial_batches,
-                                                             num_workers=int(opt.nThreads))
-        dataset = data_loader.load_data()
-        return dataset
-    # test
 
     def process(self):
         try:
@@ -116,7 +117,7 @@ class OcrdAnybaseocrDewarper(Processor):
 
             page = pcgts.get_Page()
 
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(
+            page_image, page_xywh, _ = self.workspace.image_from_page(
                 page, page_id, feature_filter='dewarped', feature_selector='binarized')  # images should be deskewed and cropped
             if oplevel == 'page':
                 dataset = self.prepare_data(opt, page_image, path)
@@ -154,7 +155,7 @@ class OcrdAnybaseocrDewarper(Processor):
             )
 
     def _process_segment(self, model, dataset, page, page_xywh, page_id, input_file, orig_img_size, n):
-        for i, data in enumerate(dataset):
+        for _, data in enumerate(dataset):
             w, h = orig_img_size
             generated = model.inference(
                 data['label'], data['inst'], data['image'])
@@ -175,6 +176,6 @@ class OcrdAnybaseocrDewarper(Processor):
                                                        page_id=page_id,
                                                        file_grp=self.image_grp,
                                                        force=self.parameter['force']
-                                                       )
+                                                      )
             page.add_AlternativeImage(AlternativeImageType(
                 filename=file_path, comments=page_xywh['features']))
