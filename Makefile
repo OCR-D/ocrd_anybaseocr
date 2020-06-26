@@ -6,6 +6,7 @@ export
 SHELL = /bin/bash
 PYTHON = python
 PIP = pip
+PIP_INSTALL = $(PIP) install
 LOG_LEVEL = INFO
 PYTHONIOENCODING=utf8
 
@@ -18,21 +19,21 @@ help:
 	@echo ""
 	@echo "  Targets"
 	@echo ""
-	@echo "    deps                     Install python deps via pip"
-	@echo "    install                  Install"
-	@echo "    model                    Download sample model TODO Add other models here"
-	@echo "    repo/assets              Clone OCR-D/assets to ./repo/assets"
-	@echo "    assets-clean             Remove assets"
-	@echo "    assets                   Setup test assets"
-	@echo "    #test                    Run all tests"
-	@echo "    test                     Run minimum sample"
-	@echo "    test-binarize            Test binarization"
-	@echo "    test-deskew              Test deskewing"
-	@echo "    test-crop                Test cropping"
-	@echo "    test-tiseg               Test text/non-text segmentation"
-	@echo "    test-textline            Test textline extraction"
-	@echo "    test-block-segmentation  Test block segmentation"
-	@echo "    test-layout-analysis     Test document structure analysis"
+	@echo "    deps                                  Install python deps via pip"
+	@echo "    install                               Install"
+	@echo "    patch-pix2pixhd                       Patch pix2pixhd to trick it into thinking it was part of this mess"
+	@echo "    models/block_segmentation_weights.h5  Download sample model TODO Add other models here"
+	@echo "    repo/assets                           Clone OCR-D/assets to ./repo/assets"
+	@echo "    assets-clean                          Remove assets"
+	@echo "    assets                                Setup test assets"
+	@echo "    test                                  Run all tests"
+	@echo "    test-binarize                         Test binarization"
+	@echo "    test-deskew                           Test deskewing"
+	@echo "    test-crop                             Test cropping"
+	@echo "    test-tiseg                            Test text/non-text segmentation"
+	@echo "    test-block-segmentation               Test block segmentation"
+	@echo "    test-textline                         Test textline extraction"
+	@echo "    test-layout-analysis                  Test document structure analysis"
 	@echo ""
 	@echo "  Variables"
 	@echo ""
@@ -42,11 +43,19 @@ help:
 
 # Install python deps via pip
 deps:
-	$(PIP) install -r requirements.txt
+	$(PIP_INSTALL) -r requirements.txt
 
 # Install
-install:
-	$(PIP) install .
+install: patch-pix2pixhd
+	$(PIP_INSTALL) .
+.PHONY: patch-pix2pixhd
+
+# Patch pix2pixhd to trick it into thinking it was part of this mess
+patch-pix2pixhd: pix2pixhd
+	sed -i 's,from utils import utils,from ..util import util,' ocrd_anybaseocr/pix2pixhd/options/base_options.py
+
+pix2pixhd:
+	git submodule update --init
 
 #
 # Assets
@@ -95,6 +104,7 @@ assets: repo/assets
 	cp -r  models/ $(testdir)/assets/dfki-testdata/data/
 #
 # Tests
+
 # Run all tests
 test: test-binarize test-deskew test-crop test-tiseg test-block-segmentation test-textline test-layout-analysis
 
