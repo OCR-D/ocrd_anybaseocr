@@ -52,8 +52,12 @@ install: patch-pix2pixhd
 .PHONY: patch-pix2pixhd
 
 # Patch pix2pixhd to trick it into thinking it was part of this mess
+PIX2PIX_FILES = ocrd_anybaseocr/pix2pixhd/*/*.py ocrd_anybaseocr/pix2pixhd/*.py
 patch-pix2pixhd: pix2pixhd
-	sed -i 's,from util import util,from ..util import util,' ocrd_anybaseocr/pix2pixhd/options/base_options.py
+	sed -i 's,^from util,from ..util,' $(PIX2PIX_FILES)
+	sed -i 's,^import util,import ..util,' $(PIX2PIX_FILES)
+	# string exceptions, srsly y
+	sed -i "s,raise('\([^']*\),raise(Exception('\1)," $(PIX2PIX_FILES)
 
 pix2pixhd:
 	git submodule update --init
