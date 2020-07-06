@@ -1,2 +1,1 @@
-graft pix2pixHD
 global-exclude .git
