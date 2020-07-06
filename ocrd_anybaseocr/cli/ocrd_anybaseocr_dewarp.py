@@ -125,7 +125,7 @@ class OcrdAnybaseocrDewarper(Processor):
             page_image, page_xywh, _ = self.workspace.image_from_page(
                 page, page_id, feature_filter='dewarped', feature_selector='binarized')  # images should be deskewed and cropped
             if oplevel == 'page':
-                dataset = self.prepare_data(opt, page_image)
+                dataset = prepare_data(opt, page_image)
                 orig_img_size = page_image.size
                 self._process_segment(
                     model, dataset, page, page_xywh, page_id, input_file, orig_img_size, n)
