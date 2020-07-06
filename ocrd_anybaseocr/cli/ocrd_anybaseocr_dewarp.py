@@ -61,7 +61,7 @@ def prepare_options(gpu_id, dataroot, model_path, resize_or_crop, loadSize, fine
     sys.argv.extend(['--fineSize', str(fineSize)])
     sys.argv.extend(['--model', 'pix2pixHD'])
     sys.argv.extend(['--verbose'])
-    LOG.info("Options passed to pix2pixHD: %s", sys.argv)
+    LOG.debug("Options passed to pix2pixHD: %s", sys.argv)
     opt = TestOptions()
     opt.initialize()
     opt = opt.parse(save=False)
@@ -91,7 +91,7 @@ class OcrdAnybaseocrDewarper(Processor):
         model_path = Path(self.parameter['model_path'])
         if not model_path.is_file():
             LOG.error("""\
-                    pix2pixHD model file was not found at '%s'. Make sure the this file exists.
+                    pix2pixHD model file was not found at '%s'. Make sure this file exists.
                 """ % model_path)
             sys.exit(1)
 
