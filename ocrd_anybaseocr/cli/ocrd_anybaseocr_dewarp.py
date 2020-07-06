@@ -138,7 +138,7 @@ class OcrdAnybaseocrDewarper(Processor):
                         region, page_image, page_xywh)
                     # TODO: not tested on regions
                     # TODO: region has to exist as a physical file to be processed by pix2pixHD
-                    dataset = self.prepare_data(opt, region_image)
+                    dataset = prepare_data(opt, region_image)
                     orig_img_size = region_image.size
                     self._process_segment(
                         model, dataset, page, region_xywh, region.id, input_file, orig_img_size, n)
