@@ -91,7 +91,7 @@ class OcrdAnybaseocrDewarper(Processor):
         model_path = Path(self.parameter['model_path'])
         if not model_path.is_file():
             LOG.error("""\
-                    pix2pixHD model file was not found at '%s'. Make sure the this file exists.
+                    pix2pixHD model file was not found at '%s'. Make sure this file exists.
                 """ % model_path)
             sys.exit(1)
 
