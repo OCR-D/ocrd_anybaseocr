@@ -106,7 +106,7 @@ assets: repo/assets
 	cp -r -t $(testdir)/assets repo/assets/data/*
 	mkdir -p models
 	make model
-	cp -r  models/ $(testdir)/assets/dfki-testdata/data/
+	cp -r --reflink=auto  models/ $(testdir)/assets/dfki-testdata/data/
 #
 # Tests
 #
