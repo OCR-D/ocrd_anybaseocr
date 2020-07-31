@@ -3,10 +3,6 @@ import pickle
 import numpy as np 
 import warnings
 warnings.filterwarnings('ignore',category=FutureWarning) 
-import tensorflow as tf
-import tensorflow.keras as keras
-from keras.models import load_model
-from keras.preprocessing.image import ImageDataGenerator
 from collections import defaultdict
 from ..constants import OCRD_TOOL
 
@@ -44,6 +40,10 @@ from ocrd_models.constants import (
     TAG_MODS_IDENTIFIER,
     METS_XML_EMPTY,
 )
+
+from ..tensorflow_importer import tf, keras
+from keras.models import load_model
+from keras.preprocessing.image import ImageDataGenerator
 
 TAG_METS_STRUCTLINK = '{%s}structLink' % NS['mets']
 TAG_METS_SMLINK = '{%s}smLink' % NS['mets']
