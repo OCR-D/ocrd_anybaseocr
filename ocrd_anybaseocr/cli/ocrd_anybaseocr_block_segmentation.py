@@ -1,9 +1,21 @@
+# pylint: missing-module-docstring, missing-class-docstring, invalid-name
+# pylint: disable=line-too-long, import-error, no-name-in-module, too-many-statements
+# pylint: disable=wrong-import-position, wrong-import-order, too-many-locals, too-few-public-methods
 import sys
-import skimage
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # No prints from the tensorflow side
+from pathlib import Path
+import warnings
 
-from ..constants import OCRD_TOOL
+import cv2
+import numpy as np
+from shapely.geometry import Polygon
+import ocrolib
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # No prints from the tensorflow side
+warnings.filterwarnings('ignore', category=FutureWarning)
+#import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
@@ -15,32 +27,20 @@ from ocrd_utils import (
     points_from_polygon,
     polygon_from_points
 )
-import cv2
-import warnings
-import ocrolib
-warnings.filterwarnings('ignore', category=FutureWarning)
-#import tensorflow as tf
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
-from pathlib import Path
-import numpy as np
-import matplotlib.path as pltPath
-from shapely.geometry import Polygon
-
-from ocrd_anybaseocr.mrcnn import model
-from ocrd_anybaseocr.mrcnn.config import Config
-from ocrd_models.constants import NAMESPACES as NS
-
 from ocrd_models.ocrd_page import (
     CoordsType,
     TextRegionType,
-    AlternativeImageType,
+    GraphicRegionType,
+    TableRegionType,
+    ImageRegionType,
     to_xml,
     MetadataItemType,
     LabelsType, LabelType,
     RegionRefIndexedType, OrderedGroupType, ReadingOrderType
 )
-from ocrd_models.ocrd_page_generateds import CoordsType
+from ocrd_anybaseocr.mrcnn import model
+from ocrd_anybaseocr.mrcnn.config import Config
+from ..constants import OCRD_TOOL
 
 
 TOOL = 'ocrd-anybaseocr-block-segmentation'
@@ -98,7 +98,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             LOG.error("""\
                 Block Segmentation model weights file was not found at '%s'. Make sure the `model_weights` parameter
                 points to the local model weights path.
-                """ % model_weights)
+                """, model_weights)
             sys.exit(1)
 
 #         config = InferenceConfig(Config,DETECTION_MIN_CONFIDENCE)
