@@ -17,7 +17,7 @@ from ocrd_models.ocrd_page import (
 import click
 
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
-from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
+from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE, assert_file_grp_cardinality
 from ocrd_modelfactory import page_from_file
 from pylab import array
 from pathlib import Path
@@ -46,8 +46,7 @@ def prepare_data(opt, page_img):
     return dataset
 
 def prepare_options(gpu_id, dataroot, model_path, resize_or_crop, loadSize, fineSize):
-    # XXX h boy
-    # https://github.com/OCR-D/ocrd_anybaseocr/pull/62#discussion_r450232164
+    # XXX https://github.com/OCR-D/ocrd_anybaseocr/pull/62#discussion_r450232164
     # The problem was with how BaseOptions.parse is implemented in pix2pixHD based on
     # argparse. I cannot explain why but the approach to let pix2pixHD fill the
     # TestOptions instance with argparse default values and then modifying the
@@ -92,9 +91,7 @@ class OcrdAnybaseocrDewarper(Processor):
 
     def process(self):
 
-        if len(self.output_file_grp.split(',')) > 1:
-            LOG.error("Expects exactly one output file group, not %s", len(self.output_file_grp.split(',')))
-            sys.exit(1)
+        assert_file_grp_cardinality(self.output_file_grp, 1)
 
         if self.parameter['gpu_id'] > -1 and not torch.cuda.is_available():
             LOG.warning("torch cannot detect CUDA installation.")
