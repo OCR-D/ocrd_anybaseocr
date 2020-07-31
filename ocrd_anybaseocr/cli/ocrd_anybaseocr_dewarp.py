@@ -46,7 +46,15 @@ def prepare_data(opt, page_img):
     return dataset
 
 def prepare_options(gpu_id, dataroot, model_path, resize_or_crop, loadSize, fineSize):
-    # TODO oh boy
+    # XXX h boy
+    # https://github.com/OCR-D/ocrd_anybaseocr/pull/62#discussion_r450232164
+    # The problem was with how BaseOptions.parse is implemented in pix2pixHD based on
+    # argparse. I cannot explain why but the approach to let pix2pixHD fill the
+    # TestOptions instance with argparse default values and then modifying the
+    # instance did not work, the overrides were simply ignored. The only way I got
+    # pix2pixHD to reliably pick up the overrides was this sys.argv approach. It's
+    # ugly, true, but so is using argparse as an API. At least this way, it is
+    # uniform as you say.
     sys.argv = ['python']
     sys.argv.extend(['--gpu_ids', str(gpu_id)])
     sys.argv.extend(['--nThreads', str(1)])   # test code only supports nThreads = 1
