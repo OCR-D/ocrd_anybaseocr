@@ -23,9 +23,9 @@ setup(
             'ocrd-anybaseocr-binarize           = ocrd_anybaseocr.cli.ocrd_anybaseocr_binarize:cli',
             'ocrd-anybaseocr-deskew             = ocrd_anybaseocr.cli.ocrd_anybaseocr_deskew:cli',
             'ocrd-anybaseocr-crop               = ocrd_anybaseocr.cli.ocrd_anybaseocr_cropping:cli',
-            'ocrd-anybaseocr-dewarp             = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_dewarp',
-            'ocrd-anybaseocr-tiseg              = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_tiseg',
-            'ocrd-anybaseocr-textline           = ocrd_anybaseocr.cli.cli:ocrd_anybaseocr_textline',
+            'ocrd-anybaseocr-dewarp             = ocrd_anybaseocr.cli.ocrd_anybaseocr_dewarp:cli',
+            'ocrd-anybaseocr-tiseg              = ocrd_anybaseocr.cli.ocrd_anybaseocr_tiseg:cli',
+            'ocrd-anybaseocr-textline           = ocrd_anybaseocr.cli.ocrd_anybaseocr_textline:cli',
             'ocrd-anybaseocr-layout-analysis    = ocrd_anybaseocr.cli.ocrd_anybaseocr_layout_analysis:cli',
             'ocrd-anybaseocr-block-segmentation = ocrd_anybaseocr.cli.ocrd_anybaseocr_block_segmentation:cli'
         ]
