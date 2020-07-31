@@ -177,7 +177,7 @@ class OcrdAnybaseocrDewarper(Processor):
 
             file_path = self.workspace.save_image_file(dewarped,
                                                        file_id,
-                                                       page_id=page_id,
+                                                       page_id=input_file.pageId,
                                                        file_grp=self.output_file_grp,
                                                        force=self.parameter['force']
                                                       )
