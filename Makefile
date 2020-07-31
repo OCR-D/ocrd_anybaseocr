@@ -1,14 +1,16 @@
-exec_name_prefix = ocrd-anybaseocr
 testdir = tests
 
 export
 
+CUDA_VISIBLE_DEVICES=0
 SHELL = /bin/bash
 PYTHON = python
 PIP = pip
 PIP_INSTALL = $(PIP) install
 LOG_LEVEL = INFO
 PYTHONIOENCODING=utf8
+
+TESTDATA = $(testdir)/assets/dfki-testdata/data
 
 TESTS=tests
 
@@ -108,7 +110,7 @@ assets: repo/assets
 	cp -r -t $(testdir)/assets repo/assets/data/*
 	mkdir -p models
 	make model
-	cp -r --reflink=auto  models/ $(testdir)/assets/dfki-testdata/data/
+	cp -r --reflink=auto  models/ $(TESTDATA)/
 #
 # Tests
 #
@@ -123,28 +125,28 @@ cli-test: assets-clean assets \
 
 # Test binarization CLI
 test-binarize:
-	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-binarize -m mets.xml -I OCR-D-IMG -O OCR-D-IMG-BIN-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-binarize -m mets.xml -I OCR-D-IMG -O OCR-D-IMG-BIN-TEST
 
 # Test deskewing CLI
 test-deskew:
-	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-deskew -m mets.xml -I OCR-D-IMG-BIN-TEST -O OCR-D-IMG-DESKEW-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-deskew -m mets.xml -I OCR-D-IMG-BIN-TEST -O OCR-D-IMG-DESKEW-TEST
 
 # Test cropping CLI
 test-crop:
-	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-crop -m mets.xml -I OCR-D-IMG-DESKEW-TEST -O OCR-D-IMG-CROP-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-crop -m mets.xml -I OCR-D-IMG-DESKEW-TEST -O OCR-D-IMG-CROP-TEST
 
 # Test text/non-text segmentation CLI
 test-tiseg:
-	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-tiseg -m mets.xml -I OCR-D-IMG-CROP-TEST -O OCR-D-IMG-TISEG-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-tiseg -m mets.xml -I OCR-D-IMG-CROP-TEST -O OCR-D-IMG-TISEG-TEST
 
 # Test block segmentation CLI
 test-block-segmentation:
-	cd $(testdir)/assets/dfki-testdata/data && CUDA_VISIBLE_DEVICES=0 && $(exec_name_prefix)-block-segmentation -m mets.xml -I OCR-D-IMG-TISEG-TEST -O OCR-D-BLOCK-SEGMENT
+	cd $(TESTDATA) && ocrd-anybaseocr-block-segmentation -m mets.xml -I OCR-D-IMG-TISEG-TEST -O OCR-D-BLOCK-SEGMENT
 
 # Test textline extraction CLI
 test-textline:
-	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-textline -m mets.xml -I OCR-D-BLOCK-SEGMENT -O OCR-D-IMG-TL-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-textline -m mets.xml -I OCR-D-BLOCK-SEGMENT -O OCR-D-IMG-TL-TEST
 
 # Test document structure analysis CLI
 test-layout-analysis:
-	cd $(testdir)/assets/dfki-testdata/data && CUDA_VISIBLE_DEVICES=0 && $(exec_name_prefix)-layout-analysis -m mets.xml -I OCR-D-IMG-BIN-TEST -O OCR-D-IMG-LAYOUT
+	cd $(TESTDATA) && ocrd-anybaseocr-layout-analysis -m mets.xml -I OCR-D-IMG-BIN-TEST -O OCR-D-IMG-LAYOUT
