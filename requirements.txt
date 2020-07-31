@@ -1,15 +1,15 @@
-ocrd >= 2.12.7
+keras >= 2.3.0, < 2.4.0
+keras-preprocessing == 1.1.0
 numpy >= 1.15.4
-opencv-python-headless >= 3.4
+ocrd >= 2.12.7
 ocrd-fork-ocropy >= 1.4.0a3
 ocrd-fork-pylsd >= 0.0.3
-torch>=1.1.0
-shapely
+opencv-python-headless >= 3.4
 pandas
-keras >= 2.3.0, < 2.4.0
-tensorflow >= 2.1.0, < 2.2.0
-setuptools >= 41.0.0
 scikit-image >= 0.17.2
 scipy == 1.4.1
-keras-preprocessing == 1.1.0
+setuptools >= 41.0.0
+shapely
+tensorflow >= 2.1.0, < 2.2.0
+torch>=1.1.0
 torchvision >= 0.6.1
