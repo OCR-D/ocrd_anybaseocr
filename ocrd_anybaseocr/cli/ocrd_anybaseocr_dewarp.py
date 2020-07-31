@@ -185,8 +185,8 @@ class OcrdAnybaseocrDewarper(Processor):
 
             file_path = self.workspace.save_image_file(dewarped,
                                                        file_id,
-                                                       page_id=page_id,
-                                                       file_grp=self.output_file_grp
+                                                       page_id=input_file.pageId,
+                                                       file_grp=self.output_file_grp,
                                                       )
             page.add_AlternativeImage(AlternativeImageType(
                 filename=file_path, comments=page_xywh['features']))
