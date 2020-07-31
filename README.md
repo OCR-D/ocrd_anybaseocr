@@ -1,6 +1,6 @@
 # Document Preprocessing and Segmentation
 
-[![CircleCI](https://circleci.com/gh/mjenckel/OCR-D-LAYoutERkennung.svg?style=svg)](https://circleci.com/gh/mjenckel/OCR-D-LAYoutERkennung)
+[![CircleCI](https://circleci.com/gh/OCR-D/ocrd_anybaseocr.svg?style=svg)](https://circleci.com/gh/OCR-D/ocrd_anybaseocr)
 
 > Tools for preprocessing scanned images for OCR
 
