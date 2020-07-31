@@ -46,7 +46,8 @@ jobs:
       # https://pytest.org
       # https://nose.readthedocs.io
 
-      # -run: make test
+       -run: make test
+       -run: make cli-test
 
       - store_artifacts:
           path: test-reports

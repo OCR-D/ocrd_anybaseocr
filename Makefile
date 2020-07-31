@@ -118,22 +118,23 @@ test: assets-clean assets models/latest_net_G.pth
 	$(PYTHON) -m pytest --continue-on-collection-errors $(TESTS)
 
 # Run CLI tests
-cli-test: test-binarize test-deskew test-crop test-tiseg test-block-segmentation test-textline test-layout-analysis
+cli-test: assets-clean assets \
+	test-binarize test-deskew test-crop test-tiseg test-block-segmentation test-textline test-layout-analysis
 
 # Test binarization CLI
-test-binarize: assets-clean assets
+test-binarize:
 	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-binarize -m mets.xml -I OCR-D-IMG -O OCR-D-IMG-BIN-TEST
 
 # Test deskewing CLI
-test-deskew: assets-clean assets
+test-deskew:
 	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-deskew -m mets.xml -I OCR-D-IMG-BIN-TEST -O OCR-D-IMG-DESKEW-TEST
 
 # Test cropping CLI
-test-crop: assets-clean assets
+test-crop:
 	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-crop -m mets.xml -I OCR-D-IMG-DESKEW-TEST -O OCR-D-IMG-CROP-TEST
 
 # Test text/non-text segmentation CLI
-test-tiseg: assets-clean assets
+test-tiseg:
 	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-tiseg -m mets.xml -I OCR-D-IMG-CROP-TEST -O OCR-D-IMG-TISEG-TEST
 
 # Test block segmentation CLI
@@ -141,7 +142,7 @@ test-block-segmentation:
 	cd $(testdir)/assets/dfki-testdata/data && CUDA_VISIBLE_DEVICES=0 && $(exec_name_prefix)-block-segmentation -m mets.xml -I OCR-D-IMG-TISEG-TEST -O OCR-D-BLOCK-SEGMENT
 
 # Test textline extraction CLI
-test-textline: assets-clean assets
+test-textline:
 	cd $(testdir)/assets/dfki-testdata/data && $(exec_name_prefix)-textline -m mets.xml -I OCR-D-BLOCK-SEGMENT -O OCR-D-IMG-TL-TEST
 
 # Test document structure analysis CLI
