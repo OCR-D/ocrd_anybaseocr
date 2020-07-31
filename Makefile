@@ -10,6 +10,8 @@ PIP_INSTALL = $(PIP) install
 LOG_LEVEL = INFO
 PYTHONIOENCODING=utf8
 
+TESTS=tests
+
 # Tag to publish docker image to
 DOCKER_TAG = ocrd/anybaseocr
 
@@ -113,7 +115,7 @@ assets: repo/assets
 
 # Run unit tests
 test: assets-clean assets models/latest_net_G.pth
-	$(PYTHON) -m pytest --continue-on-collection-errors tests
+	$(PYTHON) -m pytest --continue-on-collection-errors $(TESTS)
 
 # Run CLI tests
 cli-test: test-binarize test-deskew test-crop test-tiseg test-block-segmentation test-textline test-layout-analysis
