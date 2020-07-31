@@ -210,7 +210,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
     def process(self):
         if not tf.test.is_gpu_available():
             LOG.error("Your system has no CUDA installed. No GPU detected.")
-            sys.exit(1)
+            # sys.exit(1)
         model_path = Path(self.parameter['model_path'])
         class_mapper_path = Path(self.parameter['class_mapping_path'])
         if not Path(model_path).is_file():
