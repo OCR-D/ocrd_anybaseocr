@@ -10,7 +10,6 @@
       "input_file_grp": ["OCR-D-IMG"],
       "output_file_grp": ["OCR-D-IMG-BIN"],
       "parameters": {
-        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "nocheck":         {"type": "boolean",                     "default": false, "description": "disable error checking on inputs"},
         "show":            {"type": "boolean",                     "default": false, "description": "display final results"},
         "raw_copy":        {"type": "boolean",                     "default": false, "description": "also copy the raw image"},
@@ -35,7 +34,6 @@
       "input_file_grp": ["OCR-D-IMG-BIN"],
       "output_file_grp": ["OCR-D-IMG-DESKEW"],
       "parameters": {
-        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "escale":    {"type": "number", "format": "float",   "default": 1.0, "description": "scale for estimating a mask over the text region"},
         "bignore":   {"type": "number", "format": "float",   "default": 0.1, "description": "ignore this much of the border for threshold estimation"},
         "threshold": {"type": "number", "format": "float",   "default": 0.5, "description": "threshold, determines lightness"},
@@ -78,7 +76,6 @@
       "input_file_grp": ["OCR-D-IMG-CROP"],
       "output_file_grp": ["OCR-D-IMG-DEWARP"],
       "parameters": {
-        "force":        {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "imgresize":    { "type": "string",                     "default": "resize_and_crop", "description": "run on original size image"},
         "model_path":	{ "type": "string", "description": "Path to the trained pix2pixHD model (Download from https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download)", "required": true, "cacheable": true, "content-type": "application/vnd.pytorch"},
         "gpu_id":       { "type": "number", "format": "integer", "default": -1,   "description": "device ID of CUDA GPU to use. Set -1 to use CPU only."},
@@ -95,7 +92,6 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Separates the text and non-text elements with anyBaseOCR. Outputs clipped versions of the input image as AlternativeImage containing either only text or non-text elements.",
       "parameters": {
-        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "use_deeplr":      {"type":"boolean",                      "default":true, "description": "use deep learning model"},
         "seg_weights":     {"type":"string",                       "default":"models/seg_model.hdf5", "description":"path to weights file", "required":false},
          "classes":        {"type":"integer",                      "default":3, "description":"number of classes" },
@@ -112,7 +108,6 @@
       "steps": ["layout/segmentation/line"],
       "description": "Finds region polygons for each text line in the input image.",
       "parameters": {
-        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "minscale":    {"type": "number", "format": "float", "default": 12.0, "description": "minimum scale permitted"},
         "maxlines":    {"type": "number", "format": "float", "default": 300, "description": "non-standard scaling of horizontal parameters"},
         "scale":       {"type": "number", "format": "float", "default": 0.0, "description": "the basic scale of the document (roughly, xheight) 0=automatic"},
@@ -143,7 +138,6 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Generates a table-of-content like document structure of the whole document.",
       "parameters": {
-        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
         "model_path":         { "type": "string", "default":"models/structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
         "class_mapping_path": { "type": "string", "default":"models/mapping_densenet.pickle","required": false, "description": "Path to Layout Structure Classes"}
@@ -157,7 +151,6 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Segments and classifies document segments in a single page and outputs the the region polygons and classes.",
       "parameters": {     
-        "force":           {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
         "block_segmentation_weights": { "type": "string","default":"models/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
         "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"},

@@ -127,7 +127,6 @@ class OcrdAnybaseocrTiseg(Processor):
                 local_filename=os.path.join(self.output_file_grp,
                                         file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8'),
-                force=self.parameter['force']
             )
                     
     def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, model):
@@ -202,7 +201,6 @@ class OcrdAnybaseocrTiseg(Processor):
                                    file_id+"_img",
                                    page_id=page_id,
                                    file_grp=self.image_grp,
-                                   force=self.parameter['force']
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']+',non_text'))
         
@@ -214,7 +212,6 @@ class OcrdAnybaseocrTiseg(Processor):
                                    file_id+"_txt",
                                    page_id=page_id,
                                    file_grp=self.image_grp,
-                                   force=self.parameter['force']
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features'])) 
     

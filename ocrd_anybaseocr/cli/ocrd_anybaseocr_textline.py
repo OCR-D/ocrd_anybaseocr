@@ -119,8 +119,7 @@ class OcrdAnybaseocrTextline(Processor):
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(self.output_file_grp,
                                         file_id + '.xml'),
-                content=to_xml(pcgts).encode('utf-8'),
-                force=self.parameter['force']
+                content=to_xml(pcgts).encode('utf-8')
             )
 
     def _process_segment(self, page_image, page, textregion, region_xywh, page_id, input_file, n):
@@ -199,8 +198,7 @@ class OcrdAnybaseocrTextline(Processor):
             file_path = self.workspace.save_image_file(img,
                                    file_id+"_"+str(n)+"_"+str(i),
                                    page_id=page_id,
-                                   file_grp=self.image_grp,
-                                   force=self.parameter['force']
+                                   file_grp=self.image_grp
             )
             ai = AlternativeImageType(filename=file_path, comments=region_xywh['features'])
             line_id = '%s_line%04d' % (page_id, i)

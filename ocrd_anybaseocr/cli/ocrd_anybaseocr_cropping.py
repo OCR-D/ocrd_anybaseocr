@@ -479,8 +479,7 @@ class OcrdAnybaseocrCropper(Processor):
                 mimetype=MIMETYPE_PAGE,
                 local_filename=os.path.join(page_grp,
                                             file_id + '.xml'),
-                content=to_xml(pcgts).encode('utf-8'),
-                force=self.parameter['force']
+                content=to_xml(pcgts).encode('utf-8')
             )
 
     def _process_segment(self, page_image, page, page_xywh, page_id, input_file, n):
@@ -538,8 +537,7 @@ class OcrdAnybaseocrCropper(Processor):
         file_path = self.workspace.save_image_file(page_image,
                                                    file_id,
                                                    page_id=page_id,
-                                                   file_grp=self.image_grp,
-                                                   force=self.parameter['force'])
+                                                   file_grp=self.image_grp)
         page.add_AlternativeImage(AlternativeImageType(
             filename=file_path, comments=page_xywh['features']))
 
