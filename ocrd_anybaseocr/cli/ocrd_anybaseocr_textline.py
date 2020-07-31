@@ -13,6 +13,9 @@ import imageio
 from ..constants import OCRD_TOOL
 from shapely.geometry import MultiPoint
 
+import click
+from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
+
 import subprocess
 
 from ocrolib import psegutils, morph, sl
@@ -435,3 +438,7 @@ class OcrdAnybaseocrTextline(Processor):
 
         
     
+@click.command()
+@ocrd_cli_options
+def cli(*args, **kwargs):
+    return ocrd_cli_wrap_processor(OcrdAnybaseocrTextline, *args, **kwargs)

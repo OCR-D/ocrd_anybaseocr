@@ -45,10 +45,12 @@ from pylab import amin, amax, mean, ginput, ones, clip, imshow, median, ion, gra
 from scipy.ndimage import filters, interpolation, morphology
 from scipy import stats
 import numpy as np
+import click
 
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
+from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import (
     to_xml, 
@@ -255,3 +257,8 @@ class OcrdAnybaseocrBinarizer(Processor):
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
 
+
+@click.command()
+@ocrd_cli_options
+def cli(*args, **kwargs):
+    return ocrd_cli_wrap_processor(OcrdAnybaseocrBinarizer, *args, **kwargs)

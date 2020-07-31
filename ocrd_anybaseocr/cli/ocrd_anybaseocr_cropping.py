@@ -37,6 +37,9 @@ import ocrolib
 import cv2
 from PIL import Image
 
+import click
+from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
+
 
 from ..constants import OCRD_TOOL
 from ocrd import Processor
@@ -539,3 +542,8 @@ class OcrdAnybaseocrCropper(Processor):
                                                    force=self.parameter['force'])
         page.add_AlternativeImage(AlternativeImageType(
             filename=file_path, comments=page_xywh['features']))
+
+@click.command()
+@ocrd_cli_options
+def cli(*args, **kwargs):
+    return ocrd_cli_wrap_processor(OcrdAnybaseocrCropper, *args, **kwargs)

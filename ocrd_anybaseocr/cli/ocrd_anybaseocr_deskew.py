@@ -48,6 +48,8 @@ from scipy.ndimage import filters, interpolation, morphology
 from scipy import stats
 import ocrolib
 from ..constants import OCRD_TOOL
+import click
+from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
@@ -228,3 +230,8 @@ class OcrdAnybaseocrDeskewer(Processor):
         
         
         
+
+@click.command()
+@ocrd_cli_options
+def cli(*args, **kwargs):
+    return ocrd_cli_wrap_processor(OcrdAnybaseocrDeskewer, *args, **kwargs)    

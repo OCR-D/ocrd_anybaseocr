@@ -31,6 +31,8 @@ from ocrd_utils import (
     coordinates_for_segment,
     points_from_polygon,
     )
+import click
+from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 
 from keras.models import load_model
 #from keras_segmentation.models.unet import resnet50_unet
@@ -336,3 +338,8 @@ class OcrdAnybaseocrTiseg(Processor):
         triangles = list(polygonize(m))
         return cascaded_union(triangles), edge_points
 
+
+@click.command()
+@ocrd_cli_options
+def cli(*args, **kwargs):
+    return ocrd_cli_wrap_processor(OcrdAnybaseocrTiseg, *args, **kwargs)

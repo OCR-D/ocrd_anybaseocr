@@ -10,6 +10,9 @@ from keras.preprocessing.image import ImageDataGenerator
 from collections import defaultdict
 from ..constants import OCRD_TOOL
 
+import click
+from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
+
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import (
@@ -257,3 +260,8 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             self.workspace.mets.set_physical_page_for_file("PHYS_000" + str(n) , input_file)
             self.create_logmap_smlink(pcgts)
             self.write_to_mets(results, "PHYS_000" + str(n))
+
+@click.command()
+@ocrd_cli_options
+def cli(*args, **kwargs):
+    return ocrd_cli_wrap_processor(OcrdAnybaseocrLayoutAnalyser, *args, **kwargs)

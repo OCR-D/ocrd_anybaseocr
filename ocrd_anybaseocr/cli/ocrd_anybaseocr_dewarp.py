@@ -14,10 +14,14 @@ from ocrd_models.ocrd_page import (
     MetadataItemType,
     LabelsType, LabelType)
 
+import click
+
+from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
 from ocrd_modelfactory import page_from_file
 from pylab import array
 from pathlib import Path
+from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 
 import torch
 import ocrolib
@@ -183,3 +187,8 @@ class OcrdAnybaseocrDewarper(Processor):
                                                       )
             page.add_AlternativeImage(AlternativeImageType(
                 filename=file_path, comments=page_xywh['features']))
+
+@click.command()
+@ocrd_cli_options
+def cli(*args, **kwargs):
+    return ocrd_cli_wrap_processor(OcrdAnybaseocrDewarper, *args, **kwargs)

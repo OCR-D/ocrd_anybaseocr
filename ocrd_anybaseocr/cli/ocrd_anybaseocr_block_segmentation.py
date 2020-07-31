@@ -5,19 +5,16 @@ import sys
 import os
 from pathlib import Path
 import warnings
+import click
 
 import cv2
 import numpy as np
 from shapely.geometry import Polygon
 import ocrolib
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # No prints from the tensorflow side
-warnings.filterwarnings('ignore', category=FutureWarning)
-#import tensorflow as tf
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
 
 from ocrd import Processor
+from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 from ocrd_modelfactory import page_from_file
 from ocrd_utils import (
     getLogger,
@@ -38,9 +35,10 @@ from ocrd_models.ocrd_page import (
     LabelsType, LabelType,
     RegionRefIndexedType, OrderedGroupType, ReadingOrderType
 )
-from ocrd_anybaseocr.mrcnn import model
-from ocrd_anybaseocr.mrcnn.config import Config
+from ..mrcnn import model
+from ..mrcnn.config import Config
 from ..constants import OCRD_TOOL
+from ..tensorflow_importer import tf
 
 
 TOOL = 'ocrd-anybaseocr-block-segmentation'
@@ -408,3 +406,9 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             #    border.add_TextRegion(textregion)
             # else:
             page.add_TextRegion(textregion)
+
+
+@click.command()
+@ocrd_cli_options
+def cli(*args, **kwargs):
+    return ocrd_cli_wrap_processor(OcrdAnybaseocrBlockSegmenter, *args, **kwargs)
