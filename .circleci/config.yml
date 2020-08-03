@@ -24,7 +24,7 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements.test.txt" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
@@ -34,12 +34,15 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install --upgrade pip
+            pip install -r requirements.test.txt
+            make patch-pix2pixhd
             pip install -r requirements.txt
 
       - save_cache:
           paths:
             - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
+            - ./models
+          key: v1-dependencies-{{ checksum "requirements.txt" }}-{{ checksum "requirements.test.txt" }}
 
        # run tests!
        # this example uses Django's built-in test-runner
@@ -47,8 +50,8 @@ jobs:
        # https://pytest.org
        # https://nose.readthedocs.io
 
-      - run: make test
-      - run: make cli-test
+      - run: . venv/bin/activate; make test
+      - run: . venv/bin/activate; make cli-test
 
       - store_artifacts:
           path: test-reports
