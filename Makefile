@@ -60,6 +60,8 @@ PIX2PIX_FILES = ocrd_anybaseocr/pix2pixhd/*/*.py ocrd_anybaseocr/pix2pixhd/*.py
 patch-pix2pixhd: pix2pixhd
 	sed -i 's,^from util,from ..util,' $(PIX2PIX_FILES)
 	sed -i 's,^import util,import ..util,' $(PIX2PIX_FILES)
+	sed -i 's,^\(\s*\)from data,\1from .data,' ocrd_anybaseocr/pix2pixhd/*.py
+	sed -i 's,^\(\s*\)from data,\1from ..data,' ocrd_anybaseocr/pix2pixhd/*/*.py
 	# string exceptions, srsly y
 	sed -i "s,raise('\([^']*\)',raise(Exception('\1')," $(PIX2PIX_FILES)
 
@@ -110,7 +112,7 @@ assets: repo/assets
 	cp -r -t $(testdir)/assets repo/assets/data/*
 	mkdir -p models
 	make model
-	cp -r --reflink=auto  models/ $(TESTDATA)/
+	ln -sr models/* $(TESTDATA)/
 #
 # Tests
 #

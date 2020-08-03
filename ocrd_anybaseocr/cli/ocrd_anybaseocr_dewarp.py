@@ -106,7 +106,7 @@ class OcrdAnybaseocrDewarper(Processor):
 
         opt, model = prepare_options(
             gpu_id=self.parameter['gpu_id'],
-            dataroot=self.input_file_grp,
+            dataroot=str(Path(self.workspace.directory, self.input_file_grp)),
             model_path=model_path,
             resize_or_crop=self.parameter['imgresize'],
             loadSize=self.parameter['resizeHeight'],
@@ -131,8 +131,12 @@ class OcrdAnybaseocrDewarper(Processor):
 
             page = pcgts.get_Page()
 
-            page_image, page_xywh, _ = self.workspace.image_from_page(
-                page, page_id, feature_filter='dewarped', feature_selector='binarized')  # images should be deskewed and cropped
+            try:
+                page_image, page_xywh, _ = self.workspace.image_from_page(
+                    page, page_id, feature_filter='dewarped', feature_selector='binarized')  # images should be deskewed and cropped
+            except Exception:
+                page_image, page_xywh, _ = self.workspace.image_from_page(
+                    page, page_id, feature_filter='dewarped')  # images should be deskewed and cropped
             if oplevel == 'page':
                 dataset = prepare_data(opt, page_image)
                 orig_img_size = page_image.size
