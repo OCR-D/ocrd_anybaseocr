@@ -4,6 +4,10 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+Fixed:
+
+  * Refactoring to make tools installable, with `--help` and `-J` working
+
 ## [0.0.4] - 2020-07-08
 
 Fixed:
