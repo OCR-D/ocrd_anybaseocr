@@ -35,6 +35,8 @@ from ocrd_models.ocrd_page import (
     to_xml, 
     AlternativeImageType,
     MetadataItemType,
+    make_file_id,
+    assert_file_grp_cardinality,
     LabelsType, LabelType,
     TextRegionType,
     CoordsType,
@@ -43,8 +45,6 @@ from ocrd_models.ocrd_page import (
     
 TOOL = 'ocrd-anybaseocr-textline'
 LOG = getLogger('OcrdAnybaseocrTextline')
-FALLBACK_IMAGE_GRP = 'OCR-D-IMG-TL'
-
 
 class OcrdAnybaseocrTextline(Processor):
 
@@ -65,12 +65,9 @@ class OcrdAnybaseocrTextline(Processor):
             F.write(d)    
     
     def process(self):
-        try:
-            page_grp, self.image_grp = self.output_file_grp.split(',')
-        except ValueError:
-            page_grp = self.output_file_grp
-            self.image_grp = FALLBACK_IMAGE_GRP
-            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
+        assert_file_grp_cardinality(self.input_file_grp, 1)
+        assert_file_grp_cardinality(self.output_file_grp, 1)
+
         oplevel = self.parameter['operation_level']
         
         for (n, input_file) in enumerate(self.input_files):
@@ -107,18 +104,14 @@ class OcrdAnybaseocrTextline(Processor):
         
                     self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
 
-            # Use input_file's basename for the new file -
-            # this way the files retain the same basenames:
-            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)            
-            if file_id == input_file.ID:
-                file_id = concat_padded(self.output_file_grp, n)                
+            file_id = make_file_id(input_file, self.output_file_grp)
+            pcgts.set_PcGtsId(file_id)
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=page_grp,
+                file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(self.output_file_grp,
-                                        file_id + '.xml'),
+                local_filename=os.path.join(self.output_file_grp, file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
 
@@ -191,14 +184,11 @@ class OcrdAnybaseocrTextline(Processor):
             img = 255-img
             img = ocrolib.array2pil(img)
            
-            file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
-            if file_id == input_file.ID:
-                file_id = concat_padded(self.image_grp, n)
-        
+            file_id = make_file_id(input_file, self.output_file_grp)
             file_path = self.workspace.save_image_file(img,
                                    file_id+"_"+str(n)+"_"+str(i),
                                    page_id=page_id,
-                                   file_grp=self.image_grp
+                                   file_grp=self.output_file_grp
             )
             ai = AlternativeImageType(filename=file_path, comments=region_xywh['features'])
             line_id = '%s_line%04d' % (page_id, i)

@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 # ======================================================================
 # ====================================
 # README file for Page Cropping component
@@ -47,9 +48,12 @@ from ocrd_modelfactory import page_from_file
 from ocrd_utils import (
     getLogger,
     crop_image,
+    make_file_id,
+    assert_file_grp_cardinality,
     concat_padded, 
     MIMETYPE_PAGE, 
     coordinates_for_segment,
+    bbox_from_points,
     points_from_polygon
 )
 from ocrd_models.ocrd_page import (
@@ -64,8 +68,6 @@ from ocrd_models.ocrd_page_generateds import BorderType
 TOOL = 'ocrd-anybaseocr-crop'
 
 LOG = getLogger('OcrdAnybaseocrCropper')
-FALLBACK_IMAGE_GRP = 'OCR-D-IMG-CROP'
-
 
 class OcrdAnybaseocrCropper(Processor):
 
@@ -420,14 +422,9 @@ class OcrdAnybaseocrCropper(Processor):
 
     def process(self):
         """Performs border detection on the workspace. """
-        try:
-            LOG.info("OUTPUT FILE %s", self.output_file_grp)
-            page_grp, self.image_grp = self.output_file_grp.split(',')
-        except ValueError:
-            page_grp = self.output_file_grp
-            self.image_grp = FALLBACK_IMAGE_GRP
-            LOG.info(
-                "No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
+        assert_file_grp_cardinality(self.input_file_grp, 1)
+        assert_file_grp_cardinality(self.output_file_grp, 1)
+
         oplevel = self.parameter['operation_level']
         for (n, input_file) in enumerate(self.input_files):
             page_id = input_file.pageId or input_file.ID
@@ -465,20 +462,14 @@ class OcrdAnybaseocrCropper(Processor):
             else:
                 raise Exception(
                     'Operation level %s, but should be "page".', oplevel)
-            file_id = input_file.ID.replace(
-                self.input_file_grp, page_grp)
-
-            # Use input_file's basename for the new file -
-            # this way the files retain the same basenames:
-            if file_id == input_file.ID:
-                file_id = concat_padded(page_grp, n)
+            file_id = make_file_id(input_file, self.output_file_grp)
+            pcgts.set_PcGtsId(file_id)
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=page_grp,
+                file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(page_grp,
-                                            file_id + '.xml'),
+                local_filename=os.path.join(self.output_file_grp, file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
 
@@ -530,14 +521,12 @@ class OcrdAnybaseocrCropper(Processor):
         page_image = crop_image(page_image, box=(min_x, min_y, max_x, max_y))
         page_xywh['features'] += ',cropped'
 
-        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
-        if file_id == input_file.ID:
-            file_id = concat_padded(self.image_grp, n)
+        file_id = make_file_id(input_file, self.output_file_grp)
 
         file_path = self.workspace.save_image_file(page_image,
-                                                   file_id,
+                                                   file_id + '-IMG',
                                                    page_id=page_id,
-                                                   file_grp=self.image_grp)
+                                                   file_grp=self.output_file_grp)
         page.add_AlternativeImage(AlternativeImageType(
             filename=file_path, comments=page_xywh['features']))
 

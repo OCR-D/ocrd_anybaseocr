@@ -1,10 +1,9 @@
-# pylint: missing-module-docstring, missing-class-docstring, invalid-name
+# pylint: disable=missing-module-docstring, missing-class-docstring, invalid-name
 # pylint: disable=line-too-long, import-error, no-name-in-module, too-many-statements
 # pylint: disable=wrong-import-position, wrong-import-order, too-many-locals, too-few-public-methods
 import sys
 import os
 from pathlib import Path
-import warnings
 import click
 
 import cv2
@@ -18,7 +17,8 @@ from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 from ocrd_modelfactory import page_from_file
 from ocrd_utils import (
     getLogger,
-    concat_padded,
+    make_file_id,
+    assert_file_grp_cardinality,
     MIMETYPE_PAGE,
     coordinates_for_segment,
     points_from_polygon,
@@ -73,14 +73,11 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
     def process(self):
 
+        assert_file_grp_cardinality(self.input_file_grp, 1)
+        assert_file_grp_cardinality(self.output_file_grp, 1)
+
         if not tf.test.is_gpu_available():
             LOG.warning("Tensorflow cannot detect CUDA installation. Running without GPU will be slow.")
-        try:
-            page_grp, self.image_grp = self.output_file_grp.split(',')
-        except ValueError:
-            page_grp = self.output_file_grp
-            self.image_grp = FALLBACK_IMAGE_GRP
-            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
 
         model_path = Path(self.parameter['block_segmentation_model'])
         model_weights = Path(self.parameter['block_segmentation_weights'])
@@ -139,19 +136,15 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             else:
                 LOG.warning('Operation level %s, but should be "page".', oplevel)
                 break
-            file_id = input_file.ID.replace(self.input_file_grp, page_grp)
 
-            # Use input_file's basename for the new file -
-            # this way the files retain the same basenames:
-            if file_id == input_file.ID:
-                file_id = concat_padded(page_grp, n)
+            file_id = make_file_id(input_file, self.output_file_grp)
+            pcgts.set_PcGtsId(file_id)
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=page_grp,
+                file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(self.output_file_grp,
-                                            file_id + '.xml'),
+                local_filename=os.path.join(self.output_file_grp, file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
 
@@ -161,7 +154,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         if page.get_TextRegion():
             if self.parameter['overwrite']:
                 LOG.info('removing existing TextRegions in page "%s"', page_id)
-                textregion.set_TextRegion([])
+                page.set_TextRegion([])
             else:
                 LOG.warning('keeping existing TextRegions in page "%s"', page_id)
                 return
@@ -366,14 +359,11 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
             region_img = ocrolib.array2pil(region_img)
 
-            file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
-            if file_id == input_file.ID:
-                file_id = concat_padded(self.image_grp, n)
-
+            file_id = make_file_id(input_file, self.output_file_grp)
             file_path = self.workspace.save_image_file(region_img,
                                                        file_id+"_"+str(i),
                                                        page_id=page_id,
-                                                       file_grp=self.image_grp)
+                                                       file_grp=self.output_file_grp)
 
             # ai = AlternativeImageType(filename=file_path, comments=page_xywh['features'])
             region_id = '%s_region%04d' % (page_id, i)

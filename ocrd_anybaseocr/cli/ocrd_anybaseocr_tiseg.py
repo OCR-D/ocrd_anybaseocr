@@ -30,6 +30,8 @@ from ocrd_utils import (
     MIMETYPE_PAGE,
     coordinates_for_segment,
     points_from_polygon,
+    make_file_id,
+    assert_file_grp_cardinality,
     )
 import click
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
@@ -46,7 +48,6 @@ from ocrd_models.ocrd_page import (
 
 TOOL = 'ocrd-anybaseocr-tiseg'
 LOG = getLogger('OcrdAnybaseocrTiseg')
-FALLBACK_IMAGE_GRP = 'OCR-D-IMG-TISEG'
 
 class OcrdAnybaseocrTiseg(Processor):
 
@@ -61,12 +62,8 @@ class OcrdAnybaseocrTiseg(Processor):
         return cropped
 
     def process(self):
-        try:
-            page_grp, self.image_grp = self.output_file_grp.split(',')
-        except ValueError:
-            page_grp = self.output_file_grp
-            self.image_grp = FALLBACK_IMAGE_GRP
-            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
+        assert_file_grp_cardinality(self.input_file_grp, 1)
+        assert_file_grp_cardinality(self.output_file_grp, 1)
         oplevel = self.parameter['operation_level']
         
         model = None
@@ -114,18 +111,15 @@ class OcrdAnybaseocrTiseg(Processor):
                 LOG.warning('Operation level %s, but should be "page".', oplevel)
                 break
         
-            # Use input_file's basename for the new file -
-            # this way the files retain the same basenames:
-            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)            
-            if file_id == input_file.ID:
-                file_id = concat_padded(self.output_file_grp, n)                
+
+            file_id = make_file_id(input_file, self.output_file_grp)
+            pcgts.set_PcGtsId(file_id)
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=page_grp, #self.output_file_grp,
+                file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(self.output_file_grp,
-                                        file_id + '.xml'),
+                local_filename=os.path.join(self.output_file_grp, file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8'),
             )
                     
@@ -194,24 +188,19 @@ class OcrdAnybaseocrTiseg(Processor):
             image_part = ocrolib.array2pil(bin_array)                            
         
         
-        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
-        if file_id == input_file.ID:
-            file_id = concat_padded(self.image_grp, n)
+        file_id = make_file_id(input_file, self.output_file_grp)
         file_path = self.workspace.save_image_file(image_part,
                                    file_id+"_img",
                                    page_id=page_id,
-                                   file_grp=self.image_grp,
+                                   file_grp=self.output_file_grp,
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']+',non_text'))
         
         page_xywh['features'] += ',clipped'
-        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
-        if file_id == input_file.ID:
-            file_id = concat_padded(self.image_grp, n)
         file_path = self.workspace.save_image_file(text_part,
                                    file_id+"_txt",
                                    page_id=page_id,
-                                   file_grp=self.image_grp,
+                                   file_grp=self.output_file_grp,
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features'])) 
     
