@@ -56,13 +56,17 @@ from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_models.ocrd_page import (
     to_xml,
-    make_file_id,
-    assert_file_grp_cardinality,
     AlternativeImageType,
     MetadataItemType,
     LabelsType, LabelType
     )
-from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
+from ocrd_utils import (
+    getLogger,
+    concat_padded,
+    MIMETYPE_PAGE,
+    make_file_id,
+    assert_file_grp_cardinality
+)
 
 TOOL = 'ocrd-anybaseocr-deskew'
 LOG = getLogger('OcrdAnybaseocrDeskewer')

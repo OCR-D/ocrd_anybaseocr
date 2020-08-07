@@ -23,20 +23,18 @@ from scipy.ndimage.filters import gaussian_filter, uniform_filter, maximum_filte
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
 from ocrd_utils import (
-    concat_padded, 
     getLogger, 
+    make_file_id,
+    assert_file_grp_cardinality,
     MIMETYPE_PAGE, 
     coordinates_for_segment,
-    points_from_polygon,
-    polygon_from_points
-    )
+    points_from_polygon
+)
 
 from ocrd_models.ocrd_page import (
     to_xml, 
     AlternativeImageType,
     MetadataItemType,
-    make_file_id,
-    assert_file_grp_cardinality,
     LabelsType, LabelType,
     TextRegionType,
     CoordsType,
