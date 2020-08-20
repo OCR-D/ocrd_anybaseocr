@@ -40,6 +40,8 @@ LOG = getLogger('OcrdAnybaseocrDewarper')
 
 def prepare_data(opt, page_img):
 
+    # XXX this needs to be created or the CreateDataLoader(opt) call will fail
+    Path(opt.dataroot, 'test_A').mkdir()
     data_loader = CreateDataLoader(opt)
     data_loader.dataset.A_paths = [page_img.filename]
     data_loader.dataset.dataset_size = len(data_loader.dataset.A_paths)
