@@ -51,7 +51,7 @@ jobs:
        # https://nose.readthedocs.io
 
       - run: . venv/bin/activate; make test
-      - run: . venv/bin/activate; make cli-test
+      - run: . venv/bin/activate; pip install .; make cli-test
 
       - store_artifacts:
           path: test-reports
