@@ -58,7 +58,12 @@ from ocrd_models.ocrd_page import (
     MetadataItemType,
     LabelsType, LabelType
     )
-from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE
+from ocrd_utils import (
+    getLogger,
+    MIMETYPE_PAGE,
+    make_file_id,
+    assert_file_grp_cardinality
+)
 
 # Ignore zoom warning from interpolation
 import warnings
@@ -100,19 +105,17 @@ class OcrdAnybaseocrBinarizer(Processor):
         ginput(1, self.parameter['debug'])
 
     def process(self):
-        try:
-            page_grp, self.image_grp = self.output_file_grp.split(',')
-        except ValueError:
-            page_grp = self.output_file_grp
-            self.image_grp = FALLBACK_IMAGE_GRP
-            LOG.info("No output file group for images specified, falling back to '%s'", FALLBACK_IMAGE_GRP)
+        assert_file_grp_cardinality(self.input_file_grp, 1)
+        assert_file_grp_cardinality(self.output_file_grp, 1)
         oplevel = self.parameter['operation_level']
 
         for (n, input_file) in enumerate(self.input_files):            
+            file_id = make_file_id(input_file, self.output_file_grp)
             page_id = input_file.pageId or input_file.ID
             
             LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
+            pcgts.set_pcGtsId(file_id)
             metadata = pcgts.get_Metadata()
             metadata.add_MetadataItem(
                     MetadataItemType(type_="processingStep",
@@ -138,18 +141,12 @@ class OcrdAnybaseocrBinarizer(Processor):
                     # TODO: not tested on regions
                     self._process_segment(region_image, page, region_xywh, region.id, input_file, str(n)+"_"+str(k))
 
-            # Use input_file's basename for the new file -
-            # this way the files retain the same basenames:
-            file_id = input_file.ID.replace(self.input_file_grp, page_grp)            
-            if file_id == input_file.ID:
-                file_id = concat_padded(page_grp, n)          
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=page_grp,
+                file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(page_grp,
-                                        file_id + '.xml'),
+                local_filename=os.path.join(self.output_file_grp, file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
 
@@ -244,13 +241,11 @@ class OcrdAnybaseocrBinarizer(Processor):
         bin_array = array(255*(binarized>ocrolib.midrange(binarized)),'B')
         bin_image = ocrolib.array2pil(bin_array)                            
         
-        file_id = input_file.ID.replace(self.input_file_grp, self.image_grp)
-        if file_id == input_file.ID:
-            file_id = concat_padded(self.image_grp, n)
+        file_id = make_file_id(input_file, self.output_file_grp)
         file_path = self.workspace.save_image_file(bin_image,
-                                   file_id,
+                                   file_id + '-IMG',
                                    page_id=page_id,
-                                   file_grp=self.image_grp
+                                   file_grp=self.output_file_grp
             )     
         page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
 

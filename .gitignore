@@ -28,3 +28,4 @@ lib64
 *.png
 *.jpg
 ocrd_anybaseocr/pix2pixhd
+/models

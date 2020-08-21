@@ -17,6 +17,8 @@ TESTS=tests
 # Tag to publish docker image to
 DOCKER_TAG = ocrd/anybaseocr
 
+MODELS = $(PWD)/models
+
 # BEGIN-EVAL makefile-parser --make-help Makefile
 
 help:
@@ -58,6 +60,7 @@ install: patch-pix2pixhd
 # Patch pix2pixhd to trick it into thinking it was part of this mess
 PIX2PIX_FILES = ocrd_anybaseocr/pix2pixhd/*/*.py ocrd_anybaseocr/pix2pixhd/*.py
 patch-pix2pixhd: pix2pixhd
+	touch ocrd_anybaseocr/pix2pixhd/__init__.py
 	sed -i 's,^from util,from ..util,' $(PIX2PIX_FILES)
 	sed -i 's,^import util,import ..util,' $(PIX2PIX_FILES)
 	sed -i 's,^\(\s*\)from data,\1from .data,' ocrd_anybaseocr/pix2pixhd/*.py
@@ -127,31 +130,31 @@ cli-test: assets-clean assets \
 
 # Test binarization CLI
 test-binarize:
-	cd $(TESTDATA) && ocrd-anybaseocr-binarize -m mets.xml -I OCR-D-IMG -O OCR-D-IMG-BIN-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-binarize -m mets.xml -I MAX -O BIN-TEST
 
 # Test deskewing CLI
 test-deskew:
-	cd $(TESTDATA) && ocrd-anybaseocr-deskew -m mets.xml -I OCR-D-IMG-BIN-TEST -O OCR-D-IMG-DESKEW-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-deskew -m mets.xml -I BIN-TEST -O DESKEW-TEST
 
 # Test cropping CLI
 test-crop:
-	cd $(TESTDATA) && ocrd-anybaseocr-crop -m mets.xml -I OCR-D-IMG-DESKEW-TEST -O OCR-D-IMG-CROP-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-crop -m mets.xml -I DESKEW-TEST -O CROP-TEST
 
 # Test text/non-text segmentation CLI
 test-tiseg:
-	cd $(TESTDATA) && ocrd-anybaseocr-tiseg -m mets.xml -I OCR-D-IMG-CROP-TEST -O OCR-D-IMG-TISEG-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-tiseg -m mets.xml -I CROP-TEST -O TISEG-TEST -P seg_weights seg_model.hdf5
 
 # Test block segmentation CLI
 test-block-segmentation:
-	cd $(TESTDATA) && ocrd-anybaseocr-block-segmentation -m mets.xml -I OCR-D-IMG-TISEG-TEST -O OCR-D-BLOCK-SEGMENT
+	cd $(TESTDATA) && ocrd-anybaseocr-block-segmentation -m mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT -P block_segmentation_weights block_segmentation_weights.h5
 
 # Test textline extraction CLI
 test-textline:
-	cd $(TESTDATA) && ocrd-anybaseocr-textline -m mets.xml -I OCR-D-BLOCK-SEGMENT -O OCR-D-IMG-TL-TEST
+	cd $(TESTDATA) && ocrd-anybaseocr-textline -m mets.xml -I OCR-D-BLOCK-SEGMENT -O TL-TEST
 
 # Test document structure analysis CLI
 test-layout-analysis:
 	cd $(TESTDATA) && ocrd-anybaseocr-layout-analysis -m mets.xml \
-		-I OCR-D-IMG-BIN-TEST -O OCR-D-IMG-LAYOUT \
-		-P model_path models/structure_analysis.h5 \
-		-P class_mapping_path models/mapping_densenet.pickle
+		-I BIN-TEST -O LAYOUT \
+		-P model_path structure_analysis.h5 \
+		-P class_mapping_path mapping_densenet.pickle

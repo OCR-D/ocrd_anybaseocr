@@ -17,7 +17,12 @@ from ocrd_models.ocrd_page import (
 import click
 
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
-from ocrd_utils import getLogger, concat_padded, MIMETYPE_PAGE, assert_file_grp_cardinality
+from ocrd_utils import (
+    getLogger,
+    MIMETYPE_PAGE,
+    assert_file_grp_cardinality,
+    make_file_id
+)
 from ocrd_modelfactory import page_from_file
 from pylab import array
 from pathlib import Path
@@ -35,6 +40,8 @@ LOG = getLogger('OcrdAnybaseocrDewarper')
 
 def prepare_data(opt, page_img):
 
+    # XXX this needs to be created or the CreateDataLoader(opt) call will fail
+    Path(opt.dataroot, 'test_A').mkdir()
     data_loader = CreateDataLoader(opt)
     data_loader.dataset.A_paths = [page_img.filename]
     data_loader.dataset.dataset_size = len(data_loader.dataset.A_paths)
@@ -91,6 +98,7 @@ class OcrdAnybaseocrDewarper(Processor):
 
     def process(self):
 
+        assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
 
         if self.parameter['gpu_id'] > -1 and not torch.cuda.is_available():
@@ -156,18 +164,14 @@ class OcrdAnybaseocrDewarper(Processor):
                     self._process_segment(
                         model, dataset, page, region_xywh, region.id, input_file, orig_img_size, n)
 
-            # Use input_file's basename for the new file -
-            # this way the files retain the same basenames:
-            page_grp = self.output_file_grp
-            file_id = input_file.ID.replace(self.input_file_grp, page_grp)
-            if file_id == input_file.ID:
-                file_id = concat_padded(page_grp, n)
+            file_id = make_file_id(input_file, self.output_file_grp)
+            pcgts.set_pcGtsId(file_id)
             self.workspace.add_file(
                 ID=file_id,
-                file_grp=page_grp,
+                file_grp=self.output_file_grp,
                 pageId=input_file.pageId,
                 mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(page_grp, file_id + '.xml'),
+                local_filename=os.path.join(self.output_file_grp, file_id + '.xml'),
                 content=to_xml(pcgts).encode('utf-8')
             )
 
@@ -183,10 +187,7 @@ class OcrdAnybaseocrDewarper(Processor):
 
             page_xywh['features'] += ',dewarped'
 
-            file_id = input_file.ID.replace(self.input_file_grp, self.output_file_grp)
-            if file_id == input_file.ID:
-                file_id = concat_padded(self.output_file_grp, n)
-
+            file_id = make_file_id(input_file, self.output_file_grp) + '-IMG'
             file_path = self.workspace.save_image_file(dewarped,
                                                        file_id,
                                                        page_id=input_file.pageId,
