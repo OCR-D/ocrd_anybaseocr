@@ -115,7 +115,7 @@ class OcrdAnybaseocrBinarizer(Processor):
             
             LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            pcgts.set_PcGtsId(file_id)
+            pcgts.set_pcGtsId(file_id)
             metadata = pcgts.get_Metadata()
             metadata.add_MetadataItem(
                     MetadataItemType(type_="processingStep",

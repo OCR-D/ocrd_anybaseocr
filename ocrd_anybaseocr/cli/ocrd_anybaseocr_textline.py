@@ -103,7 +103,7 @@ class OcrdAnybaseocrTextline(Processor):
                     self._process_segment(region_image, page, region, region_xywh, region.id, input_file, k)
 
             file_id = make_file_id(input_file, self.output_file_grp)
-            pcgts.set_PcGtsId(file_id)
+            pcgts.set_pcGtsId(file_id)
             self.workspace.add_file(
                 ID=file_id,
                 file_grp=self.output_file_grp,
