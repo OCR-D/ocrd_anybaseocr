@@ -110,7 +110,7 @@ class OcrdAnybaseocrBinarizer(Processor):
         oplevel = self.parameter['operation_level']
 
         for (n, input_file) in enumerate(self.input_files):            
-            file_id = input_file.ID.replace(self.input_file_grp, page_grp)
+            file_id = make_file_id(input_file, self.output_file_grp)
             page_id = input_file.pageId or input_file.ID
             
             LOG.info("INPUT FILE %i / %s", n, page_id)
