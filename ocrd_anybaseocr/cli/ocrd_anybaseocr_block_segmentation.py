@@ -31,8 +31,6 @@ from ocrd_models.ocrd_page import (
     TableRegionType,
     ImageRegionType,
     to_xml,
-    MetadataItemType,
-    LabelsType, LabelType,
     RegionRefIndexedType, OrderedGroupType, ReadingOrderType
 )
 from ..mrcnn import model

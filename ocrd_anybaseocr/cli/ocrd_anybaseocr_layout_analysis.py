@@ -11,11 +11,7 @@ from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
-from ocrd_models.ocrd_page import (
-    to_xml,
-    MetadataItemType,
-    LabelsType, LabelType
-)
+from ocrd_models.ocrd_page import to_xml
 from ocrd_utils import getLogger, assert_file_grp_cardinality
 from ocrd_models import ocrd_mets
 
@@ -238,16 +234,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             page_id = input_file.pageId or input_file.ID
             size = 600, 500
             
-            metadata = pcgts.get_Metadata()
-            metadata.add_MetadataItem(
-                    MetadataItemType(type_="processingStep",
-                                     name=self.ocrd_tool['steps'][0],
-                                     value=TOOL,                                     
-                                     Labels=[LabelsType(#externalRef="parameter",
-                                                        Label=[LabelType(type_=name,
-                                                                         value=self.parameter[name])
-                                                               for name in self.parameter.keys()])]))
-
+            self.add_metadata(pcgts)
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             

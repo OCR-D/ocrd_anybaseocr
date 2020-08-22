@@ -39,12 +39,7 @@ from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 from keras.models import load_model
 #from keras_segmentation.models.unet import resnet50_unet
 
-from ocrd_models.ocrd_page import (
-    to_xml, 
-    AlternativeImageType,
-    MetadataItemType,
-    LabelsType, LabelType
-    )
+from ocrd_models.ocrd_page import to_xml, AlternativeImageType
 
 TOOL = 'ocrd-anybaseocr-tiseg'
 LOG = getLogger('OcrdAnybaseocrTiseg')
@@ -87,15 +82,7 @@ class OcrdAnybaseocrTiseg(Processor):
             page_id = input_file.pageId or input_file.ID
             
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            metadata = pcgts.get_Metadata()
-            metadata.add_MetadataItem(
-                    MetadataItemType(type_="processingStep",
-                                     name=self.ocrd_tool['steps'][0],
-                                     value=TOOL,                                     
-                                     Labels=[LabelsType(#externalRef="parameters",
-                                                        Label=[LabelType(type_=name,
-                                                                         value=self.parameter[name])
-                                                               for name in self.parameter.keys()])]))
+            self.add_metadata(pcgts)
 
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)

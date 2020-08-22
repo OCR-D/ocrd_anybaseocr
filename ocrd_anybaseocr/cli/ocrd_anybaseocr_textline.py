@@ -34,8 +34,6 @@ from ocrd_utils import (
 from ocrd_models.ocrd_page import (
     to_xml, 
     AlternativeImageType,
-    MetadataItemType,
-    LabelsType, LabelType,
     TextRegionType,
     CoordsType,
     TextLineType
@@ -72,16 +70,7 @@ class OcrdAnybaseocrTextline(Processor):
             page_id = input_file.pageId or input_file.ID
             
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            metadata = pcgts.get_Metadata()
-            metadata.add_MetadataItem(
-                    MetadataItemType(type_="processingStep",
-                                     name=self.ocrd_tool['steps'][0],
-                                     value=TOOL,                                     
-                                     Labels=[LabelsType(#externalRef="parameter",
-                                                        Label=[LabelType(type_=name,
-                                                                         value=self.parameter[name])
-                                                               for name in self.parameter.keys()])]))
-
+            self.add_metadata(pcgts)
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
             

@@ -116,15 +116,7 @@ class OcrdAnybaseocrBinarizer(Processor):
             LOG.info("INPUT FILE %i / %s", n, page_id)
             pcgts = page_from_file(self.workspace.download_file(input_file))
             pcgts.set_pcGtsId(file_id)
-            metadata = pcgts.get_Metadata()
-            metadata.add_MetadataItem(
-                    MetadataItemType(type_="processingStep",
-                                     name=self.ocrd_tool['steps'][0],
-                                     value=TOOL,                                     
-                                     Labels=[LabelsType(#externalRef="parameters",
-                                                        Label=[LabelType(type_=name,
-                                                                         value=self.parameter[name])
-                                                               for name in self.parameter.keys()])]))
+            self.add_metadata(pcgts)
 
             page = pcgts.get_Page()
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter="binarized")
