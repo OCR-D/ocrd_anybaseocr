@@ -8,11 +8,7 @@ import os
 from ..constants import OCRD_TOOL
 
 from ocrd import Processor
-from ocrd_models.ocrd_page import (
-    to_xml,
-    AlternativeImageType,
-    MetadataItemType,
-    LabelsType, LabelType)
+from ocrd_models.ocrd_page import to_xml, AlternativeImageType
 
 import click
 
@@ -127,16 +123,7 @@ class OcrdAnybaseocrDewarper(Processor):
             LOG.info("INPUT FILE %s", page_id)
 
             pcgts = page_from_file(self.workspace.download_file(input_file))
-            metadata = pcgts.get_Metadata()
-            metadata.add_MetadataItem(
-                MetadataItemType(type_="processingStep",
-                                 name=self.ocrd_tool['steps'][0],
-                                 value=TOOL,
-                                 Labels=[LabelsType(  # externalRef="parameters",
-                                     Label=[LabelType(type_=name,
-                                                      value=self.parameter[name])
-                                            for name in self.parameter.keys()])]))
-
+            self.add_metadata(pcgts)
             page = pcgts.get_Page()
 
             try:

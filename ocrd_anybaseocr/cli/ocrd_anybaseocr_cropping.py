@@ -60,8 +60,6 @@ from ocrd_models.ocrd_page import (
     CoordsType,
     AlternativeImageType,
     to_xml,
-    MetadataItemType,
-    LabelsType, LabelType,
 )
 from ocrd_models.ocrd_page_generateds import BorderType
 
@@ -432,6 +430,7 @@ class OcrdAnybaseocrCropper(Processor):
             LOG.info("INPUT FILE %i / %s", n, page_id)
 
             pcgts = page_from_file(self.workspace.download_file(input_file))
+            self.add_metadata(pcgts)
             page = pcgts.get_Page()
             # Check for existing Border --> already cropped
             border = page.get_Border()
@@ -441,15 +440,6 @@ class OcrdAnybaseocrCropper(Processor):
                 LOG.warning('Overwriting existing Border: %i:%i,%i:%i',
                             left, top, right, bottom)
 
-            metadata = pcgts.get_Metadata()
-            metadata.add_MetadataItem(
-                MetadataItemType(type_="processingStep",
-                                 name=self.ocrd_tool['steps'][0],
-                                 value=TOOL,
-                                 Labels=[LabelsType(  # externalRef="parameters",
-                                         Label=[LabelType(type_=name,
-                                                          value=self.parameter[name])
-                                                for name in self.parameter.keys()])]))
             page = pcgts.get_Page()
             page_image, page_coords, page_image_info = self.workspace.image_from_page(
                 page, page_id,
