@@ -105,18 +105,9 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         for (n, input_file) in enumerate(self.input_files):
 
             pcgts = page_from_file(self.workspace.download_file(input_file))
+            self.add_metadata(pcgts)
             page = pcgts.get_Page()
             page_id = input_file.pageId or input_file.ID
-
-            metadata = pcgts.get_Metadata()
-            metadata.add_MetadataItem(
-                MetadataItemType(type_="processingStep",
-                                 name=self.ocrd_tool['steps'][0],
-                                 value=TOOL,
-                                 Labels=[LabelsType(  # externalRef="parameter",
-                                         Label=[LabelType(type_=name,
-                                                          value=self.parameter[name])
-                                                for name in self.parameter.keys()])]))
 
             page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='binarized,deskewed,cropped,clipped,non_text')
             # try to load pixel masks
