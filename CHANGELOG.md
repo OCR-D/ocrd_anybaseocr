@@ -4,6 +4,10 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+Fixed:
+
+  * replace copy&pasted metadata addition with `self.add_metadata`, #67
+
 ## [1.0.0] - 2020-08-21
 
 Fixed:
