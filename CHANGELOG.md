@@ -4,6 +4,8 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.0.1] - 2020-08-24
+
 Fixed:
 
   * replace copy&pasted metadata addition with `self.add_metadata`, #67
@@ -41,6 +43,7 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[1.0.1]: ../../compare/v1.0.1...v1.0.0
 [1.0.0]: ../../compare/v1.0.0...v0.0.5
 [0.0.5]: ../../compare/v0.0.5...v0.0.4
 [0.0.4]: ../../compare/v0.0.3...v0.0.4
