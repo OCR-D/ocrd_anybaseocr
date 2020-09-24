@@ -70,7 +70,6 @@ import warnings
 warnings.filterwarnings('ignore', '.*output shape of zoom.*')
 
 TOOL = 'ocrd-anybaseocr-binarize'
-LOG = getLogger('OcrdAnybaseocrBinarizer')
 FALLBACK_IMAGE_GRP = 'OCR-D-IMG-BIN'
 
 class OcrdAnybaseocrBinarizer(Processor):
@@ -108,6 +107,7 @@ class OcrdAnybaseocrBinarizer(Processor):
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
         oplevel = self.parameter['operation_level']
+        LOG = getLogger('OcrdAnybaseocrBinarizer')
 
         for (n, input_file) in enumerate(self.input_files):            
             file_id = make_file_id(input_file, self.output_file_grp)
@@ -143,6 +143,7 @@ class OcrdAnybaseocrBinarizer(Processor):
             )
 
     def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n):
+        LOG = getLogger('OcrdAnybaseocrBinarizer')
         raw = ocrolib.pil2array(page_image)
         if len(raw.shape) > 2:
             raw = np.mean(raw, 2)

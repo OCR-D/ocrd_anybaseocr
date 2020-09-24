@@ -67,7 +67,6 @@ from ocrd_utils import (
 )
 
 TOOL = 'ocrd-anybaseocr-deskew'
-LOG = getLogger('OcrdAnybaseocrDeskewer')
 
 class OcrdAnybaseocrDeskewer(Processor):
 
@@ -94,8 +93,9 @@ class OcrdAnybaseocrDeskewer(Processor):
     def process(self):
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
-
         oplevel = self.parameter['operation_level']
+
+        LOG = getLogger('OcrdAnybaseocrDeskewer')
 
         for (n, input_file) in enumerate(self.input_files):
             page_id = input_file.pageId or input_file.ID 
@@ -128,7 +128,7 @@ class OcrdAnybaseocrDeskewer(Processor):
             )
     
     def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n):                
-                
+        LOG = getLogger('OcrdAnybaseocrDeskewer')
         raw = ocrolib.pil2array(page_image)
         flat = raw.astype("float64")
 

@@ -32,7 +32,6 @@ from ..pix2pixhd.models.models import create_model
 from ..pix2pixhd.data.data_loader import CreateDataLoader
 
 TOOL = 'ocrd-anybaseocr-dewarp'
-LOG = getLogger('OcrdAnybaseocrDewarper')
 
 def prepare_data(opt, page_img):
 
@@ -49,6 +48,7 @@ def prepare_data(opt, page_img):
     return dataset
 
 def prepare_options(gpu_id, dataroot, model_path, resize_or_crop, loadSize, fineSize):
+    LOG = getLogger('OcrdAnybaseocrDewarper')
     # XXX https://github.com/OCR-D/ocrd_anybaseocr/pull/62#discussion_r450232164
     # The problem was with how BaseOptions.parse is implemented in pix2pixHD based on
     # argparse. I cannot explain why but the approach to let pix2pixHD fill the
@@ -93,6 +93,7 @@ class OcrdAnybaseocrDewarper(Processor):
 
 
     def process(self):
+        LOG = getLogger('OcrdAnybaseocrDewarper')
 
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)

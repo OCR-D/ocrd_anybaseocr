@@ -42,7 +42,6 @@ from keras.models import load_model
 from ocrd_models.ocrd_page import to_xml, AlternativeImageType
 
 TOOL = 'ocrd-anybaseocr-tiseg'
-LOG = getLogger('OcrdAnybaseocrTiseg')
 
 class OcrdAnybaseocrTiseg(Processor):
 
@@ -57,6 +56,8 @@ class OcrdAnybaseocrTiseg(Processor):
         return cropped
 
     def process(self):
+        LOG = getLogger('OcrdAnybaseocrTiseg')
+
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
         oplevel = self.parameter['operation_level']
@@ -111,6 +112,7 @@ class OcrdAnybaseocrTiseg(Processor):
             )
                     
     def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, model):
+        LOG = getLogger('OcrdAnybaseocrTiseg')
     
         if model:
             
