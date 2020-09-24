@@ -4,6 +4,12 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.0.2] - 2020-09-24
+
+Fixed:
+
+  * logging according to https://github.com/OCR-D/core/pull/599
+
 ## [1.0.1] - 2020-08-24
 
 Fixed:
@@ -43,6 +49,7 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[1.0.2]: ../../compare/v1.0.2...v1.0.1
 [1.0.1]: ../../compare/v1.0.1...v1.0.0
 [1.0.0]: ../../compare/v1.0.0...v0.0.5
 [0.0.5]: ../../compare/v0.0.5...v0.0.4
