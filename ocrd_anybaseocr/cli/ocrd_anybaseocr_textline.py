@@ -40,7 +40,6 @@ from ocrd_models.ocrd_page import (
     )
     
 TOOL = 'ocrd-anybaseocr-textline'
-LOG = getLogger('OcrdAnybaseocrTextline')
 
 class OcrdAnybaseocrTextline(Processor):
 
@@ -61,6 +60,8 @@ class OcrdAnybaseocrTextline(Processor):
             F.write(d)    
     
     def process(self):
+        LOG = getLogger('OcrdAnybaseocrTextline')
+
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
 
@@ -103,6 +104,7 @@ class OcrdAnybaseocrTextline(Processor):
             )
 
     def _process_segment(self, page_image, page, textregion, region_xywh, page_id, input_file, n):
+        LOG = getLogger('OcrdAnybaseocrTextline')
         #check for existing text lines and whether to overwrite them
         if textregion.get_TextLine():
             if self.parameter['overwrite']:

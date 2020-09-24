@@ -46,7 +46,6 @@ TAG_METS_SMLINK = '{%s}smLink' % NS['mets']
 
 
 TOOL = 'ocrd-anybaseocr-layout-analysis'
-LOG = getLogger('OcrdAnybaseocrLayoutAnalyser')
 
 
 class OcrdAnybaseocrLayoutAnalyser(Processor):
@@ -190,6 +189,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         self.last_result = result
     
     def create_logmap_smlink(self, workspace):
+        LOG = getLogger('OcrdAnybaseocrLayoutAnalyser')
         el_root = self.workspace.mets._tree.getroot()
         log_map = el_root.find('mets:structMap[@TYPE="LOGICAL"]', NS)
         if log_map is None:
@@ -204,6 +204,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         self.log_map = log_map                        
 
     def process(self):
+        LOG = getLogger('OcrdAnybaseocrLayoutAnalyser')
         if not tf.test.is_gpu_available():
             LOG.error("Your system has no CUDA installed. No GPU detected.")
             # sys.exit(1)

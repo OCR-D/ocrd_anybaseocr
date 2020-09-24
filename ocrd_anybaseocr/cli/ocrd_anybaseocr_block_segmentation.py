@@ -40,7 +40,6 @@ from ..tensorflow_importer import tf
 
 
 TOOL = 'ocrd-anybaseocr-block-segmentation'
-LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
 FALLBACK_IMAGE_GRP = 'OCR-D-IMG-BLOCK-SEGMENT'
 
 
@@ -73,6 +72,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
+
+        LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
 
         if not tf.test.is_gpu_available():
             LOG.warning("Tensorflow cannot detect CUDA installation. Running without GPU will be slow.")
@@ -138,6 +139,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             )
 
     def _process_segment(self, page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names, mask):
+        LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
         # check for existing text regions and whether to overwrite them
         border = None
         if page.get_TextRegion():

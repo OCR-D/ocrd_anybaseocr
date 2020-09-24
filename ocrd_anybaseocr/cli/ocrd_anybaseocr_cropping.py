@@ -65,7 +65,6 @@ from ocrd_models.ocrd_page_generateds import BorderType
 
 TOOL = 'ocrd-anybaseocr-crop'
 
-LOG = getLogger('OcrdAnybaseocrCropper')
 
 class OcrdAnybaseocrCropper(Processor):
 
@@ -422,6 +421,8 @@ class OcrdAnybaseocrCropper(Processor):
         """Performs border detection on the workspace. """
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
+
+        LOG = getLogger('OcrdAnybaseocrCropper')
 
         oplevel = self.parameter['operation_level']
         for (n, input_file) in enumerate(self.input_files):
