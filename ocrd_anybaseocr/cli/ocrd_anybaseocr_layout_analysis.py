@@ -107,9 +107,8 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             if i !="page":
             
             # if not page, chapter and section then its something old
-                
                 if i!="chapter" and i!="section":
-        
+
                     if i in self.last_result:
                         self.log_id = self.logIDs[i]
                     else:
@@ -117,26 +116,20 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
 
                     if i =='binding':
                         parent_node = self.log_map
-                    
-                    if i=='cover' or i=='endsheet' or i=='paste_down':
-
+                    elif i=='cover' or i=='endsheet' or i=='paste_down':
                         # get the link for master node
                         parent_node = self.log_links['binding']
-
                     else:
-                        
                         if self.first is not None and i!='title_page':
                             parent_node = self.log_links[self.first]
                         else:
                             parent_node = self.log_map
-                            
                 else:
                     create_new_logical = True
                     
                     if self.first is None:
                         self.first = i
                         parent_node = self.log_map
-                            
                     else:
                         if self.first == i:
                             parent_node = self.log_map
