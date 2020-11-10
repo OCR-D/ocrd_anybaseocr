@@ -54,7 +54,6 @@
       "input_file_grp": ["OCR-D-IMG-DESKEW"],
       "output_file_grp": ["OCR-D-IMG-CROP"],
       "parameters": {
-        "force"       :  {"type":"boolean",                      "default":true, "description": "overwrite existing files"},
         "colSeparator":  {"type": "number", "format": "float", "default": 0.04, "description": "consider space between column. 25% of width"},
         "maxRularArea":  {"type": "number", "format": "float", "default": 0.3, "description": "Consider maximum rular area"},
         "minArea":       {"type": "number", "format": "float", "default": 0.05, "description": "rular position in below"},
@@ -65,7 +64,7 @@
         "rularRatioMax": {"type": "number", "format": "float", "default": 10.0, "description": "rular position in below"},
         "rularRatioMin": {"type": "number", "format": "float", "default": 3.0, "description": "rular position in below"},
         "rularWidth":    {"type": "number", "format": "float", "default": 0.95, "description": "maximum rular width"},
-        "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
+        "padding":       {"type": "number", "format": "integer", "default": 10, "description": "extend resulting border by this many px in each direction"}
       }
     },
     "ocrd-anybaseocr-dewarp": {
