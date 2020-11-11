@@ -53,7 +53,9 @@ from ocrd_utils import (
     concat_padded, 
     MIMETYPE_PAGE, 
     coordinates_for_segment,
+    coordinates_of_segment,
     bbox_from_points,
+    bbox_from_polygon,
     points_from_polygon,
     polygon_from_bbox
 )
@@ -484,16 +486,23 @@ class OcrdAnybaseocrCropper(Processor):
             min_x, min_y, max_x, max_y = self.select_borderLine(
                 img_array_rr, lineDetectH, lineDetectV)
 
-        left = max(0, min_x - self.parameter['padding'])
-        top = max(0, min_y - self.parameter['padding'])
-        right = min(page_image.width, max_x + self.parameter['padding'])
-        bottom = min(page_image.height, max_y + self.parameter['padding'])
-        border_polygon = polygon_from_bbox(left, top, right, bottom)
+        def clip(point):
+            x, y = point
+            x = max(0, min(page_image.width, x))
+            y = max(0, min(page_image.height, y))
+            return x, y
+        pad = self.parameter['padding']
+        border_polygon = polygon_from_bbox(min_x - pad, min_y - pad, max_x + pad, max_y + pad)
         border_polygon = coordinates_for_segment(border_polygon, page_image, page_xywh)
+        border_polygon = list(map(clip, border_polygon))
         border_points = points_from_polygon(border_polygon)
-        page.set_Border(BorderType(Coords=CoordsType(border_points)))
+        border = BorderType(Coords=CoordsType(border_points))
+        page.set_Border(border)
+        # get clipped relative coordinates for current image
+        border_polygon = coordinates_of_segment(border, page_image, page_xywh)
+        border_bbox = bbox_from_polygon(border_polygon)
 
-        page_image = crop_image(page_image, box=(left, top, right, bottom))
+        page_image = crop_image(page_image, box=border_bbox)
         page_xywh['features'] += ',cropped'
 
         file_id = make_file_id(input_file, self.output_file_grp)
