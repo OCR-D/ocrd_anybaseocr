@@ -53,8 +53,11 @@ from ocrd_utils import (
     concat_padded, 
     MIMETYPE_PAGE, 
     coordinates_for_segment,
+    coordinates_of_segment,
     bbox_from_points,
-    points_from_polygon
+    bbox_from_polygon,
+    points_from_polygon,
+    polygon_from_bbox
 )
 from ocrd_models.ocrd_page import (
     CoordsType,
@@ -64,7 +67,6 @@ from ocrd_models.ocrd_page import (
 from ocrd_models.ocrd_page_generateds import BorderType
 
 TOOL = 'ocrd-anybaseocr-crop'
-
 
 class OcrdAnybaseocrCropper(Processor):
 
@@ -406,12 +408,6 @@ class OcrdAnybaseocrCropper(Processor):
         if len(textarea) > 0:
             textarea = sorted(textarea, key=lambda x: (
                 (x[2]-x[0])*(x[3]-x[1])), reverse=True)
-            # print textarea
-            x1, y1, x2, y2 = textarea[0]
-            x1 = x1-20 if x1 > 20 else 0
-            x2 = x2+20 if x2 < width-20 else width
-            y1 = y1-40 if y1 > 40 else 0
-            y2 = y2+40 if y2 < height-40 else height
 
             #self.save_pf(base, [x1, y1, x2, y2])
 
@@ -424,10 +420,8 @@ class OcrdAnybaseocrCropper(Processor):
 
         LOG = getLogger('OcrdAnybaseocrCropper')
 
-        oplevel = self.parameter['operation_level']
         for (n, input_file) in enumerate(self.input_files):
             page_id = input_file.pageId or input_file.ID
-
             LOG.info("INPUT FILE %i / %s", n, page_id)
 
             pcgts = page_from_file(self.workspace.download_file(input_file))
@@ -447,12 +441,7 @@ class OcrdAnybaseocrCropper(Processor):
                 feature_filter='cropped',
                 feature_selector='binarized') # should also be deskewed
 
-            if oplevel == "page":
-                self._process_segment(
-                    page_image, page, page_coords, page_id, input_file, n)
-            else:
-                raise Exception(
-                    'Operation level %s, but should be "page".', oplevel)
+            self._process_page(page, page_image, page_coords, input_file)
             file_id = make_file_id(input_file, self.output_file_grp)
             pcgts.set_pcGtsId(file_id)
             self.workspace.add_file(
@@ -464,7 +453,7 @@ class OcrdAnybaseocrCropper(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-    def _process_segment(self, page_image, page, page_xywh, page_id, input_file, n):
+    def _process_page(self, page, page_image, page_xywh, input_file):
         img_array = ocrolib.pil2array(page_image)
 
         # Check if image is RGB or not #FIXME: check not needed anymore?
@@ -492,31 +481,34 @@ class OcrdAnybaseocrCropper(Processor):
             else:
                 min_x, min_y, max_x, max_y = textarea[0]
         elif len(textarea) == 1 and (height*width*0.5 < (abs(textarea[0][2]-textarea[0][0]) * abs(textarea[0][3]-textarea[0][1]))):
-            x1, y1, x2, y2 = textarea[0]
-            x1 = x1-20 if x1 > 20 else 0
-            x2 = x2+20 if x2 < width-20 else width
-            y1 = y1-40 if y1 > 40 else 0
-            y2 = y2+40 if y2 < height-40 else height
-
             min_x, min_y, max_x, max_y = textarea[0]
         else:
             min_x, min_y, max_x, max_y = self.select_borderLine(
                 img_array_rr, lineDetectH, lineDetectV)
 
-        border_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
+        def clip(point):
+            x, y = point
+            x = max(0, min(page_image.width, x))
+            y = max(0, min(page_image.height, y))
+            return x, y
+        pad = self.parameter['padding']
+        border_polygon = polygon_from_bbox(min_x - pad, min_y - pad, max_x + pad, max_y + pad)
         border_polygon = coordinates_for_segment(border_polygon, page_image, page_xywh)
+        border_polygon = list(map(clip, border_polygon))
         border_points = points_from_polygon(border_polygon)
-        brd = BorderType(Coords=CoordsType(border_points))
-        page.set_Border(brd)
+        border = BorderType(Coords=CoordsType(border_points))
+        page.set_Border(border)
+        # get clipped relative coordinates for current image
+        border_polygon = coordinates_of_segment(border, page_image, page_xywh)
+        border_bbox = bbox_from_polygon(border_polygon)
 
-        page_image = crop_image(page_image, box=(min_x, min_y, max_x, max_y))
+        page_image = crop_image(page_image, box=border_bbox)
         page_xywh['features'] += ',cropped'
 
         file_id = make_file_id(input_file, self.output_file_grp)
-
         file_path = self.workspace.save_image_file(page_image,
                                                    file_id + '-IMG',
-                                                   page_id=page_id,
+                                                   page_id=input_file.pageId,
                                                    file_grp=self.output_file_grp)
         page.add_AlternativeImage(AlternativeImageType(
             filename=file_path, comments=page_xywh['features']))
