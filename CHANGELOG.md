@@ -4,6 +4,8 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.1.0] - 2020-11-16
+
 Fixed:
 
   * crop: remove `operation_level` parameter
@@ -55,6 +57,7 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[1.1.0]: ../../compare/v1.1.0...v1.0.2
 [1.0.2]: ../../compare/v1.0.2...v1.0.1
 [1.0.1]: ../../compare/v1.0.1...v1.0.0
 [1.0.0]: ../../compare/v1.0.0...v0.0.5
