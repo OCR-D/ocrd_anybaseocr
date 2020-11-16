@@ -4,6 +4,12 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+Fixed:
+
+  * crop: remove `operation_level` parameter
+  * crop: remove `force` parameter
+  * crop: fix setting pageId of derived images
+
 ## [1.0.2] - 2020-09-24
 
 Fixed:
