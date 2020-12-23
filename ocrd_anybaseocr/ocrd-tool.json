@@ -150,8 +150,7 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Segments and classifies document segments in a single page and outputs the the region polygons and classes.",
       "parameters": {     
-        "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
-        "block_segmentation_weights": { "type": "string","default":"models/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
+        "block_segmentation_weights": { "type": "string","default":"block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
         "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"},
         "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"},
         "th"       :   {"type": "integer", "default": 15, "description": "num of pixels to include in the area region"},
