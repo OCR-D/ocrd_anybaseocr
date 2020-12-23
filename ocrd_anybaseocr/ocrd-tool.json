@@ -76,7 +76,7 @@
       "output_file_grp": ["OCR-D-IMG-DEWARP"],
       "parameters": {
         "imgresize":    { "type": "string",                     "default": "resize_and_crop", "description": "run on original size image"},
-        "model_path":	{ "type": "string", "default": "models/latest_net_G.pth", "description": "Path to the trained pix2pixHD model (Download from https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download)", "cacheable": true, "content-type": "application/vnd.pytorch"},
+        "model_path":	{ "type": "string", "default": "latest_net_G.pth", "description": "Path to the trained pix2pixHD model", "cacheable": true, "content-type": "application/vnd.pytorch"},
         "gpu_id":       { "type": "number", "format": "integer", "default": -1,   "description": "device ID of CUDA GPU to use. Set -1 to use CPU only."},
         "resizeHeight": { "type": "number", "format": "integer", "default": 1024, "description": "resized image height"},
         "resizeWidth":  { "type": "number", "format": "integer", "default": 1024, "description": "resized image width"},
