@@ -65,7 +65,7 @@ class OcrdAnybaseocrTiseg(Processor):
         model = None
         if self.parameter['use_deeplr']:
             
-            model_weights = self.parameter['seg_weights']
+            model_weights = self.resolve_resource(self.parameter['seg_weights'])
             
             if not Path(model_weights).is_file():
                 LOG.error("""\

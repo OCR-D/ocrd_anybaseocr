@@ -92,7 +92,7 @@
       "description": "Separates the text and non-text elements with anyBaseOCR. Outputs clipped versions of the input image as AlternativeImage containing either only text or non-text elements.",
       "parameters": {
         "use_deeplr":      {"type":"boolean",                      "default":true, "description": "use deep learning model"},
-        "seg_weights":     {"type":"string",                       "default":"models/seg_model.hdf5", "description":"path to weights file", "required":false},
+        "seg_weights":     {"type":"string",                       "default":"seg_model.hdf5", "description":"path to weights file", "required":false},
          "classes":        {"type":"integer",                      "default":3, "description":"number of classes" },
          "width"  :        {"type":"integer",                      "default":1024, "description":"input image height"},
          "height" :        {"type":"integer",                      "default":800, "description":"input image width"},
