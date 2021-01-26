@@ -138,8 +138,8 @@
       "description": "Generates a table-of-content like document structure of the whole document.",
       "parameters": {
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
-        "model_path":         { "type": "string", "default":"models/structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
-        "class_mapping_path": { "type": "string", "default":"models/mapping_densenet.pickle","required": false, "description": "Path to Layout Structure Classes"}
+        "model_path":         { "type": "string", "default":"structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
+        "class_mapping_path": { "type": "string", "default":"mapping_densenet.pickle","required": false, "description": "Path to Layout Structure Classes"}
       }
     },
     "ocrd-anybaseocr-block-segmentation": {
