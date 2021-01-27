@@ -113,27 +113,27 @@ cli-test: assets-clean assets \
 
 # Test binarization CLI
 test-binarize:
-	cd $(TESTDATA) && ocrd-anybaseocr-binarize -m mets.xml -I MAX -O BIN-TEST
+	ocrd-anybaseocr-binarize -m $(TESTDATA)/mets.xml -I MAX -O BIN-TEST
 
 # Test deskewing CLI
 test-deskew:
-	cd $(TESTDATA) && ocrd-anybaseocr-deskew -m mets.xml -I BIN-TEST -O DESKEW-TEST
+	ocrd-anybaseocr-deskew -m $(TESTDATA)/mets.xml -I BIN-TEST -O DESKEW-TEST
 
 # Test cropping CLI
 test-crop:
-	cd $(TESTDATA) && ocrd-anybaseocr-crop -m mets.xml -I DESKEW-TEST -O CROP-TEST
+	ocrd-anybaseocr-crop -m $(TESTDATA)/mets.xml -I DESKEW-TEST -O CROP-TEST
 
 # Test text/non-text segmentation CLI
 test-tiseg:
-	cd $(TESTDATA) && ocrd-anybaseocr-tiseg -m mets.xml -I CROP-TEST -O TISEG-TEST
+	ocrd-anybaseocr-tiseg -m $(TESTDATA)/mets.xml --overwrite -I CROP-TEST -O TISEG-TEST
 
 # Test block segmentation CLI
 test-block-segmentation:
-	cd $(TESTDATA) && ocrd-anybaseocr-block-segmentation -m mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT
+	ocrd-anybaseocr-block-segmentation -m $(TESTDATA)/mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT
 
 # Test textline extraction CLI
 test-textline:
-	cd $(TESTDATA) && ocrd-anybaseocr-textline -m mets.xml -I OCR-D-BLOCK-SEGMENT -O TL-TEST
+	ocrd-anybaseocr-textline -m $(TESTDATA)/mets.xml -I OCR-D-BLOCK-SEGMENT -O TL-TEST
 
 # Test document structure analysis CLI
 test-layout-analysis:
