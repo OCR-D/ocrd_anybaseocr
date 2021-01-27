@@ -125,11 +125,11 @@ test-crop:
 
 # Test text/non-text segmentation CLI
 test-tiseg:
-	cd $(TESTDATA) && ocrd-anybaseocr-tiseg -m mets.xml -I CROP-TEST -O TISEG-TEST -P seg_weights seg_model.hdf5
+	cd $(TESTDATA) && ocrd-anybaseocr-tiseg -m mets.xml -I CROP-TEST -O TISEG-TEST -P seg_weights $(PWD)/ocrd-resources/seg_model.hdf5
 
 # Test block segmentation CLI
 test-block-segmentation:
-	cd $(TESTDATA) && ocrd-anybaseocr-block-segmentation -m mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT -P block_segmentation_weights block_segmentation_weights.h5
+	cd $(TESTDATA) && ocrd-anybaseocr-block-segmentation -m mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT -P block_segmentation_weights $(PWD)/ocrd-resources/block_segmentation_weights.h5
 
 # Test textline extraction CLI
 test-textline:
