@@ -137,7 +137,4 @@ test-textline:
 
 # Test document structure analysis CLI
 test-layout-analysis:
-	cd $(TESTDATA) && ocrd-anybaseocr-layout-analysis -m mets.xml \
-		-I BIN-TEST -O LAYOUT \
-		-P model_path structure_analysis.h5 \
-		-P class_mapping_path mapping_densenet.pickle
+	ocrd-anybaseocr-layout-analysis -m $(TESTDATA)/mets.xml -I BIN-TEST -O LAYOUT
