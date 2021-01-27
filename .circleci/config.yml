@@ -23,6 +23,7 @@ jobs:
             pip install -r requirements.test.txt
             make patch-pix2pixhd
             pip install -r requirements.txt
+            make models
       - save_cache:
           paths:
             - ./venv
