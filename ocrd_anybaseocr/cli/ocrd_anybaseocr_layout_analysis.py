@@ -210,8 +210,8 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             # sys.exit(1)
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
-        model_path = Path(self.resolve_resource(parameter['model_path']))
-        class_mapper_path = Path(self.resolve_resource(parameter['class_mapping_path']))
+        model_path = Path(self.resolve_resource(self.parameter['model_path']))
+        class_mapper_path = Path(self.resolve_resource(self.parameter['class_mapping_path']))
         if not Path(model_path).is_file():
             LOG.error("""\
                 Layout Classfication model was not found at '%s'. Make sure the `model_path` parameter
