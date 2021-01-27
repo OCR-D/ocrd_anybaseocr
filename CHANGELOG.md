@@ -4,6 +4,12 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.2.0] - 2021-01-27
+
+Changed:
+
+  * Use the OCR-D/core `resmgr` mechanism to resolve file parameters
+
 ## [1.1.0] - 2020-11-16
 
 Fixed:
