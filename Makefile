@@ -17,8 +17,6 @@ TESTS=tests
 # Tag to publish docker image to
 DOCKER_TAG = ocrd/anybaseocr
 
-MODELS = $(PWD)/models
-
 # BEGIN-EVAL makefile-parser --make-help Makefile
 
 help:
@@ -28,7 +26,6 @@ help:
 	@echo "    deps                                  Install python deps via pip"
 	@echo "    install                               Install"
 	@echo "    patch-pix2pixhd                       Patch pix2pixhd to trick it into thinking it was part of this mess"
-	@echo "    models/block_segmentation_weights.h5  Download sample model TODO Add other models here"
 	@echo "    repo/assets                           Clone OCR-D/assets to ./repo/assets"
 	@echo "    assets-clean                          Remove assets"
 	@echo "    assets                                Setup test assets"
@@ -77,25 +74,12 @@ pix2pixhd:
 
 
 # Download sample model TODO Add other models here
-model: models/latest_net_G.pth
-models/latest_net_G.pth:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download"
-	
-model: models/block_segmentation_weights.h5
-models/block_segmentation_weights.h5:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/dgACCYzytxnb7Ey/download"
-
-model: models/structure_analysis.h5
-models/structure_analysis.h5:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/E85PL48Cjs8ZkJL/download"
-
-model: models/mapping_densenet.pickle
-models/mapping_densenet.pickle:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/2kpMxnMSSqS8z3X/download"
-	
-model: models/seg_model.hdf5
-models/seg_model.hdf5:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/Qxm8baqq9Zf8brQ/download"
+.PHONY: models
+models:
+	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-dewarp '*'
+	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-block-segmentation '*'
+	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-layout-analysis '*'
+	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-tiseg '*'
 
 docker:
 	docker build -t '$(DOCKER_TAG)' .
@@ -113,15 +97,14 @@ assets-clean:
 assets: repo/assets
 	mkdir -p $(testdir)/assets
 	cp -r -t $(testdir)/assets repo/assets/data/*
-	mkdir -p models
-	make model
-	ln -sr models/* $(TESTDATA)/
+	$(MAKE) models
+	ln -sr ocrd-resources/* $(TESTDATA)/
 #
 # Tests
 #
 
 # Run unit tests
-test: assets-clean assets models/latest_net_G.pth
+test: assets-clean assets
 	$(PYTHON) -m pytest --continue-on-collection-errors $(TESTS)
 
 # Run CLI tests
