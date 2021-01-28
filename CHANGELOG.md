@@ -4,11 +4,15 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
-## [1.2.0] - 2021-01-27
+## [1.3.0] - 2021-01-28
 
 Changed:
 
   * Use the OCR-D/core `resmgr` mechanism to resolve file parameters
+
+## [1.2.0] - 2021-01-27
+
+Please disregard, forgot to merge #78
 
 ## [1.1.0] - 2020-11-16
 
@@ -63,6 +67,8 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[1.3.0]: ../../compare/v1.1.0...v1.2.0
+[1.2.0]: ../../compare/v1.2.0...v1.1.0
 [1.1.0]: ../../compare/v1.1.0...v1.0.2
 [1.0.2]: ../../compare/v1.0.2...v1.0.1
 [1.0.1]: ../../compare/v1.0.1...v1.0.0
