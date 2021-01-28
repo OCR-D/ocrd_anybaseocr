@@ -4,8 +4,9 @@
 import sys
 import os
 from pathlib import Path
-import click
+from pkg_resources import resource_filename
 
+import click
 import cv2
 import numpy as np
 from shapely.geometry import Polygon
@@ -78,8 +79,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         if not tf.test.is_gpu_available():
             LOG.warning("Tensorflow cannot detect CUDA installation. Running without GPU will be slow.")
 
-        model_path = Path(self.parameter['block_segmentation_model'])
-        model_weights = Path(self.parameter['block_segmentation_weights'])
+        model_path = resource_filename(__name__, '../mrcnn')
+        model_weights = Path(self.resolve_resource(self.parameter['block_segmentation_weights']))
 
         confidence = self.parameter['DETECTION_MIN_CONFIDENCE']
 #         DETECTION_MIN_CONFIDENCE = Path(self.parameter['DETECTION_MIN_CONFIDENCE'])

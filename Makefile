@@ -17,8 +17,6 @@ TESTS=tests
 # Tag to publish docker image to
 DOCKER_TAG = ocrd/anybaseocr
 
-MODELS = $(PWD)/models
-
 # BEGIN-EVAL makefile-parser --make-help Makefile
 
 help:
@@ -28,7 +26,6 @@ help:
 	@echo "    deps                                  Install python deps via pip"
 	@echo "    install                               Install"
 	@echo "    patch-pix2pixhd                       Patch pix2pixhd to trick it into thinking it was part of this mess"
-	@echo "    models/block_segmentation_weights.h5  Download sample model TODO Add other models here"
 	@echo "    repo/assets                           Clone OCR-D/assets to ./repo/assets"
 	@echo "    assets-clean                          Remove assets"
 	@echo "    assets                                Setup test assets"
@@ -77,25 +74,12 @@ pix2pixhd:
 
 
 # Download sample model TODO Add other models here
-model: models/latest_net_G.pth
-models/latest_net_G.pth:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download"
-	
-model: models/block_segmentation_weights.h5
-models/block_segmentation_weights.h5:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/dgACCYzytxnb7Ey/download"
-
-model: models/structure_analysis.h5
-models/structure_analysis.h5:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/E85PL48Cjs8ZkJL/download"
-
-model: models/mapping_densenet.pickle
-models/mapping_densenet.pickle:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/2kpMxnMSSqS8z3X/download"
-	
-model: models/seg_model.hdf5
-models/seg_model.hdf5:
-	wget -O"$@" "https://cloud.dfki.de/owncloud/index.php/s/Qxm8baqq9Zf8brQ/download"
+.PHONY: models
+models:
+	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-dewarp '*'
+	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-block-segmentation '*'
+	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-layout-analysis '*'
+	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-tiseg '*'
 
 docker:
 	docker build -t '$(DOCKER_TAG)' .
@@ -113,15 +97,14 @@ assets-clean:
 assets: repo/assets
 	mkdir -p $(testdir)/assets
 	cp -r -t $(testdir)/assets repo/assets/data/*
-	mkdir -p models
-	make model
-	ln -sr models/* $(TESTDATA)/
+	$(MAKE) models
+	ln -sr ocrd-resources/* $(TESTDATA)/
 #
 # Tests
 #
 
 # Run unit tests
-test: assets-clean assets models/latest_net_G.pth
+test: assets-clean assets
 	$(PYTHON) -m pytest --continue-on-collection-errors $(TESTS)
 
 # Run CLI tests
@@ -130,31 +113,28 @@ cli-test: assets-clean assets \
 
 # Test binarization CLI
 test-binarize:
-	cd $(TESTDATA) && ocrd-anybaseocr-binarize -m mets.xml -I MAX -O BIN-TEST
+	ocrd-anybaseocr-binarize -m $(TESTDATA)/mets.xml -I MAX -O BIN-TEST
 
 # Test deskewing CLI
 test-deskew:
-	cd $(TESTDATA) && ocrd-anybaseocr-deskew -m mets.xml -I BIN-TEST -O DESKEW-TEST
+	ocrd-anybaseocr-deskew -m $(TESTDATA)/mets.xml -I BIN-TEST -O DESKEW-TEST
 
 # Test cropping CLI
 test-crop:
-	cd $(TESTDATA) && ocrd-anybaseocr-crop -m mets.xml -I DESKEW-TEST -O CROP-TEST
+	ocrd-anybaseocr-crop -m $(TESTDATA)/mets.xml -I DESKEW-TEST -O CROP-TEST
 
 # Test text/non-text segmentation CLI
 test-tiseg:
-	cd $(TESTDATA) && ocrd-anybaseocr-tiseg -m mets.xml -I CROP-TEST -O TISEG-TEST -P seg_weights seg_model.hdf5
+	ocrd-anybaseocr-tiseg -m $(TESTDATA)/mets.xml --overwrite -I CROP-TEST -O TISEG-TEST
 
 # Test block segmentation CLI
 test-block-segmentation:
-	cd $(TESTDATA) && ocrd-anybaseocr-block-segmentation -m mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT -P block_segmentation_weights block_segmentation_weights.h5
+	ocrd-anybaseocr-block-segmentation -m $(TESTDATA)/mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT
 
 # Test textline extraction CLI
 test-textline:
-	cd $(TESTDATA) && ocrd-anybaseocr-textline -m mets.xml -I OCR-D-BLOCK-SEGMENT -O TL-TEST
+	ocrd-anybaseocr-textline -m $(TESTDATA)/mets.xml -I OCR-D-BLOCK-SEGMENT -O TL-TEST
 
 # Test document structure analysis CLI
 test-layout-analysis:
-	cd $(TESTDATA) && ocrd-anybaseocr-layout-analysis -m mets.xml \
-		-I BIN-TEST -O LAYOUT \
-		-P model_path structure_analysis.h5 \
-		-P class_mapping_path mapping_densenet.pickle
+	ocrd-anybaseocr-layout-analysis -m $(TESTDATA)/mets.xml -I BIN-TEST -O LAYOUT

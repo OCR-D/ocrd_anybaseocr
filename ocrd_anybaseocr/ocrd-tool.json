@@ -76,7 +76,7 @@
       "output_file_grp": ["OCR-D-IMG-DEWARP"],
       "parameters": {
         "imgresize":    { "type": "string",                     "default": "resize_and_crop", "description": "run on original size image"},
-        "model_path":	{ "type": "string", "default": "models/latest_net_G.pth", "description": "Path to the trained pix2pixHD model (Download from https://cloud.dfki.de/owncloud/index.php/s/3zKza5sRfQB3ygy/download)", "cacheable": true, "content-type": "application/vnd.pytorch"},
+        "model_path":	{ "type": "string", "default": "latest_net_G.pth", "description": "Path to the trained pix2pixHD model", "cacheable": true, "content-type": "application/vnd.pytorch"},
         "gpu_id":       { "type": "number", "format": "integer", "default": -1,   "description": "device ID of CUDA GPU to use. Set -1 to use CPU only."},
         "resizeHeight": { "type": "number", "format": "integer", "default": 1024, "description": "resized image height"},
         "resizeWidth":  { "type": "number", "format": "integer", "default": 1024, "description": "resized image width"},
@@ -92,7 +92,7 @@
       "description": "Separates the text and non-text elements with anyBaseOCR. Outputs clipped versions of the input image as AlternativeImage containing either only text or non-text elements.",
       "parameters": {
         "use_deeplr":      {"type":"boolean",                      "default":true, "description": "use deep learning model"},
-        "seg_weights":     {"type":"string",                       "default":"models/seg_model.hdf5", "description":"path to weights file", "required":false},
+        "seg_weights":     {"type":"string",                       "default":"seg_model.hdf5", "description":"path to weights file", "required":false},
          "classes":        {"type":"integer",                      "default":3, "description":"number of classes" },
          "width"  :        {"type":"integer",                      "default":1024, "description":"input image height"},
          "height" :        {"type":"integer",                      "default":800, "description":"input image width"},
@@ -138,8 +138,8 @@
       "description": "Generates a table-of-content like document structure of the whole document.",
       "parameters": {
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
-        "model_path":         { "type": "string", "default":"models/structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
-        "class_mapping_path": { "type": "string", "default":"models/mapping_densenet.pickle","required": false, "description": "Path to Layout Structure Classes"}
+        "model_path":         { "type": "string", "default":"structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
+        "class_mapping_path": { "type": "string", "default":"mapping_densenet.pickle","required": false, "description": "Path to Layout Structure Classes"}
       }
     },
     "ocrd-anybaseocr-block-segmentation": {
@@ -150,8 +150,7 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Segments and classifies document segments in a single page and outputs the the region polygons and classes.",
       "parameters": {     
-        "block_segmentation_model":   { "type": "string","default":"mrcnn/", "required": false, "description": "Path to block segmentation Model"},
-        "block_segmentation_weights": { "type": "string","default":"models/block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
+        "block_segmentation_weights": { "type": "string","default":"block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
         "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"},
         "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"},
         "th"       :   {"type": "integer", "default": 15, "description": "num of pixels to include in the area region"},

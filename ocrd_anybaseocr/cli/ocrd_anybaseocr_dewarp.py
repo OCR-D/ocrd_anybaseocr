@@ -38,6 +38,7 @@ def prepare_data(opt, page_img):
     # XXX this needs to be created or the CreateDataLoader(opt) call will fail
     Path(opt.dataroot, 'test_A').mkdir()
     data_loader = CreateDataLoader(opt)
+    print(dir(page_img))
     data_loader.dataset.A_paths = [page_img.filename]
     data_loader.dataset.dataset_size = len(data_loader.dataset.A_paths)
     data_loader.dataloader = torch.utils.data.DataLoader(data_loader.dataset,
@@ -102,7 +103,7 @@ class OcrdAnybaseocrDewarper(Processor):
             LOG.warning("torch cannot detect CUDA installation.")
             self.parameter['gpu_id'] = -1
 
-        model_path = Path(self.parameter['model_path'])
+        model_path = Path(self.resolve_resource(self.parameter['model_path']))
         if not model_path.is_file():
             LOG.error("""\
                     pix2pixHD model file was not found at '%s'. Make sure this file exists.
