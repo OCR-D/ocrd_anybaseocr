@@ -88,11 +88,12 @@ class OcrdAnybaseocrTiseg(Processor):
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
 
             if self.parameter['use_deeplr']:
-                page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='binarized,deskewed,cropped')
+                page_image, page_coords, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='binarized,deskewed,cropped')
             else:
-                page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed,cropped')
+                # _should_ also be deskewed and cropped, but no need to enforce that here
+                page_image, page_coords, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
 
-            self._process_segment(page_image, page, page_xywh, page_id, input_file, n, model)
+            self._process_segment(page, page_image, page_coords, page_id, input_file, model)
 
             file_id = make_file_id(input_file, self.output_file_grp)
             pcgts.set_pcGtsId(file_id)
@@ -105,7 +106,7 @@ class OcrdAnybaseocrTiseg(Processor):
                 content=to_xml(pcgts).encode('utf-8'),
             )
 
-    def _process_segment(self,page_image, page, page_xywh, page_id, input_file, n, model):
+    def _process_segment(self, page, page_image, page_coords, page_id, input_file, model):
         LOG = getLogger('OcrdAnybaseocrTiseg')
 
         if model:
@@ -177,15 +178,16 @@ class OcrdAnybaseocrTiseg(Processor):
                                    page_id=page_id,
                                    file_grp=self.output_file_grp,
             )
-        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']+',non_text'))
+        page.add_AlternativeImage(AlternativeImageType(
+            filename=file_path, comments=page_coords['features'] + ',non_text'))
 
-        page_xywh['features'] += ',clipped'
         file_path = self.workspace.save_image_file(text_part,
                                    file_id+"_txt",
                                    page_id=page_id,
                                    file_grp=self.output_file_grp,
             )
-        page.add_AlternativeImage(AlternativeImageType(filename=file_path, comments=page_xywh['features']))
+        page.add_AlternativeImage(AlternativeImageType(
+            filename=file_path, comments=page_coords['features'] + ',clipped'))
 
     def pixMorphSequence_mask_seed_fill_holes(self, I):
         Imask = self.reduction_T_1(I)
