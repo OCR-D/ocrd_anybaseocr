@@ -152,17 +152,14 @@ class OcrdAnybaseocrTiseg(Processor):
             Iseedfill = self.expansion(Iseedfill, (rows, cols))
 
             # Write Text and Non-Text images
-            image_part = np.array((1-I*Iseedfill), dtype=int)
-            text_part = np.array((1-I*(1-Iseedfill)), dtype=int)
+            nontext_part = np.array(255*(1-I*Iseedfill), dtype='B')
+            text_part = np.array(255*(1-I*(1-Iseedfill)), dtype='B')
 
-            bin_array = np.array(255*(text_part>ocrolib.midrange(image_part)),'B')
-            text_part = ocrolib.array2pil(bin_array)
-
-            bin_array = np.array(255*(image_part>ocrolib.midrange(text_part)),'B')
-            image_part = ocrolib.array2pil(bin_array)
+            nontext_image = ocrolib.array2pil(nontext_part)
+            text_image = ocrolib.array2pil(text_part)
 
         file_id = make_file_id(input_file, self.output_file_grp)
-        file_path = self.workspace.save_image_file(image_part,
+        file_path = self.workspace.save_image_file(nontext_image,
                                    file_id+"_img",
                                    page_id=input_file.pageId,
                                    file_grp=self.output_file_grp,
@@ -170,7 +167,7 @@ class OcrdAnybaseocrTiseg(Processor):
         page.add_AlternativeImage(AlternativeImageType(
             filename=file_path, comments=page_coords['features'] + ',non_text'))
 
-        file_path = self.workspace.save_image_file(text_part,
+        file_path = self.workspace.save_image_file(text_image,
                                    file_id+"_txt",
                                    page_id=input_file.pageId,
                                    file_grp=self.output_file_grp,
