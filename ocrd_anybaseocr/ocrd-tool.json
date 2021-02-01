@@ -91,12 +91,19 @@
       "steps": ["layout/segmentation/text-image"],
       "description": "Separates the text and non-text elements with anyBaseOCR. Outputs clipped versions of the input image as AlternativeImage containing either only text or non-text elements.",
       "parameters": {
-        "use_deeplr":      {"type":"boolean",                      "default":true, "description": "use deep learning model"},
-        "seg_weights":     {"type":"string",                       "default":"seg_model.hdf5", "description":"path to weights file", "required":false},
-         "classes":        {"type":"integer",                      "default":3, "description":"number of classes" },
-         "width"  :        {"type":"integer",                      "default":1024, "description":"input image height"},
-         "height" :        {"type":"integer",                      "default":800, "description":"input image width"},
-        "operation_level": {"type": "string", "enum": ["page","region", "line"], "default": "page","description": "PAGE XML hierarchy level to operate on"}
+        "use_deeplr": {
+          "type":"boolean",
+          "default":true,
+          "description": "Whether to use deep learning model (UNet pixel classifier) instead of rule-based implementation (multi-resolution morphology)."
+        },
+        "seg_weights": {
+          "type":"string",
+          "format":"uri",
+          "content-type": "application/x-hdf;subtype=bag",
+          "cacheable": true,
+          "default":"seg_model.hdf5",
+          "description":"Path to weights file for deep learning model when use_deeplr is true."
+        }
       }
     },
     "ocrd-anybaseocr-textline": {

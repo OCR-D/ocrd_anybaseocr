@@ -60,7 +60,6 @@ class OcrdAnybaseocrTiseg(Processor):
 
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
-        oplevel = self.parameter['operation_level']
 
         model = None
         if self.parameter['use_deeplr']:
@@ -93,11 +92,7 @@ class OcrdAnybaseocrTiseg(Processor):
             else:
                 page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized,deskewed,cropped')
 
-            if oplevel == 'page':
-                self._process_segment(page_image, page, page_xywh, page_id, input_file, n, model)
-            else:
-                LOG.warning('Operation level %s, but should be "page".', oplevel)
-                break
+            self._process_segment(page_image, page, page_xywh, page_id, input_file, n, model)
 
             file_id = make_file_id(input_file, self.output_file_grp)
             pcgts.set_pcGtsId(file_id)
