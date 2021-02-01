@@ -8,22 +8,23 @@
 # URL - https://www.dfki.de/fileadmin/user_upload/import/9512_ICDAR2017_anyOCR.pdf
 
 
-from scipy import ones, zeros, array, where, shape, ndimage, logical_or, logical_and
 import copy
-from pylab import unique
-import ocrolib
 import json
-from PIL import Image
-import sys
 import os
+from pathlib import Path
+import sys
+import math
+import click
+from PIL import Image
+from scipy import ndimage
 import numpy as np
 import shapely
-import cv2
-import math
-from ..constants import OCRD_TOOL
-from pathlib import Path
+import ocrolib
+from keras.models import load_model
+#from keras_segmentation.models.unet import resnet50_unet
 from ocrd import Processor
 from ocrd_modelfactory import page_from_file
+from ocrd_models.ocrd_page import to_xml, AlternativeImageType
 from ocrd_utils import (
     getLogger,
     concat_padded,
@@ -33,13 +34,8 @@ from ocrd_utils import (
     make_file_id,
     assert_file_grp_cardinality,
 )
-import click
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
-
-from keras.models import load_model
-#from keras_segmentation.models.unet import resnet50_unet
-
-from ocrd_models.ocrd_page import to_xml, AlternativeImageType
+from ..constants import OCRD_TOOL
 
 TOOL = 'ocrd-anybaseocr-tiseg'
 
@@ -131,10 +127,10 @@ class OcrdAnybaseocrTiseg(Processor):
             image_part = np.ones(out.shape)
             image_part[np.where(out==2)] = 0
 
-            image_part = array(255*(image_part), 'B')
+            image_part = np.array(255*(image_part), 'B')
             image_part = ocrolib.array2pil(image_part)
 
-            text_part = array(255*(text_part), 'B')
+            text_part = np.array(255*(text_part), 'B')
             text_part = ocrolib.array2pil(text_part)
 
             text_part = text_part.resize(page_image.size, Image.BICUBIC)
@@ -155,20 +151,20 @@ class OcrdAnybaseocrTiseg(Processor):
             Iseedfill = self.pixSeedfillBinary(Imask, Iseed)
 
             # Dilation of Iseedfill
-            mask = ones((3, 3))
+            mask = np.ones((3, 3))
             Iseedfill = ndimage.binary_dilation(Iseedfill, mask)
 
             # Expansion of Iseedfill to become equal in size of I
             Iseedfill = self.expansion(Iseedfill, (rows, cols))
 
             # Write Text and Non-Text images
-            image_part = array((1-I*Iseedfill), dtype=int)
-            text_part = array((1-I*(1-Iseedfill)), dtype=int)
+            image_part = np.array((1-I*Iseedfill), dtype=int)
+            text_part = np.array((1-I*(1-Iseedfill)), dtype=int)
 
-            bin_array = array(255*(text_part>ocrolib.midrange(image_part)),'B')
+            bin_array = np.array(255*(text_part>ocrolib.midrange(image_part)),'B')
             text_part = ocrolib.array2pil(bin_array)
 
-            bin_array = array(255*(text_part>ocrolib.midrange(text_part)),'B')
+            bin_array = np.array(255*(text_part>ocrolib.midrange(text_part)),'B')
             image_part = ocrolib.array2pil(bin_array)
 
 
@@ -195,53 +191,53 @@ class OcrdAnybaseocrTiseg(Processor):
         Imask = ndimage.binary_fill_holes(Imask)
         Iseed = self.reduction_T_4(Imask)
         Iseed = self.reduction_T_3(Iseed)
-        mask = array(ones((5, 5)), dtype=int)
+        mask = np.array(np.ones((5, 5)), dtype=int)
         Iseed = ndimage.binary_opening(Iseed, mask)
         Iseed = self.expansion(Iseed, Imask.shape)
         return Imask, Iseed
 
     def pixSeedfillBinary(self, Imask, Iseed):
         Iseedfill = copy.deepcopy(Iseed)
-        s = ones((3, 3))
+        s = np.ones((3, 3))
         Ijmask, k = ndimage.label(Imask, s)
         Ijmask2 = Ijmask * Iseedfill
-        A = list(unique(Ijmask2))
+        A = list(np.unique(Ijmask2))
         A.remove(0)
         for i in range(0, len(A)):
-            x, y = where(Ijmask == A[i])
+            x, y = np.where(Ijmask == A[i])
             Iseedfill[x, y] = 1
         return Iseedfill
 
     def reduction_T_1(self, I):
-        A = logical_or(I[0:-1:2, :], I[1::2, :])
-        A = logical_or(A[:, 0:-1:2], A[:, 1::2])
+        A = np.logical_or(I[0:-1:2, :], I[1::2, :])
+        A = np.logical_or(A[:, 0:-1:2], A[:, 1::2])
         return A
 
     def reduction_T_2(self, I):
-        A = logical_or(I[0:-1:2, :], I[1::2, :])
-        A = logical_and(A[:, 0:-1:2], A[:, 1::2])
-        B = logical_and(I[0:-1:2, :], I[1::2, :])
-        B = logical_or(B[:, 0:-1:2], B[:, 1::2])
-        C = logical_or(A, B)
+        A = np.logical_or(I[0:-1:2, :], I[1::2, :])
+        A = np.logical_and(A[:, 0:-1:2], A[:, 1::2])
+        B = np.logical_and(I[0:-1:2, :], I[1::2, :])
+        B = np.logical_or(B[:, 0:-1:2], B[:, 1::2])
+        C = np.logical_or(A, B)
         return C
 
     def reduction_T_3(self, I):
-        A = logical_or(I[0:-1:2, :], I[1::2, :])
-        A = logical_and(A[:, 0:-1:2], A[:, 1::2])
-        B = logical_and(I[0:-1:2, :], I[1::2, :])
-        B = logical_or(B[:, 0:-1:2], B[:, 1::2])
-        C = logical_and(A, B)
+        A = np.logical_or(I[0:-1:2, :], I[1::2, :])
+        A = np.logical_and(A[:, 0:-1:2], A[:, 1::2])
+        B = np.logical_and(I[0:-1:2, :], I[1::2, :])
+        B = np.logical_or(B[:, 0:-1:2], B[:, 1::2])
+        C = np.logical_and(A, B)
         return C
 
     def reduction_T_4(self, I):
-        A = logical_and(I[0:-1:2, :], I[1::2, :])
-        A = logical_and(A[:, 0:-1:2], A[:, 1::2])
+        A = np.logical_and(I[0:-1:2, :], I[1::2, :])
+        A = np.logical_and(A[:, 0:-1:2], A[:, 1::2])
         return A
 
     def expansion(self, I, rows_cols):
         r, c = I.shape
         rows, cols = rows_cols
-        A = zeros((rows, cols))
+        A = np.zeros((rows, cols))
         A[0:4*r:4, 0:4*c:4] = I
         A[1:4*r:4, :] = A[0:4*r:4, :]
         A[2:4*r:4, :] = A[0:4*r:4, :]
