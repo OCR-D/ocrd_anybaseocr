@@ -175,7 +175,7 @@ class OcrdAnybaseocrTiseg(Processor):
         file_id = make_file_id(input_file, self.output_file_grp)
         file_path = self.workspace.save_image_file(image_part,
                                    file_id+"_img",
-                                   page_id=page_id,
+                                   page_id=input_file.pageId,
                                    file_grp=self.output_file_grp,
             )
         page.add_AlternativeImage(AlternativeImageType(
@@ -183,7 +183,7 @@ class OcrdAnybaseocrTiseg(Processor):
 
         file_path = self.workspace.save_image_file(text_part,
                                    file_id+"_txt",
-                                   page_id=page_id,
+                                   page_id=input_file.pageId,
                                    file_grp=self.output_file_grp,
             )
         page.add_AlternativeImage(AlternativeImageType(
