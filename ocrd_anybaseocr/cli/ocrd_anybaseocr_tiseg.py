@@ -158,9 +158,8 @@ class OcrdAnybaseocrTiseg(Processor):
             bin_array = np.array(255*(text_part>ocrolib.midrange(image_part)),'B')
             text_part = ocrolib.array2pil(bin_array)
 
-            bin_array = np.array(255*(text_part>ocrolib.midrange(text_part)),'B')
+            bin_array = np.array(255*(image_part>ocrolib.midrange(text_part)),'B')
             image_part = ocrolib.array2pil(bin_array)
-
 
         file_id = make_file_id(input_file, self.output_file_grp)
         file_path = self.workspace.save_image_file(image_part,
