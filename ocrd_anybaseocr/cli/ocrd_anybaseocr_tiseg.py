@@ -60,18 +60,13 @@ class OcrdAnybaseocrTiseg(Processor):
             self.model = load_model(model_weights)
             LOG.info('Loaded segmentation model')
             
-    def crop_image(self, image_path, crop_region):
-        img = Image.open(image_path)
-        cropped = img.crop(crop_region)
-        return cropped
-
     def process(self):
         LOG = getLogger('OcrdAnybaseocrTiseg')
 
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
 
-        for (n, input_file) in enumerate(self.input_files):
+        for input_file in self.input_files:
             page_id = input_file.pageId or input_file.ID
 
             pcgts = page_from_file(self.workspace.download_file(input_file))
@@ -81,10 +76,12 @@ class OcrdAnybaseocrTiseg(Processor):
             LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
 
             if self.parameter['use_deeplr']:
-                page_image, page_coords, page_image_info = self.workspace.image_from_page(page, page_id, feature_filter='binarized,deskewed,cropped')
+                kwargs = {'feature_filter': 'binarized,deskewed,cropped'}
             else:
                 # _should_ also be deskewed and cropped, but no need to enforce that here
-                page_image, page_coords, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
+                kwargs = {'feature_selector': 'binarized'}
+            page_image, page_coords, page_image_info = self.workspace.image_from_page(
+                page, page_id, **kwargs)
 
             self._process_segment(page, page_image, page_coords, page_id, input_file)
 
