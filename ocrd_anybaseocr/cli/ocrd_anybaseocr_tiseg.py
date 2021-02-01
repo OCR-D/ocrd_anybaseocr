@@ -170,7 +170,7 @@ class OcrdAnybaseocrTiseg(Processor):
             image_part = array((1-I*Iseedfill), dtype=int)
             text_part = array((1-I*(1-Iseedfill)), dtype=int)   
 
-            bin_array = array(255*(text_part>ocrolib.midrange(img_part)),'B')
+            bin_array = array(255*(text_part>ocrolib.midrange(image_part)),'B')
             text_part = ocrolib.array2pil(bin_array)                            
             
             bin_array = array(255*(text_part>ocrolib.midrange(text_part)),'B')
