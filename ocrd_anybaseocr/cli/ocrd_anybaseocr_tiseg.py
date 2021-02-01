@@ -45,7 +45,21 @@ class OcrdAnybaseocrTiseg(Processor):
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrTiseg, self).__init__(*args, **kwargs)
+        if hasattr(self, 'output_file_grp') and hasattr(self, 'parameter'):
+            # processing context
+            self.setup()
 
+    def setup(self):
+        LOG = getLogger('OcrdAnybaseocrTiseg')
+        self.model = None
+        if self.parameter['use_deeplr']:
+
+            model_weights = self.resolve_resource(self.parameter['seg_weights'])
+            #model = resnet50_unet(n_classes=self.parameter['classes'], input_height=self.parameter['height'], input_width=self.parameter['width'])
+            #model.load_weights(model_weights)
+            self.model = load_model(model_weights)
+            LOG.info('Loaded segmentation model')
+            
     def crop_image(self, image_path, crop_region):
         img = Image.open(image_path)
         cropped = img.crop(crop_region)
@@ -56,23 +70,6 @@ class OcrdAnybaseocrTiseg(Processor):
 
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
-
-        model = None
-        if self.parameter['use_deeplr']:
-
-            model_weights = self.resolve_resource(self.parameter['seg_weights'])
-
-            if not Path(model_weights).is_file():
-                LOG.error("""
-                    Segementation model weights file was not found at '%s'. Make sure the `seg_weights` parameter
-                    points to the local model weights path.
-                    """ % model_weights)
-                sys.exit(1)
-
-            #model = resnet50_unet(n_classes=self.parameter['classes'], input_height=self.parameter['height'], input_width=self.parameter['width'])
-            #model.load_weights(model_weights)
-            model = load_model(model_weights)
-            LOG.info('Segmentation Model loaded')
 
         for (n, input_file) in enumerate(self.input_files):
             page_id = input_file.pageId or input_file.ID
@@ -89,7 +86,7 @@ class OcrdAnybaseocrTiseg(Processor):
                 # _should_ also be deskewed and cropped, but no need to enforce that here
                 page_image, page_coords, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
 
-            self._process_segment(page, page_image, page_coords, page_id, input_file, model)
+            self._process_segment(page, page_image, page_coords, page_id, input_file)
 
             file_id = make_file_id(input_file, self.output_file_grp)
             pcgts.set_pcGtsId(file_id)
@@ -102,10 +99,10 @@ class OcrdAnybaseocrTiseg(Processor):
                 content=to_xml(pcgts).encode('utf-8'),
             )
 
-    def _process_segment(self, page, page_image, page_coords, page_id, input_file, model):
+    def _process_segment(self, page, page_image, page_coords, page_id, input_file):
         LOG = getLogger('OcrdAnybaseocrTiseg')
 
-        if model:
+        if self.model:
 
             I = ocrolib.pil2array(page_image.resize((800, 1024), Image.ANTIALIAS))
             I = np.array(I)[np.newaxis, :, :, :]
@@ -114,11 +111,11 @@ class OcrdAnybaseocrTiseg(Processor):
                 print('Wrong input shape. Image should have 3 channel')
 
             # get prediction
-            #out = model.predict_segmentation(
+            #out = self.model.predict_segmentation(
             #    inp=I,
             #    out_fname="/tmp/out.png"
             #)
-            out = model.predict(I)
+            out = self.model.predict(I)
             out = out.reshape((2048, 1600, 3)).argmax(axis=2)
 
             text_part = np.ones(out.shape)
