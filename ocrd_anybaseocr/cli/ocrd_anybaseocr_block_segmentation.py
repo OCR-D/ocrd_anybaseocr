@@ -43,6 +43,26 @@ from ..tensorflow_importer import tf
 TOOL = 'ocrd-anybaseocr-block-segmentation'
 FALLBACK_IMAGE_GRP = 'OCR-D-IMG-BLOCK-SEGMENT'
 
+CLASS_NAMES = ['BG',
+               'page-number',
+               'paragraph',
+               'catch-word',
+               'heading',
+               'drop-capital',
+               'signature-mark',
+               'header',
+               'marginalia',
+               'footnote',
+               'footnote-continued',
+               'caption',
+               'endnote',
+               'footer',
+               'keynote',
+               # not included in the provided models yet:
+               #'image',
+               #'table',
+               #'graphics'
+]
 
 class InferenceConfig(Config):
 
@@ -51,7 +71,7 @@ class InferenceConfig(Config):
 
     NAME = "block"
     IMAGES_PER_GPU = 1
-    NUM_CLASSES = 1 + 14
+    NUM_CLASSES = len(CLASS_NAMES)
 
 #     NAME = "block"
 #     IMAGES_PER_GPU = 1
@@ -84,10 +104,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
         confidence = self.parameter['DETECTION_MIN_CONFIDENCE']
 #         DETECTION_MIN_CONFIDENCE = Path(self.parameter['DETECTION_MIN_CONFIDENCE'])
-
-        class_names = ['BG', 'page-number', 'paragraph', 'catch-word', 'heading', 'drop-capital', 'signature-mark', 'header',
-                       'marginalia', 'footnote', 'footnote-continued', 'caption', 'endnote', 'footer', 'keynote',
-                       'image', 'table', 'graphics']
 
         config = InferenceConfig(confidence)
         # TODO: allow selecting active class IDs
@@ -152,7 +168,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         page_image.save('./checkthis.png')
         if len(img_array.shape) <= 2:
             img_array = np.stack((img_array,)*3, axis=-1)
-        results = mrcnn_model.detect([img_array], verbose=1)
+        results = mrcnn_model.detect([img_array], verbose=0)
         r = results[0]
 
         th = self.parameter['th']
@@ -224,18 +240,20 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                     # checking for ymax case with vertical overlapping
                     # along with y, check both for xmax and xmin
                     if (region_bbox[3] <= bbox[3] and region_bbox[3] >= bbox[1] and
-                        ((region_bbox[0] >= bbox[0] and region_bbox[0] <= bbox[2]) or (region_bbox[2] >= bbox[0]
-                                                                                       and region_bbox[2] <= bbox[2]) or (region_bbox[0] <= bbox[0] and region_bbox[2] >= bbox[2]))
-                            and r['class_ids'][i] != 5):
+                        ((region_bbox[0] >= bbox[0] and region_bbox[0] <= bbox[2]) or
+                         (region_bbox[2] >= bbox[0] and region_bbox[2] <= bbox[2]) or
+                         (region_bbox[0] <= bbox[0] and region_bbox[2] >= bbox[2])) and
+                        r['class_ids'][i] != 5):
 
                         r['rois'][i][2] = bbox[1] - 1
 
                     # checking for ymin now
                     # along with y, check both for xmax and xmin
                     if (region_bbox[1] <= bbox[3] and region_bbox[1] >= bbox[1] and
-                        ((region_bbox[0] >= bbox[0] and region_bbox[0] <= bbox[2]) or (region_bbox[2] >= bbox[0]
-                                                                                       and region_bbox[2] <= bbox[2]) or (region_bbox[0] <= bbox[0] and region_bbox[2] >= bbox[2]))
-                            and r['class_ids'][i] != 5):
+                        ((region_bbox[0] >= bbox[0] and region_bbox[0] <= bbox[2]) or
+                         (region_bbox[2] >= bbox[0] and region_bbox[2] <= bbox[2]) or
+                         (region_bbox[0] <= bbox[0] and region_bbox[2] >= bbox[2])) and
+                        r['class_ids'][i] != 5):
 
                         r['rois'][i][0] = bbox[3] + 1
 
@@ -313,10 +331,11 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             min_y = r['rois'][i][1]
             max_x = r['rois'][i][2]
             max_y = r['rois'][i][3]
+            class_id = r['class_ids'][i]
 
-            if (min_y - 5) > width and r['class_ids'][i] == 2:
+            if (min_y - 5) > width and class_id == 2:
                 min_y -= 5
-            if (max_y + 10) < width and r['class_ids'][i] == 2:
+            if (max_y + 10) < width and class_id == 2:
                 min_y += 10
 
             # one change here to resolve flipped coordinates
@@ -326,7 +345,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
             if cut_region_polygon.is_empty:
                 continue
-            cut_region_polygon = [j for j in zip(list(cut_region_polygon.exterior.coords.xy[0]), list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
+            cut_region_polygon = [j for j in zip(list(cut_region_polygon.exterior.coords.xy[0]),
+                                                 list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
 
             # checking whether coordinates are flipped
 
@@ -348,35 +368,24 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                                                        page_id=page_id,
                                                        file_grp=self.output_file_grp)
 
-            # ai = AlternativeImageType(filename=file_path, comments=page_xywh['features'])
-            region_id = '%s_region%04d' % (page_id, i)
-            coords = CoordsType(region_points)
-
-            # incase of imageRegion
-            if r['class_ids'][i] == 15:
-                image_region = ImageRegionType(custom='readingOrder {index:'+str(read_order)+';}', id=region_id, Coords=coords, type_=class_names[r['class_ids'][i]])
-                # image_region.add_AlternativeImage(ai)
+            region_args = {'custom': 'readingOrder {index:'+str(read_order)+';}',
+                           'id': '%s_region%04d' % (page_id, i),
+                           'Coords': CoordsType(region_points)}
+            if class_id >= len(CLASS_NAMES):
+                raise Exception('Unexpected class id %d - model does not match' % class_id)
+            if CLASS_NAMES[class_id] == 'image':
+                image_region = ImageRegionType(**region_args)
                 page.add_ImageRegion(image_region)
-                continue
-            if r['class_ids'][i] == 16:
-                table_region = TableRegionType(custom='readingOrder {index:'+str(read_order)+';}', id=region_id, Coords=coords, type_=class_names[r['class_ids'][i]])
-                # table_region.add_AlternativeImage(ai)
+            elif CLASS_NAMES[class_id] == 'table':
+                table_region = TableRegionType(**region_args)
                 page.add_TableRegion(table_region)
-                continue
-            if r['class_ids'][i] == 17:
-                graphic_region = GraphicRegionType(custom='readingOrder {index:'+str(read_order)+';}', id=region_id, Coords=coords, type_=class_names[r['class_ids'][i]])
-                # graphic_region.add_AlternativeImage(ai)
+            elif CLASS_NAMES[class_id] == 'graphics':
+                graphic_region = GraphicRegionType(**region_args)
                 page.add_GraphicRegion(graphic_region)
-                continue
-
-            textregion = TextRegionType(custom='readingOrder {index:'+str(read_order)+';}', id=region_id, Coords=coords, type_=class_names[r['class_ids'][i]])
-            # textregion.add_AlternativeImage(ai)
-
-            #border = page.get_Border()
-            # if border:
-            #    border.add_TextRegion(textregion)
-            # else:
-            page.add_TextRegion(textregion)
+            else:
+                region_args['type_'] = CLASS_NAMES[class_id]
+                textregion = TextRegionType(**region_args)
+                page.add_TextRegion(textregion)
 
 
 @click.command()
