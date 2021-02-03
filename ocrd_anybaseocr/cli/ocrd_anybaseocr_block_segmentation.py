@@ -151,7 +151,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             border_coords = page.get_Border().get_Coords()
             border_points = polygon_from_points(border_coords.get_points())
             border = Polygon(border_points)
-#            page_image, page_xy = self.workspace.image_from_segment(page.get_Border(), page_image, page_xywh)
 
         img_array = ocrolib.pil2array(page_image)
         if len(img_array.shape) <= 2:
@@ -319,17 +318,20 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             # one change here to resolve flipped coordinates
             region_polygon = [[min_y, min_x], [max_y, min_x], [max_y, max_x], [min_y, max_x]]
 
+            # convert to absolute coordinates
+            region_polygon = coordinates_for_segment(region_polygon, page_image, page_xywh)
+            # intersect with parent and plausibilize
             cut_region_polygon = Polygon(region_polygon)
             if border:
                 cut_region_polygon = border.intersection(cut_region_polygon)
-            if cut_region_polygon.is_empty or not cut_region_polygon.is_valid:
+            if cut_region_polygon.is_empty:
+                LOG.warning('region %d does not intersect page frame', i)
                 continue
-            cut_region_polygon = [j for j in zip(list(cut_region_polygon.exterior.coords.xy[0]),
+            if not cut_region_polygon.is_valid:
+                LOG.warning('region %d has invalid polygon', i)
+                continue
+            region_polygon = [j for j in zip(list(cut_region_polygon.exterior.coords.xy[0]),
                                                  list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
-
-            # checking whether coordinates are flipped
-
-            region_polygon = coordinates_for_segment(cut_region_polygon, page_image, page_xywh)
             region_points = points_from_polygon(region_polygon)
             read_order = reading_order.index((min_y, min_x, max_y, max_x))
             region_args = {'custom': 'readingOrder {index:'+str(read_order)+';}',
