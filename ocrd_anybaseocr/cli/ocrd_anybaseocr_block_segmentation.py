@@ -73,12 +73,8 @@ class InferenceConfig(Config):
     IMAGES_PER_GPU = 1
     NUM_CLASSES = len(CLASS_NAMES)
 
-#     NAME = "block"
-#     IMAGES_PER_GPU = 1
 #     NUM_CLASSES = 1 + 14
 #     DETECTION_MIN_CONFIDENCE = 0.9 # needs to be changed back to parameter
-    #     DETECTION_MIN_CONFIDENCE = DETECTION_MIN_CONFIDENCE #taken as a parameter from tools.json
-
 
 class OcrdAnybaseocrBlockSegmenter(Processor):
 
@@ -102,15 +98,12 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         model_path = resource_filename(__name__, '../mrcnn')
         model_weights = Path(self.resolve_resource(self.parameter['block_segmentation_weights']))
 
-        confidence = self.parameter['DETECTION_MIN_CONFIDENCE']
-#         DETECTION_MIN_CONFIDENCE = Path(self.parameter['DETECTION_MIN_CONFIDENCE'])
-
+        confidence = self.parameter['min_confidence']
         config = InferenceConfig(confidence)
         # TODO: allow selecting active class IDs
         mrcnn_model = model.MaskRCNN(mode="inference", model_dir=str(model_path), config=config)
         mrcnn_model.load_weights(str(model_weights), by_name=True)
 
-        oplevel = self.parameter['operation_level']
         for (n, input_file) in enumerate(self.input_files):
 
             pcgts = page_from_file(self.workspace.download_file(input_file))
@@ -129,11 +122,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             if regions:
                 LOG.warning("Image already has text segments!")
 
-            if oplevel == "page":
-                self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, mask_image)
-            else:
-                LOG.warning('Operation level %s, but should be "page".', oplevel)
-                break
+            self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, mask_image)
 
             file_id = make_file_id(input_file, self.output_file_grp)
             pcgts.set_pcGtsId(file_id)
@@ -342,22 +331,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
             region_polygon = coordinates_for_segment(cut_region_polygon, page_image, page_xywh)
             region_points = points_from_polygon(region_polygon)
-
             read_order = reading_order.index((min_y, min_x, max_y, max_x))
-
-            # this can be tested, provided whether we need previous comments or not?
-            # resolving overlapping problem
-
-            region_img = img_array[min_x:max_x, min_y:max_y]  # extract from points and img_array
-
-            region_img = ocrolib.array2pil(region_img)
-
-            file_id = make_file_id(input_file, self.output_file_grp)
-            file_path = self.workspace.save_image_file(region_img,
-                                                       file_id+"_"+str(i),
-                                                       page_id=page_id,
-                                                       file_grp=self.output_file_grp)
-
             region_args = {'custom': 'readingOrder {index:'+str(read_order)+';}',
                            'id': '%s_region%04d' % (page_id, i),
                            'Coords': CoordsType(region_points)}
