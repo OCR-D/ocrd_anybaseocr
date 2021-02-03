@@ -253,17 +253,17 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
         # define reading order on basis of coordinates
         reading_order = []
-
         for i in range(len(r['rois'])):
             width, height, _ = img_array.shape
-            min_x = r['rois'][i][0]
-            min_y = r['rois'][i][1]
-            max_x = r['rois'][i][2]
-            max_y = r['rois'][i][3]
+            min_x, min_y, max_x, max_y = r['rois'][i]
+            class_id = r['class_ids'][i]
+            if class_id >= len(CLASS_NAMES):
+                raise Exception('Unexpected class id %d - model does not match' % class_id)
+            class_name = CLASS_NAMES[class_id]
 
-            if (min_y - 5) > width and r['class_ids'][i] == 2:
+            if (min_y - 5) > width and class_name == 'paragraph':
                 min_y -= 5
-            if (max_y + 10) < width and r['class_ids'][i] == 2:
+            if (max_y + 10) < width and class_name == 'paragraph':
                 min_y += 10
             reading_order.append((min_y, min_x, max_y, max_x))
 
@@ -282,41 +282,41 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
         # Creating Reading Order object in PageXML
         order_group = OrderedGroupType(caption="Regions reading order", id=page_id)
-
-        for i in range(len(r['rois'])):
-            min_x = r['rois'][i][0]
-            min_y = r['rois'][i][1]
-            max_x = r['rois'][i][2]
-            max_y = r['rois'][i][3]
-            if (min_y - 5) > width and r['class_ids'][i] == 2:
-                min_y -= 5
-            if (max_y + 10) < width and r['class_ids'][i] == 2:
-                min_y += 10
-
-            order_index = reading_order.index((min_y, min_x, max_y, max_x))
-            region_id = '%s_region%04d' % (page_id, i)
-            regionRefIndex = RegionRefIndexedType(index=order_index, regionRef=region_id)
-            order_group.add_RegionRefIndexed(regionRefIndex)
-
         reading_order_object = ReadingOrderType()
         reading_order_object.set_OrderedGroup(order_group)
         page.set_ReadingOrder(reading_order_object)
 
         for i in range(len(r['rois'])):
             width, height, _ = img_array.shape
-            min_x = r['rois'][i][0]
-            min_y = r['rois'][i][1]
-            max_x = r['rois'][i][2]
-            max_y = r['rois'][i][3]
+            min_x, min_y, max_x, max_y = r['rois'][i]
             class_id = r['class_ids'][i]
+            if class_id >= len(CLASS_NAMES):
+                raise Exception('Unexpected class id %d - model does not match' % class_id)
+            class_name = CLASS_NAMES[class_id]
 
-            if (min_y - 5) > width and class_id == 2:
+            if (min_y - 5) > width and class_name == 'paragraph':
                 min_y -= 5
-            if (max_y + 10) < width and class_id == 2:
+            if (max_y + 10) < width and class_name == 'paragraph':
                 min_y += 10
 
-            # one change here to resolve flipped coordinates
-            region_polygon = [[min_y, min_x], [max_y, min_x], [max_y, max_x], [min_y, max_x]]
+            # estimate glyph scale (roughly)
+            mask = r['masks'][:,:,i]
+            area = np.count_nonzero(mask)
+            scale = int(np.sqrt(area)//10)
+            scale = scale + (scale+1)%2 # odd
+
+            # dilate mask until we have a single outer contour
+            contours = [None, None]
+            for _ in range(10):
+                if len(contours) == 1:
+                    break
+                mask = cv2.dilate(mask.astype(np.uint8),
+                                  np.ones((scale,scale), np.uint8)) > 0
+                contours, _ = cv2.findContours(mask.astype(np.uint8),
+                                               cv2.RETR_EXTERNAL,
+                                               cv2.CHAIN_APPROX_SIMPLE)
+            region_polygon = contours[0][:,0,:] # already in x,y order
+            #region_polygon = [[min_y, min_x], [max_y, min_x], [max_y, max_x], [min_y, max_x]]
 
             # convert to absolute coordinates
             region_polygon = coordinates_for_segment(region_polygon, page_image, page_xywh)
@@ -335,24 +335,25 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             region_points = points_from_polygon(region_polygon)
             read_order = reading_order.index((min_y, min_x, max_y, max_x))
             region_args = {'custom': 'readingOrder {index:'+str(read_order)+';}',
-                           'id': '%s_region%04d' % (page_id, i),
+                           'id': 'region%04d' % i,
                            'Coords': CoordsType(region_points)}
-            if class_id >= len(CLASS_NAMES):
-                raise Exception('Unexpected class id %d - model does not match' % class_id)
-            if CLASS_NAMES[class_id] == 'image':
+            if class_name == 'image':
                 image_region = ImageRegionType(**region_args)
                 page.add_ImageRegion(image_region)
-            elif CLASS_NAMES[class_id] == 'table':
+            elif class_name == 'table':
                 table_region = TableRegionType(**region_args)
                 page.add_TableRegion(table_region)
-            elif CLASS_NAMES[class_id] == 'graphics':
+            elif class_name == 'graphics':
                 graphic_region = GraphicRegionType(**region_args)
                 page.add_GraphicRegion(graphic_region)
             else:
-                region_args['type_'] = CLASS_NAMES[class_id]
+                region_args['type_'] = class_name
                 textregion = TextRegionType(**region_args)
                 page.add_TextRegion(textregion)
-            LOG.info('added %s region on page "%s"', CLASS_NAMES[class_id], page_id)
+            order_index = reading_order.index((min_y, min_x, max_y, max_x))
+            regionRefIndex = RegionRefIndexedType(index=order_index, regionRef=region_args['id'])
+            order_group.add_RegionRefIndexed(regionRefIndex)
+            LOG.info('added %s region on page "%s"', class_name, page_id)
 
 
 @click.command()
