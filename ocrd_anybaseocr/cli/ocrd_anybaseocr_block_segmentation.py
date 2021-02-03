@@ -130,7 +130,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 LOG.warning("Image already has text segments!")
 
             if oplevel == "page":
-                self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names, mask_image)
+                self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, mask_image)
             else:
                 LOG.warning('Operation level %s, but should be "page".', oplevel)
                 break
@@ -146,7 +146,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-    def _process_segment(self, page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, class_names, mask):
+    def _process_segment(self, page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, mask):
         LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
         # check for existing text regions and whether to overwrite them
         border = None
@@ -165,7 +165,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 #            page_image, page_xy = self.workspace.image_from_segment(page.get_Border(), page_image, page_xywh)
 
         img_array = ocrolib.pil2array(page_image)
-        page_image.save('./checkthis.png')
         if len(img_array.shape) <= 2:
             img_array = np.stack((img_array,)*3, axis=-1)
         results = mrcnn_model.detect([img_array], verbose=0)
@@ -173,7 +172,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
         th = self.parameter['th']
         # check for existing semgentation mask
-        # this code executes only when use_deeplr is set to True in ocrd-tool.json file
+        # this code executes only when the workflow had tiseg run before with use_deeplr=true
         if mask:
             mask = ocrolib.pil2array(mask)
             mask = mask//255
@@ -186,7 +185,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 max_x = r['rois'][i][2]
                 max_y = r['rois'][i][3]
                 mask[min_x:max_x, min_y:max_y] *= i+2
-            cv2.imwrite('mask_check.png', mask*(255/(len(r['rois'])+2)))
 
             # check for left over pixels and add them to the bounding boxes
             pixel_added = True
@@ -307,15 +305,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             if (max_y + 10) < width and r['class_ids'][i] == 2:
                 min_y += 10
 
-            region_polygon = [[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]]
-
-            if border:
-                cut_region_polygon = border.intersection(Polygon(region_polygon))
-                if cut_region_polygon.is_empty:
-                    continue
-            else:
-                cut_region_polygon = Polygon(region_polygon)
-
             order_index = reading_order.index((min_y, min_x, max_y, max_x))
             region_id = '%s_region%04d' % (page_id, i)
             regionRefIndex = RegionRefIndexedType(index=order_index, regionRef=region_id)
@@ -341,9 +330,10 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             # one change here to resolve flipped coordinates
             region_polygon = [[min_y, min_x], [max_y, min_x], [max_y, max_x], [min_y, max_x]]
 
-            cut_region_polygon = border.intersection(Polygon(region_polygon))
-
-            if cut_region_polygon.is_empty:
+            cut_region_polygon = Polygon(region_polygon)
+            if border:
+                cut_region_polygon = border.intersection(cut_region_polygon)
+            if cut_region_polygon.is_empty or not cut_region_polygon.is_valid:
                 continue
             cut_region_polygon = [j for j in zip(list(cut_region_polygon.exterior.coords.xy[0]),
                                                  list(cut_region_polygon.exterior.coords.xy[1]))][:-1]
