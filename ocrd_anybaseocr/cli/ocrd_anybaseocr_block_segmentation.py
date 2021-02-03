@@ -117,10 +117,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 mask_image, mask_xywh, mask_image_info = self.workspace.image_from_page(page, page_id, feature_selector='clipped', feature_filter='binarized,deskewed,cropped,non_text')
             except:
                 mask_image = None
-            # Display Warning If image segment results already exist or not in StructMap?
-            regions = page.get_TextRegion() + page.get_TableRegion()
-            if regions:
-                LOG.warning("Image already has text segments!")
 
             self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, mask_image)
 
@@ -138,25 +134,26 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
     def _process_segment(self, page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, mask):
         LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
         # check for existing text regions and whether to overwrite them
-        border = None
-        if page.get_TextRegion():
+        if page.get_TextRegion() or page.get_TableRegion():
             if self.parameter['overwrite']:
-                LOG.info('removing existing TextRegions in page "%s"', page_id)
+                LOG.info('removing existing text/table regions in page "%s"', page_id)
                 page.set_TextRegion([])
             else:
-                LOG.warning('keeping existing TextRegions in page "%s"', page_id)
-                return
+                LOG.warning('keeping existing text/table regions in page "%s"', page_id)
         # check if border exists
+        border = None
         if page.get_Border():
             border_coords = page.get_Border().get_Coords()
             border_points = polygon_from_points(border_coords.get_points())
             border = Polygon(border_points)
 
+        LOG.info('detecting regions on page "%s"', page_id)
         img_array = ocrolib.pil2array(page_image)
         if len(img_array.shape) <= 2:
             img_array = np.stack((img_array,)*3, axis=-1)
         results = mrcnn_model.detect([img_array], verbose=0)
         r = results[0]
+        LOG.info('found %d regions on page "%s"', len(r['rois']), page_id)
 
         th = self.parameter['th']
         # check for existing semgentation mask
@@ -352,6 +349,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 region_args['type_'] = CLASS_NAMES[class_id]
                 textregion = TextRegionType(**region_args)
                 page.add_TextRegion(textregion)
+            LOG.info('added %s region on page "%s"', CLASS_NAMES[class_id], page_id)
 
 
 @click.command()
