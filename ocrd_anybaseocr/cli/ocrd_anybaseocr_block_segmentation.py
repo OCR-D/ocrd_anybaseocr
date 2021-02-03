@@ -89,17 +89,8 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                        'marginalia', 'footnote', 'footnote-continued', 'caption', 'endnote', 'footer', 'keynote',
                        'image', 'table', 'graphics']
 
-        if not Path(model_weights).is_file():
-            LOG.error("""\
-                Block Segmentation model weights file was not found at '%s'. Make sure the `model_weights` parameter
-                points to the local model weights path.
-                """, model_weights)
-            sys.exit(1)
-
-#         config = InferenceConfig(Config,DETECTION_MIN_CONFIDENCE)
-
         config = InferenceConfig(confidence)
-#         config = InferenceConfig()
+        # TODO: allow selecting active class IDs
         mrcnn_model = model.MaskRCNN(mode="inference", model_dir=str(model_path), config=config)
         mrcnn_model.load_weights(str(model_weights), by_name=True)
 
