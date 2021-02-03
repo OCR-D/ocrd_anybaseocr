@@ -82,30 +82,33 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrBlockSegmenter, self).__init__(*args, **kwargs)
+        if hasattr(self, 'output_file_grp') and hasattr(self, 'parameter'):
+            # processing context
+            self.setup()
+
+    def setup(self):
+        LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
         #self.reading_order = []
         self.order = 0
-
-    def process(self):
-
-        assert_file_grp_cardinality(self.input_file_grp, 1)
-        assert_file_grp_cardinality(self.output_file_grp, 1)
-
-        LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
-
-        if not tf.test.is_gpu_available():
-            LOG.warning("Tensorflow cannot detect CUDA installation. Running without GPU will be slow.")
-
         model_path = resource_filename(__name__, '../mrcnn')
         model_weights = Path(self.resolve_resource(self.parameter['block_segmentation_weights']))
 
         confidence = self.parameter['min_confidence']
         config = InferenceConfig(confidence)
         # TODO: allow selecting active class IDs
-        mrcnn_model = model.MaskRCNN(mode="inference", model_dir=str(model_path), config=config)
-        mrcnn_model.load_weights(str(model_weights), by_name=True)
+        self.mrcnn_model = model.MaskRCNN(mode="inference", model_dir=str(model_path), config=config)
+        self.mrcnn_model.load_weights(str(model_weights), by_name=True)
+    
+    def process(self):
 
-        for (n, input_file) in enumerate(self.input_files):
+        assert_file_grp_cardinality(self.input_file_grp, 1)
+        assert_file_grp_cardinality(self.output_file_grp, 1)
 
+        LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
+        if not tf.test.is_gpu_available():
+            LOG.warning("Tensorflow cannot detect CUDA installation. Running without GPU will be slow.")
+
+        for input_file in self.input_files:
             pcgts = page_from_file(self.workspace.download_file(input_file))
             self.add_metadata(pcgts)
             page = pcgts.get_Page()
@@ -118,7 +121,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
             except:
                 mask_image = None
 
-            self._process_segment(page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, mask_image)
+            self._process_segment(page_image, page, page_xywh, page_id, input_file, mask_image)
 
             file_id = make_file_id(input_file, self.output_file_grp)
             pcgts.set_pcGtsId(file_id)
@@ -131,7 +134,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-    def _process_segment(self, page_image, page, page_xywh, page_id, input_file, n, mrcnn_model, mask):
+    def _process_segment(self, page_image, page, page_xywh, page_id, input_file, mask):
         LOG = getLogger('OcrdAnybaseocrBlockSegmenter')
         # check for existing text regions and whether to overwrite them
         if page.get_TextRegion() or page.get_TableRegion():
@@ -151,7 +154,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         img_array = ocrolib.pil2array(page_image)
         if len(img_array.shape) <= 2:
             img_array = np.stack((img_array,)*3, axis=-1)
-        results = mrcnn_model.detect([img_array], verbose=0)
+        results = self.mrcnn_model.detect([img_array], verbose=0)
         r = results[0]
         LOG.info('found %d regions on page "%s"', len(r['rois']), page_id)
 
