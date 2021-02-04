@@ -175,6 +175,15 @@
 	  "default": 15,
 	  "description": "num of pixels to include in the area region (when applying text/non-text mask from tiseg)"
 	},
+	"active_classes": {
+	  "type": "array",
+	  "items": {
+	    "type": "string",
+	    "enum": ["page-number", "paragraph", "catch-word", "heading", "drop-capital", "signature-mark", "header", "marginalia", "footnote", "footnote-continued", "caption", "endnote", "footer", "keynote", "image", "table", "graphics"]
+	  },
+	  "default": ["page-number", "paragraph", "catch-word", "heading", "drop-capital", "signature-mark", "marginalia", "caption"],
+	  "description": "Restrict types of regions to be detected."
+	},
         "post_process": {
 	  "type": "boolean",
 	  "default": true,

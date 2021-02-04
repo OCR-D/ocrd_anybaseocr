@@ -92,7 +92,6 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
 
         confidence = self.parameter['min_confidence']
         config = InferenceConfig(confidence)
-        # TODO: allow selecting active class IDs
         self.mrcnn_model = model.MaskRCNN(mode="inference", model_dir=str(model_path), config=config)
         self.mrcnn_model.load_weights(str(model_weights), by_name=True)
     
@@ -159,7 +158,10 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         img_array = ocrolib.pil2array(page_image)
         if len(img_array.shape) <= 2:
             img_array = np.stack((img_array,)*3, axis=-1)
-        results = self.mrcnn_model.detect([img_array], verbose=0)
+        # convert to incidence matrix
+        class_ids = np.array([[1 if category in self.parameter['active_classes'] else 0
+                               for category in CLASS_NAMES]], dtype=np.int32)
+        results = self.mrcnn_model.detect([img_array], verbose=0, active_class_ids=class_ids)
         r = results[0]
         LOG.info('found %d candidates on page "%s"', len(r['rois']), page_id)
 
