@@ -88,7 +88,7 @@
       "input_file_grp": ["OCR-D-IMG-CROP"],
       "output_file_grp": ["OCR-D-SEG-TISEG"],
       "categories": ["Layout analysis"],
-      "steps": ["layout/segmentation/text-image"],
+      "steps": ["layout/segmentation/text-nontext"],
       "description": "Separates the text and non-text elements with anyBaseOCR. Outputs clipped versions of the input image as AlternativeImage containing either only text or non-text elements.",
       "parameters": {
         "use_deeplr": {
@@ -141,7 +141,7 @@
       "input_file_grp": ["OCR-D-IMG-CROP"],
       "output_file_grp": ["OCR-D-SEG-LAYOUT"],
       "categories": ["Layout analysis"],
-      "steps": ["layout/segmentation/text-image"],
+      "steps": ["layout/analysis"],
       "description": "Generates a table-of-content like document structure of the whole document.",
       "parameters": {
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
@@ -152,16 +152,69 @@
     "ocrd-anybaseocr-block-segmentation": {
       "executable": "ocrd-anybaseocr-block-segmentation",
       "input_file_grp": ["OCR-D-IMG"],
-      "output_file_grp": ["OCR-D-BLOCK-SEGMENT"],
+      "output_file_grp": ["OCR-D-SEG-BLOCK"],
       "categories": ["Layout analysis"],
-      "steps": ["layout/segmentation/text-image"],
-      "description": "Segments and classifies document segments in a single page and outputs the the region polygons and classes.",
+      "steps": ["layout/segmentation/region"],
+      "description": "Segments and classifies regions in each single page and annotates the the region polygons and classes.",
       "parameters": {     
-        "block_segmentation_weights": { "type": "string","default":"block_segmentation_weights.h5",  "required": false, "description": "Path to model weights"},
-        "operation_level": {"type": "string", "enum": ["page"], "default": "page","description": "PAGE XML hierarchy level to operate on"},
-        "overwrite":   {"type": "boolean", "default": false, "description": "check whether to overwrite existing text lines"},
-        "th"       :   {"type": "integer", "default": 15, "description": "num of pixels to include in the area region"},
-        "DETECTION_MIN_CONFIDENCE"       :   {"type": "number", "default": 0.9, "description": "Confidence value for a model to detect bounding box"}
+        "block_segmentation_weights": {
+	  "type": "string",
+          "format":"uri",
+          "content-type": "application/x-hdf;subtype=bag",
+          "cacheable": true,
+	  "default":"block_segmentation_weights.h5",
+	  "description": "Path to model weights"
+	},
+        "overwrite": {
+	  "type": "boolean",
+	  "default": false,
+	  "description": "whether to delete existing text lines prior to segmentation"
+	},
+        "th": {
+	  "type": "integer",
+	  "default": 15,
+	  "description": "num of pixels to include in the area region (when applying text/non-text mask from tiseg)"
+	},
+        "post_process": {
+	  "type": "boolean",
+	  "default": true,
+	  "description": "whether to apply non-maximum suppression (across classes) on the detections"
+	},
+        "use_masks": {
+	  "type": "boolean",
+	  "default": true,
+	  "description": "whether to segment from the mask as polygon instead of just the bbox"
+	},
+        "min_confidence": {
+	  "type": "number",
+	  "format": "float",
+	  "default": 0.9,
+	  "description": "Confidence threshold for region detections"
+	},
+	"min_share_drop": {
+	  "type": "number",
+	  "format": "float",
+	  "default": 0.9,
+	  "description": "Minimum required overlap (intersection over single) of mask-derived contour area between neighbours to suppress smaller prediction"
+	},
+	"min_share_merge": {
+	  "type": "number",
+	  "format": "float",
+	  "default": 0.8,
+	  "description": "Minimum required overlap (intersection over single) of mask-derived contour area between neighbours to merge smaller prediction"
+	},
+	"min_iou_drop": {
+	  "type": "number",
+	  "format": "float",
+	  "default": 0.8,
+	  "description": "Minimum required overlap (intersection over union) of mask-derived contour area between neighbours to suppress prediction scoring worse"
+	},
+	"min_iou_merge": {
+	  "type": "number",
+	  "format": "float",
+	  "default": 0.2,
+	  "description": "Minimum required overlap (intersection over union) of mask-derived contour area between neighbours to merge prediction scoring worse"
+	}
       }       
     }
   }
