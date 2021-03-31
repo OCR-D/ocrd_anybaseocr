@@ -276,7 +276,6 @@ class OcrdAnybaseocrCropper(Processor):
             Xend = 10
         if Yend < 0:
             Yend = 15
-        #self.save_pf(base, [Xstart, Ystart, Xend, Yend])
 
         return [Xstart, Ystart, Xend, Yend]
 
@@ -324,23 +323,37 @@ class OcrdAnybaseocrCropper(Processor):
         kernel = cv2.getStructuringElement(
             cv2.MORPH_RECT, (10, 1))  # for historical docs
         connected = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, kernel)
-        contours, _ = cv2.findContours(
-            connected.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        if DEBUG:
+            plt.imshow(connected)
+            plt.legend(handles=[Patch(label='horizontal closing')])
+            plt.show()
 
-        mask = np.zeros(bw.shape, dtype=np.uint8)
+        contours, hierarchy = cv2.findContours(
+            connected.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+        if DEBUG: mask = np.zeros(bw.shape[:2], dtype=np.uint16)
 
-        for idx in range(len(contours)):
-            x, y, w, h = cv2.boundingRect(contours[idx])
-            # print x,y,w,h
-            mask[y:y+h, x:x+w] = 0
-            cv2.drawContours(mask, contours, idx, (255, 255, 255), -1)
-            r = float(cv2.countNonZero(mask[y:y+h, x:x+w])) / (w * h)
+        def apply_contour(idx):
+            while 0 <= idx < len(contours):
+                next_idx, prev_idx, child_idx, parent_idx = hierarchy[0, idx].tolist()
+                if len(contours[idx]) >= 3:
+                    x, y, w, h = cv2.boundingRect(contours[idx])
+                    if DEBUG: cv2.drawContours(mask, contours, idx, idx+1, -1)
+                    r = cv2.contourArea(contours[idx]) / (w * h)
+                    if r > 0.45 and (width*0.9) > w > 15 and (height*0.5) > h > 15:
+                        textarea.append([x, y, x+w-1, y+h-1])
+                        if DEBUG: cv2.rectangle(arg, (x, y), (x+w-1, y+h-1), (0, 0, 255), 2)
+                    if child_idx >= 0:
+                        apply_contour(child_idx)
+                idx = next_idx
+        if contours:
+            apply_contour(0)
+        if DEBUG:
+            mask = cv2.applyColorMap(mask.astype(np.uint8), cv2.COLORMAP_JET)
+            plt.imshow(mask)
+            plt.legend(handles=[Patch(label='contours')])
+            plt.show()
 
-            if r > 0.45 and (width*0.9) > w > 15 and (height*0.5) > h > 15:
-                textarea.append([x, y, x+w-1, y+h-1])
-                cv2.rectangle(arg, (x, y), (x+w-1, y+h-1), (0, 0, 255), 2)
-
-        if len(textarea) > 1:
+        if len(textboxes) > 1:
             textarea = self.filter_noisebox(textarea, height, width)
 
         return textarea, arg, height, width
