@@ -34,7 +34,6 @@
 import os
 import numpy as np
 from pylsd.lsd import lsd
-import ocrolib
 import cv2
 from PIL import Image
 
@@ -67,6 +66,36 @@ from ocrd_models.ocrd_page import (
 from ocrd_models.ocrd_page_generateds import BorderType
 
 TOOL = 'ocrd-anybaseocr-crop'
+
+# enable to plot intermediate results interactively:
+DEBUG = False
+if DEBUG:
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Rectangle, Patch
+
+# originally from ocrolib (here also with alpha support):
+def pil2array(im,alpha=0):
+    if im.mode=="L":
+        a = np.fromstring(im.tobytes(),'B')
+        a.shape = im.height, im.width
+        return a
+    if im.mode=="LA":
+        a = np.fromstring(im.tobytes(),'B')
+        a.shape = im.height, im.width, 2
+        if not alpha: a = a[:,:,0]
+        return a
+    if im.mode=="RGB":
+        a = np.fromstring(im.tobytes(),'B')
+        a.shape = im.height, im.width, 3
+        return a
+    if im.mode=="RGBA":
+        a = np.fromstring(im.tobytes(),'B')
+        a.shape = im.height, im.width, 4
+        if not alpha: a = a[:,:,:3]
+        return a
+    # fallback to Pillow grayscale conversion:
+    return pil2array(im.convert("L"))
 
 class OcrdAnybaseocrCropper(Processor):
 
@@ -443,14 +472,11 @@ class OcrdAnybaseocrCropper(Processor):
             )
 
     def _process_page(self, page, page_image, page_xywh, input_file):
-        img_array = ocrolib.pil2array(page_image)
+        img_array = pil2array(page_image)
 
         # ensure RGB image
         if len(img_array.shape) == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
-
-        img_array_bin = np.array(
-            img_array > ocrolib.midrange(img_array), 'i')
 
         lineDetectH = []
         lineDetectV = []
