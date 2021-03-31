@@ -133,67 +133,76 @@ class OcrdAnybaseocrCropper(Processor):
         rects = [x for x in rects if x not in removeRect]
 
         predictRular = []
+
+        y1max = self.parameter['positionAbove'] * height
+        y2min = self.parameter['positionBelow'] * height
+        x1max = self.parameter['positionLeft'] * width
+        x2min = self.parameter['positionRight'] * width
+        wmax = self.parameter['rularWidth'] * width
         for rect in rects:
             (x, y, w, h) = rect
-            if (w < width*self.parameter['rularWidth']) and ((y > height*self.parameter['positionBelow']) or ((x+w) < width*self.parameter['positionLeft']) or (x > width*self.parameter['positionRight'])):
-                if (self.parameter['rularRatioMin'] < round(float(w)/float(h), 2) < self.parameter['rularRatioMax']) or (self.parameter['rularRatioMin'] < round(float(h)/float(w), 2) < self.parameter['rularRatioMax']):
+            if (w < wmax and
+                ((y+h < y1max or y > y2min) or
+                 (x+w < x1max or x > x2min))):
+                if (self.parameter['rularRatioMin'] < round(float(w)/float(h), 2) < self.parameter['rularRatioMax']) or \
+                   (self.parameter['rularRatioMin'] < round(float(h)/float(w), 2) < self.parameter['rularRatioMax']):
                     blackPixel = np.count_nonzero(arg[y:y+h, x:x+w] == 0)
                     predictRular.append((x, y, w, h, blackPixel))
 
         # Finally check number of black pixel to avoid false rular
         if predictRular:
-            predictRular = sorted(
-                predictRular, key=lambda x: (x[4]), reverse=True)
+            # sort by fg size
+            predictRular = sorted(predictRular, key=lambda x: x[4], reverse=True)
+            # pick largest candidate
             x, y, w, h, _ = predictRular[0]
+            # clip to white
             cv2.rectangle(arg, (x-15, y-15), (x+w+20, y+h+20),
                           (255, 255, 255), cv2.FILLED)
+            if DEBUG:
+                plt.imshow(arg)
+                plt.legend(handles=[Patch(label='rular clipped to white')])
+                plt.show()
 
         return arg
 
-    def BorderLine(self, MaxBoundary, lines, index, flag, lineDetectH, lineDetectV):
-        getLine = 1
-        LastLine = []
-        if flag in ('top', 'left'):
-            for i in range(len(lines)-1):
-                if(abs(lines[i][index]-lines[i+1][index])) <= 15 and lines[i][index] < MaxBoundary:
-                    LastLine = [lines[i][0], lines[i]
-                                [1], lines[i][2], lines[i][3]]
-                    getLine += 1
-                elif getLine >= 3:
+    def BorderLine(self, boundary, lines, side, detected):
+        ncontiguous = 1
+        lastline = []
+        if side in ('top', 'bottom'):
+            index = 1 # get y
+        else:
+            index = 0 # get x
+        if side in ('top', 'left'):
+            for line, nextline in zip(lines[:-1], lines[1:]):
+                if(abs(line[index]-nextline[index])) <= 15 and line[index] < boundary:
+                    lastline = line
+                    ncontiguous += 1
+                elif ncontiguous >= 3:
                     break
                 else:
-                    getLine = 1
-        elif flag in ('bottom', 'right'):
-            for i in reversed(list(range(len(lines)-1))):
-                if(abs(lines[i][index]-lines[i+1][index])) <= 15 and lines[i][index] > MaxBoundary:
-                    LastLine = [lines[i][0], lines[i]
-                                [1], lines[i][2], lines[i][3]]
-                    getLine += 1
-                elif getLine >= 3:
+                    ncontiguous = 1
+        else:
+            for line, nextline in list(zip(lines[:-1], lines[1:]))[::-1]:
+                if(abs(line[index]-nextline[index])) <= 15 and line[index] > boundary:
+                    lastline = line
+                    ncontiguous += 1
+                elif ncontiguous >= 3:
                     break
                 else:
-                    getLine = 1
-        if getLine >= 3 and LastLine:
-            if flag == "top":
-                lineDetectH.append((
-                    LastLine[0], max(LastLine[1], LastLine[3]),
-                    LastLine[2], max(LastLine[1], LastLine[3])
-                ))
-            if flag == "left":
-                lineDetectV.append((
-                    max(LastLine[0], LastLine[2]), LastLine[1],
-                    max(LastLine[0], LastLine[2]), LastLine[3]
-                ))
-            if flag == "bottom":
-                lineDetectH.append((
-                    LastLine[0], min(LastLine[1], LastLine[3]),
-                    LastLine[2], min(LastLine[1], LastLine[3])
-                ))
-            if flag == "right":
-                lineDetectV.append((
-                    min(LastLine[0], LastLine[2]), LastLine[1],
-                    min(LastLine[0], LastLine[2]), LastLine[3]
-                ))
+                    ncontiguous = 1
+        if ncontiguous >= 3 and lastline:
+            if side == "top":
+                y = max(lastline[1], lastline[3])
+                detected.append((lastline[0], y, lastline[2], y))
+            elif side == "left":
+                x = max(lastline[0], lastline[2])
+                detected.append((x, lastline[1], x, lastline[3]))
+            elif side == "bottom":
+                y = min(lastline[1], lastline[3])
+                detected.append((lastline[0], y, lastline[2], y))
+            else:
+                x = min(lastline[0], lastline[2])
+                detected.append((x, lastline[1], x, lastline[3]))
 
     def get_intersect(self, a1, a2, b1, b2):
         s = np.vstack([a1, a2, b1, b2])        # s for stacked
@@ -206,69 +215,80 @@ class OcrdAnybaseocrCropper(Processor):
             return (0, 0)
         return (x/z, y/z)
 
-    def detect_lines(self, arg):
-        Hline = []
-        Vline = []
-        gray = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
-        imgHeight, imgWidth, _ = arg.shape
-        lines = lsd(gray)
+    def get_area(self, box):
+        x1, y1, x2, y2 = box
+        return abs(y2 - y1) * abs(x2 - x1)
 
-        for i in range(lines.shape[0]):
-            pt1 = (int(lines[i, 0]), int(lines[i, 1]))
-            pt2 = (int(lines[i, 2]), int(lines[i, 3]))
-            # consider those line whise length more than this orbitrary value
-            if (abs(pt1[0]-pt2[0]) > 45) and ((int(pt1[1]) < imgHeight*0.25) or (int(pt1[1]) > imgHeight*0.75)):
+    def detect_lines(self, arg):
+        gray = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
+        lines = lsd(gray)
+        if DEBUG:
+            plt.imshow(arg)
+            for x1, y1, x2, y2, _ in lines:
+                plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=2, linestyle='dashed'))
+            plt.legend(handles=[Patch(label='line segments')])
+            plt.show()
+        imgHeight, imgWidth, _ = arg.shape
+        y1max = self.parameter['positionAbove'] * imgHeight
+        y2min = self.parameter['positionBelow'] * imgHeight
+        x1max = self.parameter['positionLeft'] * imgWidth
+        x2min = self.parameter['positionRight'] * imgWidth
+        hlines = []
+        vlines = []
+        for x1, y1, x2, y2, _ in lines:
+            # consider line segments near margins and not too short
+            if abs(x1 - x2) > 45 and (y1 < y1max or y2 > y2min): #y1 > y2min
                 # make full horizontal line
-                Hline.append([0, int(pt1[1]), imgWidth, int(pt2[1])])
-            if (abs(pt1[1]-pt2[1]) > 45) and ((int(pt1[0]) < imgWidth*0.4) or (int(pt1[0]) > imgWidth*0.6)):
+                hlines.append([0, int(y1), imgWidth, int(y2)])
+            if abs(y1 - y2) > 45 and (x1 < x1max or x2 > x2min): #x1 > x2min
                 # make full vertical line
-                Vline.append([int(pt1[0]), 0, int(pt2[0]), imgHeight])
-        Hline.sort(key=lambda x: (x[1]), reverse=False)
-        Vline.sort(key=lambda x: (x[0]), reverse=False)
-        return imgHeight, imgWidth, Hline, Vline
+                vlines.append([int(x1), 0, int(x2), imgHeight])
+        hlines.sort(key=lambda p: p[1]) # from top to bottom
+        vlines.sort(key=lambda p: p[0]) # from left to right
+        return imgHeight, imgWidth, hlines, vlines
 
     def select_borderLine(self, arg, lineDetectH, lineDetectV):
         imgHeight, imgWidth, Hlines, Vlines = self.detect_lines(arg)
-
-        # top side
-        self.BorderLine(imgHeight*0.25, Hlines, 1,
-                        "top", lineDetectH, lineDetectV)
-        # left side
-        self.BorderLine(imgWidth*0.4, Vlines, 0, "left",
-                        lineDetectH, lineDetectV)
-        # bottom side
-        self.BorderLine(imgHeight*0.75, Hlines, 1,
-                        "bottom", lineDetectH, lineDetectV)
-        # right side
-        self.BorderLine(imgWidth*0.6, Vlines, 0, "right",
-                        lineDetectH, lineDetectV)
+        y1max = self.parameter['positionAbove'] * imgHeight
+        y2min = self.parameter['positionBelow'] * imgHeight
+        x1max = self.parameter['positionLeft'] * imgWidth
+        x2min = self.parameter['positionRight'] * imgWidth
+        # connect line segments on all margins
+        self.BorderLine(y1max, Hlines, "top", lineDetectH)
+        self.BorderLine(x1max, Vlines, "left", lineDetectV)
+        self.BorderLine(y2min, Hlines, "bottom", lineDetectH)
+        self.BorderLine(x2min, Vlines, "right", lineDetectV)
+        if DEBUG:
+            plt.imshow(arg)
+            for x1, y1, x2, y2 in lineDetectH+lineDetectV:
+                plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=2, linestyle='dotted'))
+            plt.legend(handles=[Patch(label='border lines')])
+            plt.show()
 
         intersectPoint = []
-        for l1 in lineDetectH:
-            for l2 in lineDetectV:
-                x, y = self.get_intersect(
-                    (l1[0], l1[1]),
-                    (l1[2], l1[3]),
-                    (l2[0], l2[1]),
-                    (l2[2], l2[3])
-                )
+        for hx1, hy1, hx2, hy2 in lineDetectH:
+            for vx1, vy1, vx2, vy2 in lineDetectV:
+                x, y = self.get_intersect((hx1, hy1),
+                                          (hx2, hy2),
+                                          (vx1, vy1),
+                                          (vx2, vy2))
                 intersectPoint.append([x, y])
         Xstart = 0
         Xend = imgWidth
         Ystart = 0
         Yend = imgHeight
-        for i in intersectPoint:
-            Xs = int(i[0])+10 if i[0] < imgWidth*0.4 else 10
+        for xi, yi in intersectPoint:
+            Xs = int(xi)+10 if xi < x1max else 10
             if Xs > Xstart:
                 Xstart = Xs
-            Xe = int(i[0])-10 if i[0] > imgWidth*0.6 else int(imgWidth)-10
+            Xe = int(xi)-10 if xi > x2min else int(imgWidth)-10
             if Xe < Xend:
                 Xend = Xe
-            Ys = int(i[1])+10 if i[1] < imgHeight*0.25 else 10
+            Ys = int(yi)+10 if yi < y1max else 10
             # print("Ys,Ystart:",Ys,Ystart)
             if Ys > Ystart:
                 Ystart = Ys
-            Ye = int(i[1])-15 if i[1] > imgHeight*0.75 else int(imgHeight)-15
+            Ye = int(yi)-15 if yi > y2min else int(imgHeight)-15
             if Ye < Yend:
                 Yend = Ye
 
@@ -279,46 +299,55 @@ class OcrdAnybaseocrCropper(Processor):
 
         return [Xstart, Ystart, Xend, Yend]
 
-    def filter_noisebox(self, textarea, height, width):
+    def filter_noisebox(self, textboxes, height, width):
         tmp = []
         st = True
+        minArea = height * width * 0.001
 
         while st:
-            textarea = [list(x) for x in textarea if x not in tmp]
-            if len(textarea) > 1:
+            textboxes = [list(x) for x in textboxes
+                         if x not in tmp]
+            if len(textboxes) > 1:
                 tmp = []
-                textarea = sorted(
-                    textarea, key=lambda x: (x[3]), reverse=False)
+                textboxes = sorted(textboxes, key=lambda x: x[3])
                 # print textarea
-                x11, y11, x12, y12 = textarea[0]
-                x21, y21, x22, y22 = textarea[1]
+                x11, y11, x12, y12 = textboxes[0]
+                x21, y21, x22, y22 = textboxes[1]
 
-                if abs(y12-y21) > 100 and (float(abs(x12-x11)*abs(y12-y11))/(height*width)) < 0.001:
-                    tmp.append(textarea[0])
+                if abs(y12-y21) > 100 and self.get_area(textboxes[0]) < minArea:
+                    tmp.append(textboxes[0])
 
-                x11, y11, x12, y12 = textarea[-2]
-                x21, y21, x22, y22 = textarea[-1]
+                x11, y11, x12, y12 = textboxes[-2]
+                x21, y21, x22, y22 = textboxes[-1]
 
-                if abs(y12-y21) > 100 and (float(abs(x21-x22)*abs(y22-y21))/(height*width)) < 0.001:
-                    tmp.append(textarea[-1])
+                if abs(y12-y21) > 100 and self.get_area(textboxes[-1]) < minArea:
+                    tmp.append(textboxes[-1])
 
                 if len(tmp) == 0:
                     st = False
             else:
                 break
 
-        return textarea
+        return textboxes
 
-    def detect_textarea(self, arg):
-        textarea = []
+    def detect_textboxes(self, arg):
+        textboxes = []
         small = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
         height, width, _ = arg.shape
 
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         grad = cv2.morphologyEx(small, cv2.MORPH_GRADIENT, kernel)
+        if DEBUG:
+            plt.imshow(grad)
+            plt.legend(handles=[Patch(label='morphological gradient')])
+            plt.show()
 
         _, bw = cv2.threshold(
             grad, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        if DEBUG:
+            plt.imshow(bw)
+            plt.legend(handles=[Patch(label='binarized gradient')])
+            plt.show()
 
         kernel = cv2.getStructuringElement(
             cv2.MORPH_RECT, (10, 1))  # for historical docs
@@ -340,7 +369,7 @@ class OcrdAnybaseocrCropper(Processor):
                     if DEBUG: cv2.drawContours(mask, contours, idx, idx+1, -1)
                     r = cv2.contourArea(contours[idx]) / (w * h)
                     if r > 0.45 and (width*0.9) > w > 15 and (height*0.5) > h > 15:
-                        textarea.append([x, y, x+w-1, y+h-1])
+                        textboxes.append([x, y, x+w-1, y+h-1])
                         if DEBUG: cv2.rectangle(arg, (x, y), (x+w-1, y+h-1), (0, 0, 255), 2)
                     if child_idx >= 0:
                         apply_contour(child_idx)
@@ -354,96 +383,86 @@ class OcrdAnybaseocrCropper(Processor):
             plt.show()
 
         if len(textboxes) > 1:
-            textarea = self.filter_noisebox(textarea, height, width)
+            textboxes = self.filter_noisebox(textboxes, height, width)
+        if DEBUG:
+            plt.imshow(arg)
+            plt.legend(handles=[Patch(label='text boxes')])
+            plt.show()
 
-        return textarea, arg, height, width
+        return textboxes, height, width
 
-    def save_pf(self, base, textarea):
-        x1, y1, x2, y2 = textarea
-
-        img = Image.open(base+'.pf.png')
-        img2 = img.crop((x1, y1, x2, y2))
-        img2.save(base + '.pf.png')
-        self.write_crop_coordinate(base, textarea)
-
-    def filter_area(self, textarea, binImg):
-        height, width, _ = binImg.shape
-        tmp = []
-        for area in textarea:
-            if (height*width*self.parameter['minArea'] < (abs(area[2]-area[0]) * abs(area[3]-area[1]))):
-                tmp.append(area)
-        return tmp
-
-    def marge_columns(self, textarea, colSeparator):
-        tmp = []
-        marge = []
-        #  height, _ = binImg.shape
-        textarea.sort(key=lambda x: (x[0]))
-        for i in range(len(textarea)-1):
-            st = False
-            x11, y11, x12, y12 = textarea[i]
-            x21, y21, x22, y22 = textarea[i+1]
+    def merge_columns(self, textboxes, colSeparator):
+        textboxes.sort(key=lambda x: x[0]) # f.l.t.r.
+        columns = [textboxes[0]]
+        for box in textboxes[1:]:
+            x11, y11, x12, y12 = columns[-1]
+            x21, y21, x22, y22 = box
             if x21-x12 <= colSeparator:
-                if len(marge) > 0:
-                    # print "marge ", marge[0]
-                    x31, y31, x32, y32 = marge[0]
-                    marge.pop(0)
-                else:
-                    x31, y31, x32, y32 = [9999, 9999, 0, 0]
-                marge.append([min(x11, x21, x31), min(y11, y21, y31),
-                              max(x12, x22, x32), max(y12, y22, y32)])
-                st = True
+                columns[-1] = (min(x11, x21), min(y11, y21),
+                               max(x12, x22), max(y12, y22))
             else:
-                tmp.append(textarea[i])
+                columns.append(box)
+        return columns
 
-        if not st:
-            tmp.append(textarea[-1])
+    def merge_boxes(self, textboxes, img, colSeparator):
+        height, width, _ = img.shape
 
-        return tmp+marge
-
-    def crop_area(self, textarea, binImg, rgb, colSeparator):
-        height, width, _ = binImg.shape
-
-        textarea = np.unique(textarea, axis=0)
+        textboxes = np.unique(textboxes, axis=0)
         i = 0
         tmp = []
-        areas = []
-        while i < len(textarea):
-            textarea = [list(x) for x in textarea if x not in tmp]
+        boxes = []
+        while i < len(textboxes):
+            textboxes = [list(x) for x in textboxes
+                         if x not in tmp]
             tmp = []
-            if len(textarea) == 0:
+            if len(textboxes) == 0:
                 break
-            maxBox = textarea[0]
-            for chkBox in textarea:
-                if maxBox != chkBox:
-                    x11, y11, x12, y12 = maxBox
-                    x21, y21, x22, y22 = chkBox
-                    if ((x11 <= x21 <= x12) or (x21 <= x11 <= x22)):
-                        tmp.append(maxBox)
-                        tmp.append(chkBox)
-                        maxBox = [min(x11, x21), min(y11, y21),
-                                  max(x12, x22), max(y12, y22)]
+            maxBox = textboxes[0]
+            for chkBox in textboxes[1:]:
+                x11, y11, x12, y12 = maxBox
+                x21, y21, x22, y22 = chkBox
+                if ((x11 <= x21 <= x12) or (x21 <= x11 <= x22)):
+                    tmp.append(maxBox)
+                    tmp.append(chkBox)
+                    maxBox = [min(x11, x21), min(y11, y21),
+                              max(x12, x22), max(y12, y22)]
             if len(tmp) == 0:
                 tmp.append(maxBox)
-            x1, y1, x2, y2 = maxBox
-            areas.append(maxBox)
-            cv2.rectangle(rgb, (x1, y1), (x2, y2), (255, 0, 0), 2)
+            boxes.append(maxBox)
             i = i+1
+        if DEBUG:
+            plt.imshow(img)
+            for x1, y1, x2, y2 in boxes:
+                plt.gca().add_patch(Rectangle((x1,y1), x2-x1, y2-y1,
+                                              alpha=0.7, linewidth=2, linestyle='dashed'))
+            plt.legend(handles=[Patch(label='columns')])
+            plt.show()
 
-        textarea = np.unique(areas, axis=0).tolist()
-        if len(textarea) > 0:
-            textarea = self.filter_area(textarea, binImg)
-        if len(textarea) > 1:
-            textarea = self.marge_columns(textarea, colSeparator)
-            # print textarea
+        columns = np.unique(boxes, axis=0).tolist()
+        if len(columns) > 0:
+            minArea = height * width * self.parameter['minArea']
+            columns = list(filter(lambda box: self.get_area(box) > minArea, columns))
+        if DEBUG:
+            plt.imshow(img)
+            for x1, y1, x2, y2 in columns:
+                plt.gca().add_patch(Rectangle((x1,y1), x2-x1, y2-y1,
+                                              alpha=0.7, linewidth=2, linestyle='dashed'))
+            plt.legend(handles=[Patch(label='minArea columns')])
+            plt.show()
+        if len(columns) > 1:
+            columns = self.merge_columns(columns, colSeparator)
 
-        if len(textarea) > 0:
-            textarea = sorted(textarea, key=lambda x: (
-                (x[2]-x[0])*(x[3]-x[1])), reverse=True)
+        if len(columns) > 0:
+            columns = sorted(columns, key=self.get_area)
+        if DEBUG:
+            plt.imshow(img)
+            for x1, y1, x2, y2 in columns:
+                plt.gca().add_patch(Rectangle((x1,y1), x2-x1, y2-y1,
+                                              alpha=0.7, linewidth=2, linestyle='dashed'))
+            plt.legend(handles=[Patch(label='merged columns')])
+            plt.show()
 
-            #self.save_pf(base, [x1, y1, x2, y2])
-
-        return textarea
+        return columns
 
     def process(self):
         """Performs border detection on the workspace. """
@@ -491,25 +510,22 @@ class OcrdAnybaseocrCropper(Processor):
         if len(img_array.shape) == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
 
+        img_array_rr = self.remove_rular(img_array)
+        textboxes, height, width = self.detect_textboxes(img_array_rr)
+
         lineDetectH = []
         lineDetectV = []
-        img_array_rr = self.remove_rular(img_array)
+        colSeparator = int(width * self.parameter['colSeparator'])
+        if len(textboxes) > 1:
+            textboxes = self.merge_boxes(textboxes, img_array, colSeparator)
 
-        textarea, img_array_rr_ta, height, width = self.detect_textarea(
-            img_array_rr)
-        colSeparator = int(
-            width * self.parameter['colSeparator'])
-        if len(textarea) > 1:
-            textarea = self.crop_area(
-                textarea, img_array_bin, img_array_rr_ta, colSeparator)
-
-            if len(textarea) == 0:
+            if len(textboxes) == 0:
                 min_x, min_y, max_x, max_y = self.select_borderLine(
                     img_array_rr, lineDetectH, lineDetectV)
             else:
-                min_x, min_y, max_x, max_y = textarea[0]
-        elif len(textarea) == 1 and (height*width*0.5 < (abs(textarea[0][2]-textarea[0][0]) * abs(textarea[0][3]-textarea[0][1]))):
-            min_x, min_y, max_x, max_y = textarea[0]
+                min_x, min_y, max_x, max_y = textboxes[0]
+        elif len(textboxes) == 1 and (height*width*0.5 < self.get_area(textboxes[0])):
+            min_x, min_y, max_x, max_y = textboxes[0]
         else:
             min_x, min_y, max_x, max_y = self.select_borderLine(
                 img_array_rr, lineDetectH, lineDetectV)
