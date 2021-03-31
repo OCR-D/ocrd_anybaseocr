@@ -76,18 +76,8 @@ class OcrdAnybaseocrCropper(Processor):
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrCropper, self).__init__(*args, **kwargs)
 
-    def write_crop_coordinate(self, base, coordinate):
-        x1, y1, x2, y2 = coordinate
-        with open(base + '-frame-pf.dat', 'w') as fp:
-            fp.write(str(x1)+"\t"+str(y1)+"\t"+str(x2-x1)+"\t"+str(y2-y1))
-
-    def rotate_image(self, orientation, image):
-        return image.rotate(orientation)
-
     def remove_rular(self, arg):
-        #base = arg.split(".")[0]
-        #img = cv2.cvtColor(arg, cv2.COLOR_RGB2BGR)
-        gray = cv2.cvtColor(arg, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
         contours, _ = cv2.findContours(
             gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -455,7 +445,7 @@ class OcrdAnybaseocrCropper(Processor):
     def _process_page(self, page, page_image, page_xywh, input_file):
         img_array = ocrolib.pil2array(page_image)
 
-        # Check if image is RGB or not #FIXME: check not needed anymore?
+        # ensure RGB image
         if len(img_array.shape) == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
 
