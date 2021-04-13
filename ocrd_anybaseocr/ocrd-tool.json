@@ -54,18 +54,42 @@
       "input_file_grp": ["OCR-D-IMG-DESKEW"],
       "output_file_grp": ["OCR-D-IMG-CROP"],
       "parameters": {
-        "rularRatioMax": {"type": "number", "format": "float", "default": 50.0, "description": "Rular bbox maximum aspect ratio"},
-        "rularRatioMin": {"type": "number", "format": "float", "default": 3.0, "description": "Rular bbox minimum aspect ratio"},
-        "rularWidth":    {"type": "number", "format": "float", "default": 0.95, "description": "maximum rular width"},
-        "maxRularArea":  {"type": "number", "format": "float", "default": 0.3, "description": "Consider maximum rular area"},
-        "minRularArea":  {"type": "number", "format": "float", "default": 0.01, "description": "Consider minimum rular area"},
-        "minArea":       {"type": "number", "format": "float", "default": 0.05, "description": "Minimum area (as ratio of total image pixels) for detected text columns before merging"},
-        "colSeparator":  {"type": "number", "format": "float", "default": 0.04, "description": "Maximum width (as ratio of total image width) between detected text columns for merging"},
-        "positionAbove": {"type": "number", "format": "float", "default": 0.25, "description": "Top margin to look for rular and for edges"},
-        "positionBelow": {"type": "number", "format": "float", "default": 0.75, "description": "Bottom margin to look for rular and for edges"},
-        "positionLeft":  {"type": "number", "format": "float", "default": 0.4, "description": "Left margin to look for rular and for edges"},
-        "positionRight": {"type": "number", "format": "float", "default": 0.6, "description": "Right margin to look for rular and for edges"},
-        "padding":       {"type": "number", "format": "integer", "default": 10, "description": "extend resulting border by this many px in each direction"}
+        "rulerRatioMax": {
+          "type": "number", "format": "float", "default": 50.0,
+          "description": "ruler detection and suppression: maximum aspect ratio of bbox"},
+        "rulerRatioMin": {
+          "type": "number", "format": "float", "default": 3.0,
+          "description": "ruler detection and suppression: minimum aspect ratio of bbox"},
+        "rulerAreaMax":  {
+          "type": "number", "format": "float", "default": 0.3,
+          "description": "ruler detection and suppression: maximum area of bbox (as ratio of total image pixels)"},
+        "rulerAreaMin":  {
+          "type": "number", "format": "float", "default": 0.01,
+          "description": "ruler detection and suppression: minimum area of bbox (as ratio of total image pixels)"},
+        "rulerWidthMax": {
+          "type": "number", "format": "float", "default": 0.95,
+          "description": "ruler detection and suppression: maximum width of bbox (as ratio of total image width)"},
+        "columnAreaMin": {
+          "type": "number", "format": "float", "default": 0.05,
+          "description": "text block detection: minimum area of individual columns (as ratio of total image pixels)"},
+        "columnSepWidthMax": {
+          "type": "number", "format": "float", "default": 0.04,
+          "description": "text block detection: maximum width between individual columns (as ratio of total image width)"},
+        "marginTop": {
+          "type": "number", "format": "float", "default": 0.25,
+          "description": "ruler detection and edge detection: maximum y position to crop from above (as ratio of total image height)"},
+        "marginBottom": {
+          "type": "number", "format": "float", "default": 0.75,
+          "description": "ruler detection and edge detection: minimum y position to crop from below (as ratio of total image height)"},
+        "marginLeft": {
+          "type": "number", "format": "float", "default": 0.4,
+          "description": "ruler detection and edge detection: maximum x position to crop from left (as ratio of total image width)"},
+        "marginRight": {
+          "type": "number", "format": "float", "default": 0.6,
+          "description": "ruler detection and edge detection: minimum x position to crop from right (as ratio of total image width)"},
+        "padding": {
+          "type": "number", "format": "integer", "default": 10,
+          "description": "extend resulting border by this many px in each direction"}
       }
     },
     "ocrd-anybaseocr-dewarp": {

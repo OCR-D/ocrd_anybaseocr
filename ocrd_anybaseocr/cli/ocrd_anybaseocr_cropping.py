@@ -105,7 +105,7 @@ class OcrdAnybaseocrCropper(Processor):
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrCropper, self).__init__(*args, **kwargs)
 
-    def remove_rular(self, arg):
+    def remove_ruler(self, arg):
         gray = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
         contours, _ = cv2.findContours(
             gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -118,9 +118,9 @@ class OcrdAnybaseocrCropper(Processor):
         rects = sorted(rects, key=lambda x: (x[2]*x[3]), reverse=True)
         # consider those rectangle whose area>10000 and less than one-fourth of images
         rects = [r for r in rects if (
-            imgArea*self.parameter['maxRularArea']) > (r[2]*r[3]) > (imgArea*self.parameter['minRularArea'])]
+            imgArea*self.parameter['rulerAreaMax']) > (r[2]*r[3]) > (imgArea*self.parameter['rulerAreaMin'])]
 
-        # detect child rectangles. Usually those are not ruler. Rular position are basically any one side.
+        # detect child rectangles. Usually those are not ruler. Ruler position are basically any one side.
         removeRect = []
         for i, rect1 in enumerate(rects):
             (x1, y1, w1, h1) = rect1
@@ -132,77 +132,38 @@ class OcrdAnybaseocrCropper(Processor):
         # removed child rectangles.
         rects = [x for x in rects if x not in removeRect]
 
-        predictRular = []
+        predictRuler = []
 
-        y1max = self.parameter['positionAbove'] * height
-        y2min = self.parameter['positionBelow'] * height
-        x1max = self.parameter['positionLeft'] * width
-        x2min = self.parameter['positionRight'] * width
-        wmax = self.parameter['rularWidth'] * width
+        y1max = self.parameter['marginTop'] * height
+        y2min = self.parameter['marginBottom'] * height
+        x1max = self.parameter['marginLeft'] * width
+        x2min = self.parameter['marginRight'] * width
+        wmax = self.parameter['rulerWidthMax'] * width
         for rect in rects:
             (x, y, w, h) = rect
             if (w < wmax and
                 ((y+h < y1max or y > y2min) or
                  (x+w < x1max or x > x2min))):
-                if (self.parameter['rularRatioMin'] < round(float(w)/float(h), 2) < self.parameter['rularRatioMax']) or \
-                   (self.parameter['rularRatioMin'] < round(float(h)/float(w), 2) < self.parameter['rularRatioMax']):
+                if (self.parameter['rulerRatioMin'] < round(float(w)/float(h), 2) < self.parameter['rulerRatioMax']) or \
+                   (self.parameter['rulerRatioMin'] < round(float(h)/float(w), 2) < self.parameter['rulerRatioMax']):
                     blackPixel = np.count_nonzero(arg[y:y+h, x:x+w] == 0)
-                    predictRular.append((x, y, w, h, blackPixel))
+                    predictRuler.append((x, y, w, h, blackPixel))
 
-        # Finally check number of black pixel to avoid false rular
-        if predictRular:
+        # Finally check number of black pixel to avoid false ruler
+        if predictRuler:
             # sort by fg size
-            predictRular = sorted(predictRular, key=lambda x: x[4], reverse=True)
+            predictRuler = sorted(predictRuler, key=lambda x: x[4], reverse=True)
             # pick largest candidate
-            x, y, w, h, _ = predictRular[0]
+            x, y, w, h, _ = predictRuler[0]
             # clip to white
             cv2.rectangle(arg, (x-15, y-15), (x+w+20, y+h+20),
                           (255, 255, 255), cv2.FILLED)
             if DEBUG:
                 plt.imshow(arg)
-                plt.legend(handles=[Patch(label='rular clipped to white')])
+                plt.legend(handles=[Patch(label='ruler clipped to white')])
                 plt.show()
 
         return arg
-
-    def BorderLine(self, boundary, lines, side, detected):
-        ncontiguous = 1
-        lastline = []
-        if side in ('top', 'bottom'):
-            index = 1 # get y
-        else:
-            index = 0 # get x
-        if side in ('top', 'left'):
-            for line, nextline in zip(lines[:-1], lines[1:]):
-                if(abs(line[index]-nextline[index])) <= 15 and line[index] < boundary:
-                    lastline = line
-                    ncontiguous += 1
-                elif ncontiguous >= 3:
-                    break
-                else:
-                    ncontiguous = 1
-        else:
-            for line, nextline in list(zip(lines[:-1], lines[1:]))[::-1]:
-                if(abs(line[index]-nextline[index])) <= 15 and line[index] > boundary:
-                    lastline = line
-                    ncontiguous += 1
-                elif ncontiguous >= 3:
-                    break
-                else:
-                    ncontiguous = 1
-        if ncontiguous >= 3 and lastline:
-            if side == "top":
-                y = max(lastline[1], lastline[3])
-                detected.append((lastline[0], y, lastline[2], y))
-            elif side == "left":
-                x = max(lastline[0], lastline[2])
-                detected.append((x, lastline[1], x, lastline[3]))
-            elif side == "bottom":
-                y = min(lastline[1], lastline[3])
-                detected.append((lastline[0], y, lastline[2], y))
-            else:
-                x = min(lastline[0], lastline[2])
-                detected.append((x, lastline[1], x, lastline[3]))
 
     def get_intersect(self, a1, a2, b1, b2):
         s = np.vstack([a1, a2, b1, b2])        # s for stacked
@@ -229,10 +190,10 @@ class OcrdAnybaseocrCropper(Processor):
             plt.legend(handles=[Patch(label='line segments')])
             plt.show()
         imgHeight, imgWidth, _ = arg.shape
-        y1max = self.parameter['positionAbove'] * imgHeight
-        y2min = self.parameter['positionBelow'] * imgHeight
-        x1max = self.parameter['positionLeft'] * imgWidth
-        x2min = self.parameter['positionRight'] * imgWidth
+        y1max = self.parameter['marginTop'] * imgHeight
+        y2min = self.parameter['marginBottom'] * imgHeight
+        x1max = self.parameter['marginLeft'] * imgWidth
+        x2min = self.parameter['marginRight'] * imgWidth
         hlines = []
         vlines = []
         for x1, y1, x2, y2, _ in lines:
@@ -249,10 +210,10 @@ class OcrdAnybaseocrCropper(Processor):
 
     def select_borderLine(self, arg, lineDetectH, lineDetectV):
         imgHeight, imgWidth, Hlines, Vlines = self.detect_lines(arg)
-        y1max = self.parameter['positionAbove'] * imgHeight
-        y2min = self.parameter['positionBelow'] * imgHeight
-        x1max = self.parameter['positionLeft'] * imgWidth
-        x2min = self.parameter['positionRight'] * imgWidth
+        y1max = self.parameter['marginTop'] * imgHeight
+        y2min = self.parameter['marginBottom'] * imgHeight
+        x1max = self.parameter['marginLeft'] * imgWidth
+        x2min = self.parameter['marginRight'] * imgWidth
         # connect line segments on all margins
         self.BorderLine(y1max, Hlines, "top", lineDetectH)
         self.BorderLine(x1max, Vlines, "left", lineDetectV)
@@ -298,6 +259,45 @@ class OcrdAnybaseocrCropper(Processor):
             Yend = 15
 
         return [Xstart, Ystart, Xend, Yend]
+
+    def BorderLine(self, boundary, lines, side, detected):
+        ncontiguous = 1
+        lastline = []
+        if side in ('top', 'bottom'):
+            index = 1 # get y
+        else:
+            index = 0 # get x
+        if side in ('top', 'left'):
+            for line, nextline in zip(lines[:-1], lines[1:]):
+                if(abs(line[index]-nextline[index])) <= 15 and line[index] < boundary:
+                    lastline = line
+                    ncontiguous += 1
+                elif ncontiguous >= 3:
+                    break
+                else:
+                    ncontiguous = 1
+        else:
+            for line, nextline in list(zip(lines[:-1], lines[1:]))[::-1]:
+                if(abs(line[index]-nextline[index])) <= 15 and line[index] > boundary:
+                    lastline = line
+                    ncontiguous += 1
+                elif ncontiguous >= 3:
+                    break
+                else:
+                    ncontiguous = 1
+        if ncontiguous >= 3 and lastline:
+            if side == "top":
+                y = max(lastline[1], lastline[3])
+                detected.append((lastline[0], y, lastline[2], y))
+            elif side == "left":
+                x = max(lastline[0], lastline[2])
+                detected.append((x, lastline[1], x, lastline[3]))
+            elif side == "bottom":
+                y = min(lastline[1], lastline[3])
+                detected.append((lastline[0], y, lastline[2], y))
+            else:
+                x = min(lastline[0], lastline[2])
+                detected.append((x, lastline[1], x, lastline[3]))
 
     def filter_noisebox(self, textboxes, height, width):
         tmp = []
@@ -440,7 +440,7 @@ class OcrdAnybaseocrCropper(Processor):
 
         columns = np.unique(boxes, axis=0).tolist()
         if len(columns) > 0:
-            minArea = height * width * self.parameter['minArea']
+            minArea = height * width * self.parameter['columnAreaMin']
             columns = list(filter(lambda box: self.get_area(box) > minArea, columns))
         if DEBUG:
             plt.imshow(img)
@@ -510,12 +510,12 @@ class OcrdAnybaseocrCropper(Processor):
         if len(img_array.shape) == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
 
-        img_array_rr = self.remove_rular(img_array)
+        img_array_rr = self.remove_ruler(img_array)
         textboxes, height, width = self.detect_textboxes(img_array_rr)
 
         lineDetectH = []
         lineDetectV = []
-        colSeparator = int(width * self.parameter['colSeparator'])
+        colSeparator = int(width * self.parameter['columnSepWidthMax'])
         if len(textboxes) > 1:
             textboxes = self.merge_boxes(textboxes, img_array, colSeparator)
 
