@@ -32,10 +32,13 @@
 
 
 import os
+from types import SimpleNamespace
 import numpy as np
 from pylsd.lsd import lsd
 import cv2
 from PIL import Image
+from scipy.spatial import distance_matrix
+from scipy.stats import linregress
 
 import click
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
@@ -196,108 +199,274 @@ class OcrdAnybaseocrCropper(Processor):
         x2min = self.parameter['marginRight'] * imgWidth
         hlines = []
         vlines = []
-        for x1, y1, x2, y2, _ in lines:
+        for x1, y1, x2, y2, w in lines:
+            dx = abs(x1 - x2)
+            dy = abs(y1 - y2)
             # consider line segments near margins and not too short
-            if abs(x1 - x2) > 45 and (y1 < y1max or y2 > y2min): #y1 > y2min
-                # make full horizontal line
-                hlines.append([0, int(y1), imgWidth, int(y2)])
-            if abs(y1 - y2) > 45 and (x1 < x1max or x2 > x2min): #x1 > x2min
-                # make full vertical line
-                vlines.append([int(x1), 0, int(x2), imgHeight])
-        hlines.sort(key=lambda p: p[1]) # from top to bottom
-        vlines.sort(key=lambda p: p[0]) # from left to right
+            if dx > 15 and dy / dx < 0.05 and (y1 < y1max or y2 > y2min):
+                hlines.append([x1, y1, x2, y2, w])
+            if dy > 15 and dx / dy < 0.05 and (x1 < x1max or x2 > x2min):
+                vlines.append([x1, y1, x2, y2, w])
+
         return imgHeight, imgWidth, hlines, vlines
 
-    def select_borderLine(self, arg, lineDetectH, lineDetectV):
+    def aggregate_lines(self, arg, lines, is_vertical,
+                        min_length=150, # minimum total length of line group
+                        min_end=None, # start of allowed range (straight axis)
+                        max_start=None, # end of allowed range (straight axis)
+                        min_pos=None, # start of forbidden range (perpendicular axis)
+                        max_pos=None): # end of forbidden range (perpendicular axis)
+        imgHeight, imgWidth, _ = arg.shape
+        if not lines:
+            return []
+        lines = np.array(lines)
+        if is_vertical:
+            rng = 1
+            if not min_end:
+                min_end = lines[:,3].max()
+            if not max_start:
+                max_start = lines[:,1].min()
+            if not min_pos:
+                min_pos = lines[:,[0,2]].max()
+            if not max_pos:
+                max_pos = lines[:,[0,2]].min()
+        else:
+            rng = 0
+            if not min_end:
+                min_end = lines[:,2].max()
+            if not max_start:
+                max_start = lines[:,0].min()
+            if not min_pos:
+                min_pos = lines[:,[1,3]].max()
+            if not max_pos:
+                max_pos = lines[:,[1,3]].min()
+        # result: line lengths on diagonal, distances on non-diagonals
+        dist = distance_matrix(lines[:, 0:2], lines[:, 2:4])
+        # find clustering of line segments by distance and direction
+        groups = list() # list of Group
+        class Group(SimpleNamespace):
+            # ind: hlines/vlines index set
+            # res: linear x-y/y-x regressor
+            pass
+        # initialize single-line groups
+        for i, line in enumerate(lines):
+            points = np.vstack([lines[i, 0:2], lines[i, 2:4]])
+            if is_vertical:
+                newres = linregress(points[:, 1], points[:, 0])
+            else:
+                newres = linregress(points[:, 0], points[:, 1])
+            groups.append(Group(ind={i}, res=newres, wgt=lines[i, 4]))
+        # merge nearby groups (with mutual points of small distance)
+        for start, end in zip(*np.unravel_index(np.argsort(dist, None), dist.shape)):
+            if start == end:
+                continue # ignore diagonals
+            if dist[start, end] > 15:
+                break # ignore points too far apart
+            for i, igroup in enumerate(groups):
+                if not igroup.res: continue # already merged / to be deleted
+                if (start in igroup.ind) == (end in igroup.ind):
+                    continue
+                for j, jgroup in enumerate(groups[i+1:], i+1):
+                    if not jgroup.res: continue # already merged / to be deleted
+                    if (start if end in igroup.ind else end) not in jgroup.ind:
+                        continue
+                    newind = igroup.ind.union(jgroup.ind)
+                    ind = np.array(list(newind))
+                    points = np.concatenate([lines[ind, 0:2], lines[ind, 2:4]])
+                    if is_vertical:
+                        newres = linregress(points[:, 1], points[:, 0])
+                    else:
+                        newres = linregress(points[:, 0], points[:, 1])
+                    if (newres.stderr > 0.04 or
+                        newres.stderr - igroup.res.stderr > 0.02 or
+                        newres.stderr - jgroup.res.stderr > 0.02):
+                        continue # ignore line segments deviating in direction too much
+                    #print("merging {} and {}".format(igroup.ind, jgroup.ind))
+                    iind = np.array(list(igroup.ind))
+                    ilength = dist[iind,iind].sum()
+                    jind = np.array(list(jgroup.ind))
+                    jlength = dist[jind,jind].sum()
+                    igroup.wgt = (ilength * igroup.wgt + jlength * jgroup.wgt) / (ilength + jlength)
+                    igroup.ind = newind
+                    igroup.res = newres
+                    jgroup.res = None # mark for deletion
+        # merge similar groups (with approximately the same direction and no gaps)
+        for i, igroup in enumerate(groups):
+            if not igroup.res: continue # already merged / to be deleted
+            for j, jgroup in enumerate(groups[i+1:], i+1):
+                if not jgroup.res: continue # already merged / to be deleted
+                if not (0.9 < igroup.res.slope / (jgroup.res.slope or 1e-9) < 1.1 and
+                        abs(igroup.res.intercept - jgroup.res.intercept) < 0.01 * imgWidth):
+                    # inconsistent directions
+                    continue
+                iind = np.array(list(igroup.ind))
+                jind = np.array(list(jgroup.ind))
+                ipoints = np.concatenate([lines[iind, 0:2], lines[iind, 2:4]])
+                jpoints = np.concatenate([lines[jind, 0:2], lines[jind, 2:4]])
+                istart, iend = ipoints[:,rng].min(), ipoints[:,rng].max()
+                jstart, jend = jpoints[:,rng].min(), jpoints[:,rng].max()
+                if (jstart - iend > 0.1 * imgWidth or
+                    istart - jend > 0.1 * imgWidth):
+                    # too large gap
+                    continue
+                newind = igroup.ind.union(jgroup.ind)
+                points = np.concatenate([ipoints, jpoints])
+                if is_vertical:
+                    newres = linregress(points[:, 1], points[:, 0])
+                else:
+                    newres = linregress(points[:, 0], points[:, 1])
+                if (newres.stderr > 0.04 or
+                    newres.stderr - igroup.res.stderr > 0.02 or
+                    newres.stderr - jgroup.res.stderr > 0.02):
+                    continue # ignore line segments deviating in direction too much
+                #print("merging {} and {}".format(igroup.ind, jgroup.ind))
+                iind = np.array(list(igroup.ind))
+                ilength = dist[iind,iind].sum()
+                jind = np.array(list(jgroup.ind))
+                jlength = dist[jind,jind].sum()
+                igroup.wgt = (ilength * igroup.wgt + jlength * jgroup.wgt) / (ilength + jlength)
+                igroup.ind = newind
+                igroup.res = newres
+                jgroup.res = None # mark for deletion
+        if DEBUG:
+            plt.imshow(arg)
+            for group in groups:
+                if not group.res:
+                    continue
+                ind = np.array(list(group.ind))
+                points = np.concatenate([lines[ind,rng], lines[ind,2+rng]])
+                if is_vertical:
+                    # x = slope * y + intercept
+                    y1 = points.min()
+                    x1 = group.res.slope * y1 + group.res.intercept
+                    y2 = points.max()
+                    x2 = group.res.slope * y2 + group.res.intercept
+                else:
+                    # y = slope * x + intercept
+                    x1 = points.min()
+                    y1 = group.res.slope * x1 + group.res.intercept
+                    x2 = points.max()
+                    y2 = group.res.slope * x2 + group.res.intercept
+                plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=max(1,int(group.wgt/2)), linestyle='dashed'))
+            plt.legend(handles=[Patch(label='line groups')])
+            plt.show()
+        for group in groups.copy():
+            if not group.res:
+                # merged already
+                groups.remove(group)
+                continue
+            ind = np.array(list(group.ind))
+            lengths = dist[ind,ind]
+            group.length = lengths.sum()
+            if group.length < min_length:
+                # total length of lines in group is too short
+                groups.remove(group)
+                #print("too short: {} ({} < {})".format(group.ind, group.length, min_length))
+                continue
+            points = np.concatenate([lines[ind,rng], lines[ind,2+rng]])
+            group.start = points.min()
+            group.end = points.max()
+            if group.start > max_start or group.end < min_end:
+                # lines in group are completely in margin areas
+                groups.remove(group)
+                if group.start > max_start:
+                    pass #print("invalid range: {} ({} > {})".format(group.ind, group.start, max_start))
+                else:
+                    pass #print("invalid range: {} ({} < {})".format(group.ind, group.end, min_end))
+                continue
+            if is_vertical:
+                # x = slope * y + intercept
+                y1 = 0
+                y2 = imgHeight
+                x1 = group.res.intercept
+                x2 = group.res.slope * y2 + x1
+                if min_pos < 0.5 * (x1 + x2) < max_pos:
+                    # lines in group are completely in margin areas
+                    groups.remove(group)
+                    #print("invalid position: {} ({} < {} < {})".format(group.ind, min_pos, 0.5 * (x1+x2), max_pos))
+                    continue
+            else:
+                # y = slope * x + intercept
+                x1 = 0
+                x2 = imgWidth
+                y1 = group.res.intercept
+                y2 = group.res.slope * x2 + y1
+                if min_pos < 0.5 * (y1 + y2) < max_pos:
+                    # lines in group are completely in margin areas
+                    groups.remove(group)
+                    #print("invalid position: {} ({} < {} < {})".format(group.ind, min_pos, 0.5 * (y1+y2), max_pos))
+                    continue
+            group.line = [x1, y1, x2, y2]
+            #print("kept {}".format(group.ind))
+        if DEBUG:
+            plt.imshow(arg)
+            for group in groups:
+                x1, y1, x2, y2 = group.line
+                plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=1, linestyle='-', color='red'))
+            plt.legend(handles=[Patch(label='line candidates')])
+            plt.show()
+        return groups
+
+    def select_borderLine(self, arg):
         imgHeight, imgWidth, Hlines, Vlines = self.detect_lines(arg)
         y1max = self.parameter['marginTop'] * imgHeight
         y2min = self.parameter['marginBottom'] * imgHeight
         x1max = self.parameter['marginLeft'] * imgWidth
         x2min = self.parameter['marginRight'] * imgWidth
-        # connect line segments on all margins
-        self.BorderLine(y1max, Hlines, "top", lineDetectH)
-        self.BorderLine(x1max, Vlines, "left", lineDetectV)
-        self.BorderLine(y2min, Hlines, "bottom", lineDetectH)
-        self.BorderLine(x2min, Vlines, "right", lineDetectV)
+        # connect consistent line segments and filter by position and length
+        Hgroups = self.aggregate_lines(arg, Hlines, False, 0.2 * imgWidth, x1max, x2min, y1max, y2min)
+        Vgroups = self.aggregate_lines(arg, Vlines, True, 0.2 * imgHeight, y1max, y2min, x1max, x2min)
+        # select best (i.e. innermost longest) candidate on each side
+        toplines = sorted(filter(lambda group: # y pos at top margin
+                                 0.5 * (group.line[3] + group.line[1]) < y1max,
+                                 Hgroups),
+                          reverse=True,
+                          key=lambda group: # maximize product of length and y pos
+                          group.wgt * group.length * np.sqrt(group.line[3] + group.line[1]))
+        botlines = sorted(filter(lambda group: # y pos at bottom margin
+                                 0.5 * (group.line[3] + group.line[1]) > y2min,
+                                 Hgroups),
+                          reverse=True,
+                          key=lambda group: # maximize product of length and h-y pos
+                          group.wgt * group.length * np.sqrt(2 * imgHeight - group.line[3] - group.line[1]))
+        lftlines = sorted(filter(lambda group: # x pos at left margin
+                                 0.5 * (group.line[2] + group.line[0]) < x1max,
+                                 Vgroups),
+                          reverse=True,
+                          key=lambda group: # maximize product of length and x pos
+                          group.wgt * group.length * np.sqrt(group.line[2] + group.line[0]))
+        rgtlines = sorted(filter(lambda group: # x pos at right margin
+                                 0.5 * (group.line[2] + group.line[0]) > x2min,
+                                 Vgroups),
+                          reverse=True,
+                          key=lambda group: # maximize product of length and w-x pos
+                          group.wgt * group.length * np.sqrt(2 * imgWidth - group.line[2] - group.line[0]))
+        # add fallback on each side
+        toplines = list(map(lambda group: group.line, toplines))
+        toplines.append([0, 0, imgWidth, 0])
+        botlines = list(map(lambda group: group.line, botlines))
+        botlines.append([0, imgHeight, imgWidth, imgHeight])
+        lftlines = list(map(lambda group: group.line, lftlines))
+        lftlines.append([0, 0, 0, imgHeight])
+        rgtlines = list(map(lambda group: group.line, rgtlines))
+        rgtlines.append([imgWidth, 0, imgWidth, imgHeight])
         if DEBUG:
             plt.imshow(arg)
-            for x1, y1, x2, y2 in lineDetectH+lineDetectV:
+            for x1, y1, x2, y2 in [toplines[0], botlines[0], lftlines[0], rgtlines[0]]:
                 plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=2, linestyle='dotted'))
             plt.legend(handles=[Patch(label='border lines')])
             plt.show()
-
+        # intersect all sides
         intersectPoint = []
-        for hx1, hy1, hx2, hy2 in lineDetectH:
-            for vx1, vy1, vx2, vy2 in lineDetectV:
+        for hx1, hy1, hx2, hy2 in [toplines[0], botlines[0]]:
+            for vx1, vy1, vx2, vy2 in [lftlines[0], rgtlines[0]]:
                 x, y = self.get_intersect((hx1, hy1),
                                           (hx2, hy2),
                                           (vx1, vy1),
                                           (vx2, vy2))
                 intersectPoint.append([x, y])
-        Xstart = 0
-        Xend = imgWidth
-        Ystart = 0
-        Yend = imgHeight
-        for xi, yi in intersectPoint:
-            Xs = int(xi)+10 if xi < x1max else 10
-            if Xs > Xstart:
-                Xstart = Xs
-            Xe = int(xi)-10 if xi > x2min else int(imgWidth)-10
-            if Xe < Xend:
-                Xend = Xe
-            Ys = int(yi)+10 if yi < y1max else 10
-            # print("Ys,Ystart:",Ys,Ystart)
-            if Ys > Ystart:
-                Ystart = Ys
-            Ye = int(yi)-15 if yi > y2min else int(imgHeight)-15
-            if Ye < Yend:
-                Yend = Ye
-
-        if Xend < 0:
-            Xend = 10
-        if Yend < 0:
-            Yend = 15
-
-        return [Xstart, Ystart, Xend, Yend]
-
-    def BorderLine(self, boundary, lines, side, detected):
-        ncontiguous = 1
-        lastline = []
-        if side in ('top', 'bottom'):
-            index = 1 # get y
-        else:
-            index = 0 # get x
-        if side in ('top', 'left'):
-            for line, nextline in zip(lines[:-1], lines[1:]):
-                if(abs(line[index]-nextline[index])) <= 15 and line[index] < boundary:
-                    lastline = line
-                    ncontiguous += 1
-                elif ncontiguous >= 3:
-                    break
-                else:
-                    ncontiguous = 1
-        else:
-            for line, nextline in list(zip(lines[:-1], lines[1:]))[::-1]:
-                if(abs(line[index]-nextline[index])) <= 15 and line[index] > boundary:
-                    lastline = line
-                    ncontiguous += 1
-                elif ncontiguous >= 3:
-                    break
-                else:
-                    ncontiguous = 1
-        if ncontiguous >= 3 and lastline:
-            if side == "top":
-                y = max(lastline[1], lastline[3])
-                detected.append((lastline[0], y, lastline[2], y))
-            elif side == "left":
-                x = max(lastline[0], lastline[2])
-                detected.append((x, lastline[1], x, lastline[3]))
-            elif side == "bottom":
-                y = min(lastline[1], lastline[3])
-                detected.append((lastline[0], y, lastline[2], y))
-            else:
-                x = min(lastline[0], lastline[2])
-                detected.append((x, lastline[1], x, lastline[3]))
+        # FIXME: return confidence value (length and no fallback on each side)
+        return np.array(intersectPoint)
 
     def filter_noisebox(self, textboxes, height, width):
         tmp = []
@@ -349,6 +518,17 @@ class OcrdAnybaseocrCropper(Processor):
             plt.legend(handles=[Patch(label='binarized gradient')])
             plt.show()
 
+        # for x1, y1, x2, y2, w in lines:
+        #     l = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        #     if l > 40 and l / w > 20:
+        #         print("suppressing %d,%d %d,%d (%d)" %(
+        #             x1, y1, x2, y2, w))
+        #         cv2.line(bw, (int(x1),int(y1)), (int(x2),int(y2)), 0, int(np.ceil(w / 2)))
+        # if DEBUG:
+        #     plt.imshow(bw)
+        #     plt.legend(handles=[Patch(label='without lines')])
+        #     plt.show()
+        
         kernel = cv2.getStructuringElement(
             cv2.MORPH_RECT, (10, 1))  # for historical docs
         connected = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, kernel)
@@ -359,7 +539,9 @@ class OcrdAnybaseocrCropper(Processor):
 
         contours, hierarchy = cv2.findContours(
             connected.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-        if DEBUG: mask = np.zeros(bw.shape[:2], dtype=np.uint16)
+        if DEBUG:
+            mask = np.zeros(bw.shape[:2], dtype=np.uint16)
+            res = arg.copy()
 
         def apply_contour(idx):
             while 0 <= idx < len(contours):
@@ -370,7 +552,7 @@ class OcrdAnybaseocrCropper(Processor):
                     r = cv2.contourArea(contours[idx]) / (w * h)
                     if r > 0.45 and (width*0.9) > w > 15 and (height*0.5) > h > 15:
                         textboxes.append([x, y, x+w-1, y+h-1])
-                        if DEBUG: cv2.rectangle(arg, (x, y), (x+w-1, y+h-1), (0, 0, 255), 2)
+                        if DEBUG: cv2.rectangle(res, (x, y), (x+w-1, y+h-1), (0, 0, 255), 2)
                     if child_idx >= 0:
                         apply_contour(child_idx)
                 idx = next_idx
@@ -385,7 +567,7 @@ class OcrdAnybaseocrCropper(Processor):
         if len(textboxes) > 1:
             textboxes = self.filter_noisebox(textboxes, height, width)
         if DEBUG:
-            plt.imshow(arg)
+            plt.imshow(res)
             plt.legend(handles=[Patch(label='text boxes')])
             plt.show()
 
@@ -512,23 +694,22 @@ class OcrdAnybaseocrCropper(Processor):
 
         img_array_rr = self.remove_ruler(img_array)
         textboxes, height, width = self.detect_textboxes(img_array_rr)
-
-        lineDetectH = []
-        lineDetectV = []
         colSeparator = int(width * self.parameter['columnSepWidthMax'])
         if len(textboxes) > 1:
             textboxes = self.merge_boxes(textboxes, img_array, colSeparator)
 
             if len(textboxes) == 0:
-                min_x, min_y, max_x, max_y = self.select_borderLine(
-                    img_array_rr, lineDetectH, lineDetectV)
+                corners = self.select_borderLine(img_array_rr)
+                min_x, min_y = corners.min(axis=0)
+                max_x, max_y = corners.max(axis=0)
             else:
                 min_x, min_y, max_x, max_y = textboxes[0]
         elif len(textboxes) == 1 and (height*width*0.5 < self.get_area(textboxes[0])):
             min_x, min_y, max_x, max_y = textboxes[0]
         else:
-            min_x, min_y, max_x, max_y = self.select_borderLine(
-                img_array_rr, lineDetectH, lineDetectV)
+            corners = self.select_borderLine(img_array_rr)
+            min_x, min_y = corners.min(axis=0)
+            max_x, max_y = corners.max(axis=0)
 
         def clip(point):
             x, y = point
