@@ -77,16 +77,16 @@
           "description": "text block detection: maximum width between individual columns (as ratio of total image width)"},
         "marginTop": {
           "type": "number", "format": "float", "default": 0.25,
-          "description": "ruler detection and edge detection: maximum y position to crop from above (as ratio of total image height)"},
+          "description": "ruler / edge / text detection: maximum y position to crop from above (as ratio of total image height)"},
         "marginBottom": {
           "type": "number", "format": "float", "default": 0.75,
-          "description": "ruler detection and edge detection: minimum y position to crop from below (as ratio of total image height)"},
+          "description": "ruler / edge / text detection: minimum y position to crop from below (as ratio of total image height)"},
         "marginLeft": {
           "type": "number", "format": "float", "default": 0.4,
-          "description": "ruler detection and edge detection: maximum x position to crop from left (as ratio of total image width)"},
+          "description": "ruler / edge / text detection: maximum x position to crop from left (as ratio of total image width)"},
         "marginRight": {
           "type": "number", "format": "float", "default": 0.6,
-          "description": "ruler detection and edge detection: minimum x position to crop from right (as ratio of total image width)"},
+          "description": "ruler / edge / text detection: minimum x position to crop from right (as ratio of total image width)"},
         "padding": {
           "type": "number", "format": "integer", "default": 10,
           "description": "extend resulting border by this many px in each direction"}

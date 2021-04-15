@@ -588,6 +588,10 @@ class OcrdAnybaseocrCropper(Processor):
 
     def merge_boxes(self, textboxes, img, colSeparator):
         height, width, _ = img.shape
+        y1max = self.parameter['marginTop'] * height
+        y2min = self.parameter['marginBottom'] * height
+        x1max = self.parameter['marginLeft'] * width
+        x2min = self.parameter['marginRight'] * width
 
         textboxes = np.unique(textboxes, axis=0)
         i = 0
@@ -621,6 +625,7 @@ class OcrdAnybaseocrCropper(Processor):
             plt.show()
 
         columns = np.unique(boxes, axis=0).tolist()
+        # filter by size
         if len(columns) > 0:
             minArea = height * width * self.parameter['columnAreaMin']
             columns = list(filter(lambda box: self.get_area(box) > minArea, columns))
@@ -631,11 +636,20 @@ class OcrdAnybaseocrCropper(Processor):
                                               alpha=0.7, linewidth=2, linestyle='dashed'))
             plt.legend(handles=[Patch(label='minArea columns')])
             plt.show()
+        # merge columns
         if len(columns) > 1:
             columns = self.merge_columns(columns, colSeparator)
+        # remove margin-only results
+        def nonmargin(box):
+            x1, y1, x2, y2 = box
+            return not (x2 < x1max or
+                        y2 < y1max or
+                        x1 > x2min or
+                        y1 > y2min)
+        columns = list(filter(nonmargin, columns))
 
         if len(columns) > 0:
-            columns = sorted(columns, key=self.get_area)
+            columns = sorted(columns, key=self.get_area, reverse=True)
         if DEBUG:
             plt.imshow(img)
             for x1, y1, x2, y2 in columns:
