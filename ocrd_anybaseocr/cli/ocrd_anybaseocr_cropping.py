@@ -107,6 +107,7 @@ class OcrdAnybaseocrCropper(Processor):
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrCropper, self).__init__(*args, **kwargs)
+        self.logger = None
 
     def detect_ruler(self, arg):
         gray = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
@@ -152,13 +153,16 @@ class OcrdAnybaseocrCropper(Processor):
                    (self.parameter['rulerRatioMin'] < round(float(h)/float(w), 2) < self.parameter['rulerRatioMax']):
                     blackPixel = np.count_nonzero(bw[y:y+h, x:x+w])
                     predictRuler.append((x, y, w, h, blackPixel))
+                    self.logger.debug("detected ruler candidate: %dx%d+%dx%d (%dpx fg)",
+                                      x, y, w, y, blackPixel)
 
         # Finally check number of black pixel to avoid false ruler
         if predictRuler:
             # sort by fg size
             predictRuler = sorted(predictRuler, key=lambda x: x[4], reverse=True)
             # pick largest candidate
-            x, y, w, h, _ = predictRuler[0]
+            x, y, w, h, a = predictRuler[0]
+            self.logger.info("detected ruler at %dx%d+%dx%d", x, y, w, h)
             # create mask image
             mask = np.zeros(bw.shape[:2], dtype=np.uint8)
             cv2.rectangle(mask, (x-15, y-15), (x+w+20, y+h+20), 255, cv2.FILLED)
@@ -352,6 +356,8 @@ class OcrdAnybaseocrCropper(Processor):
                 plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=max(1,int(group.wgt/2)), linestyle='dashed'))
             plt.legend(handles=[Patch(label='line groups')])
             plt.show()
+        self.logger.debug("detected %d %s line groups", len(groups),
+                          "vertical" if is_vertical else "horizontal")
         for group in groups.copy():
             if not group.res:
                 # merged already
@@ -382,7 +388,8 @@ class OcrdAnybaseocrCropper(Processor):
                 y2 = imgHeight
                 x1 = group.res.intercept
                 x2 = group.res.slope * y2 + x1
-                if min_pos < 0.5 * (x1 + x2) < max_pos:
+                group.pos = 0.5 * (x1 + x2)
+                if min_pos < group.pos < max_pos:
                     # lines in group are completely in margin areas
                     groups.remove(group)
                     #print("invalid position: {} ({} < {} < {})".format(group.ind, min_pos, 0.5 * (x1+x2), max_pos))
@@ -393,13 +400,15 @@ class OcrdAnybaseocrCropper(Processor):
                 x2 = imgWidth
                 y1 = group.res.intercept
                 y2 = group.res.slope * x2 + y1
-                if min_pos < 0.5 * (y1 + y2) < max_pos:
+                group.pos = 0.5 * (y1 + y2)
+                if min_pos < group.pos < max_pos:
                     # lines in group are completely in margin areas
                     groups.remove(group)
                     #print("invalid position: {} ({} < {} < {})".format(group.ind, min_pos, 0.5 * (y1+y2), max_pos))
                     continue
             group.line = [x1, y1, x2, y2]
             #print("kept {}".format(group.ind))
+        self.logger.debug("keeping %d line candidates after filtering", len(groups))
         if DEBUG:
             plt.imshow(arg)
             for group in groups:
@@ -420,29 +429,37 @@ class OcrdAnybaseocrCropper(Processor):
         Vgroups = self.aggregate_lines(arg, Vlines, True, 0.2 * imgHeight, y1max, y2min, x1max, x2min)
         # select best (i.e. innermost longest) candidate on each side
         toplines = sorted(filter(lambda group: # y pos at top margin
-                                 0.5 * (group.line[3] + group.line[1]) < y1max,
-                                 Hgroups),
+                                 group.pos < y1max, Hgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and y pos
-                          group.wgt * group.length * np.sqrt(group.line[3] + group.line[1]))
+                          group.wgt * group.length * np.sqrt(group.pos))
+        if toplines:
+            self.logger.info("found top margin (pos: %d, length: %d)",
+                             toplines[0].pos, toplines[0].length)
         botlines = sorted(filter(lambda group: # y pos at bottom margin
-                                 0.5 * (group.line[3] + group.line[1]) > y2min,
-                                 Hgroups),
+                                 group.pos > y2min, Hgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and h-y pos
-                          group.wgt * group.length * np.sqrt(2 * imgHeight - group.line[3] - group.line[1]))
+                          group.wgt * group.length * np.sqrt(imgHeight - group.pos))
+        if botlines:
+            self.logger.info("found bottom margin (pos: %d, length: %d)",
+                             botlines[0].pos, botlines[0].length)
         lftlines = sorted(filter(lambda group: # x pos at left margin
-                                 0.5 * (group.line[2] + group.line[0]) < x1max,
-                                 Vgroups),
+                                 group.pos < x1max, Vgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and x pos
-                          group.wgt * group.length * np.sqrt(group.line[2] + group.line[0]))
+                          group.wgt * group.length * np.sqrt(group.pos))
+        if lftlines:
+            self.logger.info("found left margin (pos: %d, length: %d)",
+                             lftlines[0].pos, lftlines[0].length)
         rgtlines = sorted(filter(lambda group: # x pos at right margin
-                                 0.5 * (group.line[2] + group.line[0]) > x2min,
-                                 Vgroups),
+                                 group.pos > x2min, Vgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and w-x pos
-                          group.wgt * group.length * np.sqrt(2 * imgWidth - group.line[2] - group.line[0]))
+                          group.wgt * group.length * np.sqrt(imgWidth - group.pos))
+        if rgtlines:
+            self.logger.info("found right margin (pos: %d, length: %d)",
+                             rgtlines[0].pos, rgtlines[0].length)
         # add fallback on each side
         toplines = list(map(lambda group: group.line, toplines))
         toplines.append([0, 0, imgWidth, 0])
@@ -562,6 +579,7 @@ class OcrdAnybaseocrCropper(Processor):
                 idx = next_idx
         if contours:
             apply_contour(0)
+        self.logger.debug("found %d raw text boxes", len(textboxes))
         if DEBUG:
             mask = cv2.applyColorMap(mask.astype(np.uint8), cv2.COLORMAP_JET)
             plt.imshow(mask)
@@ -620,6 +638,7 @@ class OcrdAnybaseocrCropper(Processor):
                 tmp.append(maxBox)
             boxes.append(maxBox)
             i = i+1
+        self.logger.debug("merged into %d text boxes (i.e. columns)", len(boxes))
         if DEBUG:
             plt.imshow(img)
             for x1, y1, x2, y2 in boxes:
@@ -653,6 +672,7 @@ class OcrdAnybaseocrCropper(Processor):
                         x1 > x2min or
                         y1 > y2min)
         columns = list(filter(nonmargin, columns))
+        self.logger.debug("filtered into %d columns by margins", len(columns))
 
         if len(columns) > 0:
             columns = sorted(columns, key=self.get_area, reverse=True)
@@ -671,11 +691,11 @@ class OcrdAnybaseocrCropper(Processor):
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
 
-        LOG = getLogger('OcrdAnybaseocrCropper')
+        self.logger = getLogger('OcrdAnybaseocrCropper')
 
         for (n, input_file) in enumerate(self.input_files):
             page_id = input_file.pageId or input_file.ID
-            LOG.info("INPUT FILE %i / %s", n, page_id)
+            self.logger.info("INPUT FILE %i / %s", n, page_id)
 
             pcgts = page_from_file(self.workspace.download_file(input_file))
             self.add_metadata(pcgts)
@@ -685,12 +705,12 @@ class OcrdAnybaseocrCropper(Processor):
             if border:
                 left, top, right, bottom = bbox_from_points(
                     border.get_Coords().points)
-                LOG.warning('Overwriting existing Border: %i:%i,%i:%i',
-                            left, top, right, bottom)
+                self.logger.warning('Overwriting existing Border: %i:%i,%i:%i',
+                                    left, top, right, bottom)
 
             page = pcgts.get_Page()
             page_image, page_coords, page_image_info = self.workspace.image_from_page(
-                page, page_id, # should also be deskewed
+                page, page_id, # should be deskewed already
                 feature_filter='cropped,binarized')
 
             self._process_page(page, page_image, page_coords, input_file)
@@ -715,19 +735,26 @@ class OcrdAnybaseocrCropper(Processor):
         mask_array = self.detect_ruler(img_array)
 
         textboxes, height, width = self.detect_textboxes(img_array, mask_array)
+        size = height * width
         colSeparator = int(width * self.parameter['columnSepWidthMax'])
         if len(textboxes) > 1:
             textboxes = self.merge_boxes(textboxes, img_array, colSeparator)
 
             if len(textboxes) == 0:
+                self.logger.info("Falling back to line detector")
                 corners = self.select_borderLine(img_array)
                 min_x, min_y = corners.min(axis=0)
                 max_x, max_y = corners.max(axis=0)
             else:
+                self.logger.info("Using largest merged column (%d%% area)",
+                                 100 * self.get_area(textboxes[0]) / size)
                 min_x, min_y, max_x, max_y = textboxes[0]
-        elif len(textboxes) == 1 and (height*width*0.5 < self.get_area(textboxes[0])):
+        elif len(textboxes) == 1 and (0.5 * size < self.get_area(textboxes[0])):
+            self.logger.info("Using largest text box (%d%% area)",
+                             100 * self.get_area(textboxes[0]) / size)
             min_x, min_y, max_x, max_y = textboxes[0]
         else:
+            self.logger.info("Falling back to line detector")
             corners = self.select_borderLine(img_array)
             min_x, min_y = corners.min(axis=0)
             max_x, max_y = corners.max(axis=0)
