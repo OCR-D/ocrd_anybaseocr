@@ -554,7 +554,7 @@ class OcrdAnybaseocrCropper(Processor):
                     x, y, w, h = cv2.boundingRect(contours[idx])
                     if DEBUG: cv2.drawContours(mask, contours, idx, idx+1, -1)
                     r = cv2.contourArea(contours[idx]) / (w * h)
-                    if r > 0.45 and (width*0.9) > w > 15 and (height*0.5) > h > 15:
+                    if r > 0.25 and (width*0.9) > w > 15 and (height*0.5) > h > 15:
                         textboxes.append([x, y, x+w-1, y+h-1])
                         if DEBUG: cv2.rectangle(res, (x, y), (x+w-1, y+h-1), (0, 0, 255), 2)
                     if child_idx >= 0:
@@ -629,10 +629,15 @@ class OcrdAnybaseocrCropper(Processor):
             plt.show()
 
         columns = np.unique(boxes, axis=0).tolist()
+        # merge columns
+        if len(columns) > 1:
+            columns = self.merge_columns(columns, colSeparator)
+            self.logger.debug("merged into %d columns by sepwidth", len(columns))
         # filter by size
         if len(columns) > 0:
             minArea = height * width * self.parameter['columnAreaMin']
             columns = list(filter(lambda box: self.get_area(box) > minArea, columns))
+        self.logger.debug("filtered into %d columns by area", len(columns))
         if DEBUG:
             plt.imshow(img)
             for x1, y1, x2, y2 in columns:
@@ -640,9 +645,6 @@ class OcrdAnybaseocrCropper(Processor):
                                               alpha=0.7, linewidth=2, linestyle='dashed'))
             plt.legend(handles=[Patch(label='minArea columns')])
             plt.show()
-        # merge columns
-        if len(columns) > 1:
-            columns = self.merge_columns(columns, colSeparator)
         # remove margin-only results
         def nonmargin(box):
             x1, y1, x2, y2 = box
