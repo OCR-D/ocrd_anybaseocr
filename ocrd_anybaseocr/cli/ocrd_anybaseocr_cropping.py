@@ -667,6 +667,15 @@ class OcrdAnybaseocrCropper(Processor):
             plt.show()
 
         columns = np.unique(boxes, axis=0).tolist()
+        # remove margin-only results
+        def nonmargin(box):
+            x1, y1, x2, y2 = box
+            return not (x2 < x1max or
+                        y2 < y1max or
+                        x1 > x2min or
+                        y1 > y2min)
+        columns = list(filter(nonmargin, columns))
+        self.logger.debug("filtered into %d columns by margins", len(columns))
         # merge columns
         if len(columns) > 1:
             columns = self.merge_columns(columns, colSeparator)
@@ -683,15 +692,6 @@ class OcrdAnybaseocrCropper(Processor):
                                               alpha=0.7, linewidth=2, linestyle='dashed'))
             plt.legend(handles=[Patch(label='minArea columns')])
             plt.show()
-        # remove margin-only results
-        def nonmargin(box):
-            x1, y1, x2, y2 = box
-            return not (x2 < x1max or
-                        y2 < y1max or
-                        x1 > x2min or
-                        y1 > y2min)
-        columns = list(filter(nonmargin, columns))
-        self.logger.debug("filtered into %d columns by margins", len(columns))
 
         if len(columns) > 0:
             columns = sorted(columns, key=self.get_area, reverse=True)
