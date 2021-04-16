@@ -540,11 +540,11 @@ class OcrdAnybaseocrCropper(Processor):
 
     def detect_textboxes(self, arg, mask=None):
         textboxes = []
-        small = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
+        gray = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
         height, width, _ = arg.shape
 
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-        grad = cv2.morphologyEx(small, cv2.MORPH_GRADIENT, kernel)
+        grad = cv2.morphologyEx(gray, cv2.MORPH_GRADIENT, kernel)
         if DEBUG:
             plt.imshow(grad)
             plt.legend(handles=[Patch(label='morphological gradient')])
@@ -613,7 +613,7 @@ class OcrdAnybaseocrCropper(Processor):
             plt.legend(handles=[Patch(label='text boxes')])
             plt.show()
 
-        return textboxes, height, width
+        return textboxes
 
     def merge_columns(self, textboxes, colSeparator):
         textboxes.sort(key=lambda x: x[0]) # f.l.t.r.
@@ -628,12 +628,13 @@ class OcrdAnybaseocrCropper(Processor):
                 columns.append(box)
         return columns
 
-    def merge_boxes(self, textboxes, img, colSeparator):
+    def merge_boxes(self, textboxes, img):
         height, width, _ = img.shape
         y1max = self.parameter['marginTop'] * height
         y2min = self.parameter['marginBottom'] * height
         x1max = self.parameter['marginLeft'] * width
         x2min = self.parameter['marginRight'] * width
+        colSeparator = int(width * self.parameter['columnSepWidthMax'])
 
         textboxes = np.unique(textboxes, axis=0)
         i = 0
@@ -732,8 +733,18 @@ class OcrdAnybaseocrCropper(Processor):
             page_image, page_coords, page_image_info = self.workspace.image_from_page(
                 page, page_id, # should be deskewed already
                 feature_filter='cropped,binarized')
+            if self.parameter['dpi'] > 0:
+                zoom = 300.0/self.parameter['dpi']
+            elif page_image_info.resolution != 1:
+                dpi = page_image_info.resolution
+                if page_image_info.resolutionUnit == 'cm':
+                    dpi *= 2.54
+                self.logger.info('Page "%s" uses %f DPI', page_id, dpi)
+                zoom = 300.0/dpi
+            else:
+                zoom = 1
 
-            self._process_page(page, page_image, page_coords, input_file)
+            self._process_page(page, page_image, page_coords, input_file, zoom)
             file_id = make_file_id(input_file, self.output_file_grp)
             pcgts.set_pcGtsId(file_id)
             self.workspace.add_file(
@@ -745,7 +756,7 @@ class OcrdAnybaseocrCropper(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-    def _process_page(self, page, page_image, page_xywh, input_file):
+    def _process_page(self, page, page_image, page_xywh, input_file, zoom=1.0):
         padding = self.parameter['padding']
         img_array = pil2array(page_image)
         height, width, _ = img_array.shape
@@ -754,8 +765,12 @@ class OcrdAnybaseocrCropper(Processor):
         # ensure RGB image
         if len(img_array.shape) == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
+        if zoom != 1.0:
+            self.logger.info("scaling %dx%d image by %.2f", width, height, zoom)
+            img_array = cv2.resize(img_array, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
 
         border_polygon, prefer_border = self.select_borderLine(img_array)
+        border_polygon = np.array(border_polygon) / zoom # unzoom
         # pad inwards:
         border_polygon = Polygon(border_polygon).buffer(-padding).exterior.coords[:-1]
         # get the bounding box from the border polygon:
@@ -769,12 +784,10 @@ class OcrdAnybaseocrCropper(Processor):
         else:
             self.logger.info("Falling back to text detector")
             mask_array = self.detect_ruler(img_array)
-
-            textboxes, height, width = self.detect_textboxes(img_array, mask_array)
-            size = height * width
-            colSeparator = int(width * self.parameter['columnSepWidthMax'])
+            textboxes = self.detect_textboxes(img_array, mask_array)
             if len(textboxes) > 1:
-                textboxes = self.merge_boxes(textboxes, img_array, colSeparator)
+                textboxes = self.merge_boxes(textboxes, img_array)
+            textboxes = np.array(textboxes) / zoom # unzoom
 
             if (len(textboxes) == 1 and
                 self.parameter['columnAreaMin'] * size < self.get_area(textboxes[0])):

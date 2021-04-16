@@ -54,6 +54,9 @@
       "input_file_grp": ["OCR-D-IMG-DESKEW"],
       "output_file_grp": ["OCR-D-IMG-CROP"],
       "parameters": {
+        "dpi": {
+          "type": "number", "format": "float", "default": 0,
+          "description": "pixel density in dots per inch (overrides any meta-data in the images); disabled when zero or negative"},
         "rulerRatioMax": {
           "type": "number", "format": "float", "default": 50.0,
           "description": "ruler detection and suppression: maximum aspect ratio of bbox"},
