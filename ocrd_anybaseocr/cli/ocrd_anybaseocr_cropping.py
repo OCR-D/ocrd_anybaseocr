@@ -108,20 +108,21 @@ class OcrdAnybaseocrCropper(Processor):
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrCropper, self).__init__(*args, **kwargs)
 
-    def remove_ruler(self, arg):
+    def detect_ruler(self, arg):
         gray = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
-        contours, _ = cv2.findContours(
-            gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        _, bw = cv2.threshold(gray, 0.0, 255.0, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+        contours, _ = cv2.findContours(bw, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         height, width, _ = arg.shape
-        imgArea = height*width
+        imgArea = height * width
+        minArea = imgArea * self.parameter['rulerAreaMin']
+        maxArea = imgArea * self.parameter['rulerAreaMax']
 
         # Get bounding box x,y,w,h of each contours
         rects = [cv2.boundingRect(cnt) for cnt in contours]
-        rects = sorted(rects, key=lambda x: (x[2]*x[3]), reverse=True)
+        rects = sorted(rects, key=lambda x: x[2] * x[3], reverse=True)
         # consider those rectangle whose area>10000 and less than one-fourth of images
-        rects = [r for r in rects if (
-            imgArea*self.parameter['rulerAreaMax']) > (r[2]*r[3]) > (imgArea*self.parameter['rulerAreaMin'])]
+        rects = [rect for rect in rects if maxArea > rect[2] * rect[3] > minArea]
 
         # detect child rectangles. Usually those are not ruler. Ruler position are basically any one side.
         removeRect = []
@@ -149,7 +150,7 @@ class OcrdAnybaseocrCropper(Processor):
                  (x+w < x1max or x > x2min))):
                 if (self.parameter['rulerRatioMin'] < round(float(w)/float(h), 2) < self.parameter['rulerRatioMax']) or \
                    (self.parameter['rulerRatioMin'] < round(float(h)/float(w), 2) < self.parameter['rulerRatioMax']):
-                    blackPixel = np.count_nonzero(arg[y:y+h, x:x+w] == 0)
+                    blackPixel = np.count_nonzero(bw[y:y+h, x:x+w])
                     predictRuler.append((x, y, w, h, blackPixel))
 
         # Finally check number of black pixel to avoid false ruler
@@ -158,15 +159,16 @@ class OcrdAnybaseocrCropper(Processor):
             predictRuler = sorted(predictRuler, key=lambda x: x[4], reverse=True)
             # pick largest candidate
             x, y, w, h, _ = predictRuler[0]
-            # clip to white
-            cv2.rectangle(arg, (x-15, y-15), (x+w+20, y+h+20),
-                          (255, 255, 255), cv2.FILLED)
+            # create mask image
+            mask = np.zeros(bw.shape[:2], dtype=np.uint8)
+            cv2.rectangle(mask, (x-15, y-15), (x+w+20, y+h+20), 255, cv2.FILLED)
             if DEBUG:
-                plt.imshow(arg)
-                plt.legend(handles=[Patch(label='ruler clipped to white')])
+                plt.imshow(mask)
+                plt.legend(handles=[Patch(label='ruler mask')])
                 plt.show()
+            return mask
 
-        return arg
+        return None
 
     def get_intersect(self, a1, a2, b1, b2):
         s = np.vstack([a1, a2, b1, b2])        # s for stacked
@@ -499,7 +501,7 @@ class OcrdAnybaseocrCropper(Processor):
 
         return textboxes
 
-    def detect_textboxes(self, arg):
+    def detect_textboxes(self, arg, mask=None):
         textboxes = []
         small = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
         height, width, _ = arg.shape
@@ -513,6 +515,8 @@ class OcrdAnybaseocrCropper(Processor):
 
         _, bw = cv2.threshold(
             grad, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+        if isinstance(mask, np.ndarray):
+            bw[mask > 0] = 0
         if DEBUG:
             plt.imshow(bw)
             plt.legend(handles=[Patch(label='binarized gradient')])
@@ -706,14 +710,15 @@ class OcrdAnybaseocrCropper(Processor):
         if len(img_array.shape) == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
 
-        img_array_rr = self.remove_ruler(img_array)
-        textboxes, height, width = self.detect_textboxes(img_array_rr)
+        mask_array = self.detect_ruler(img_array)
+
+        textboxes, height, width = self.detect_textboxes(img_array, mask_array)
         colSeparator = int(width * self.parameter['columnSepWidthMax'])
         if len(textboxes) > 1:
             textboxes = self.merge_boxes(textboxes, img_array, colSeparator)
 
             if len(textboxes) == 0:
-                corners = self.select_borderLine(img_array_rr)
+                corners = self.select_borderLine(img_array)
                 min_x, min_y = corners.min(axis=0)
                 max_x, max_y = corners.max(axis=0)
             else:
@@ -721,7 +726,7 @@ class OcrdAnybaseocrCropper(Processor):
         elif len(textboxes) == 1 and (height*width*0.5 < self.get_area(textboxes[0])):
             min_x, min_y, max_x, max_y = textboxes[0]
         else:
-            corners = self.select_borderLine(img_array_rr)
+            corners = self.select_borderLine(img_array)
             min_x, min_y = corners.min(axis=0)
             max_x, max_y = corners.max(axis=0)
 
