@@ -59,7 +59,7 @@ ocrd-anybaseocr-deskew \
 ## Cropper
 
 ### Method Behaviour 
- This function takes a document image as input and crops/selects the page content area only (that's mean remove textual noise as well as any other noise around page content area). The input image has to be binarized and should be deskewed for the module to work. 
+ This function takes a document image as input and crops/selects the page content area only (that's mean remove textual noise as well as any other noise around page content area). The input image need not be binarized but should be deskewed for the module to work optimally. 
  
  #### Usage:
 ```sh
