@@ -311,8 +311,8 @@ class OcrdAnybaseocrCropper(Processor):
                 jpoints = np.concatenate([lines[jind, 0:2], lines[jind, 2:4]])
                 istart, iend = ipoints[:,rng].min(), ipoints[:,rng].max()
                 jstart, jend = jpoints[:,rng].min(), jpoints[:,rng].max()
-                if (jstart - iend > 0.1 * imgWidth or
-                    istart - jend > 0.1 * imgWidth):
+                if not (0 < jstart - iend < 0.1 * imgWidth or
+                        0 < istart - jend < 0.1 * imgWidth):
                     # too large gap
                     continue
                 newind = igroup.ind.union(jgroup.ind)
