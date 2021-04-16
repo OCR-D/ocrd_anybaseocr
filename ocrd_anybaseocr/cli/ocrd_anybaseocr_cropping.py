@@ -35,6 +35,7 @@ import os
 from types import SimpleNamespace
 import numpy as np
 from pylsd.lsd import lsd
+from shapely.geometry import Polygon
 import cv2
 from PIL import Image
 from scipy.spatial import distance_matrix
@@ -504,7 +505,7 @@ class OcrdAnybaseocrCropper(Processor):
                                           (vx2, vy2))
                 intersectPoint.append([x, y])
         # FIXME: return confidence value (length and no fallback on each side)
-        return np.array(intersectPoint), perfect
+        return intersectPoint, perfect
 
     def filter_noisebox(self, textboxes, height, width):
         tmp = []
@@ -745,15 +746,24 @@ class OcrdAnybaseocrCropper(Processor):
             )
 
     def _process_page(self, page, page_image, page_xywh, input_file):
+        padding = self.parameter['padding']
         img_array = pil2array(page_image)
+        height, width, _ = img_array.shape
+        size = height * width
 
         # ensure RGB image
         if len(img_array.shape) == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
 
-        border, prefer_border = self.select_borderLine(img_array)
-        min_x, min_y = border.min(axis=0)
-        max_x, max_y = border.max(axis=0)
+        border_polygon, prefer_border = self.select_borderLine(img_array)
+        # pad inwards:
+        border_polygon = Polygon(border_polygon).buffer(-padding).exterior.coords[:-1]
+        # get the bounding box from the border polygon:
+        # min_x, min_y = border_polygon.min(axis=0)
+        # max_x, max_y = border_polygon.max(axis=0)
+        # get the inner rectangle from the border polygon:
+        # _, min_x, max_x, _ = np.sort(border_polygon[:,0])
+        # _, min_y, max_y, _ = np.sort(border_polygon[:,1])
         if prefer_border:
             self.logger.info("Preferring line detector")
         else:
@@ -771,14 +781,17 @@ class OcrdAnybaseocrCropper(Processor):
                 self.logger.info("Using text area (%d%% area)",
                                  100 * self.get_area(textboxes[0]) / size)
                 min_x, min_y, max_x, max_y = textboxes[0]
+                # pad outwards
+                border_polygon = polygon_from_bbox(min_x - padding,
+                                                   min_y - padding,
+                                                   max_x + padding,
+                                                   max_y + padding)
 
         def clip(point):
             x, y = point
             x = max(0, min(page_image.width, x))
             y = max(0, min(page_image.height, y))
             return x, y
-        pad = self.parameter['padding']
-        border_polygon = polygon_from_bbox(min_x - pad, min_y - pad, max_x + pad, max_y + pad)
         border_polygon = coordinates_for_segment(border_polygon, page_image, page_xywh)
         border_polygon = list(map(clip, border_polygon))
         border_points = points_from_polygon(border_polygon)
