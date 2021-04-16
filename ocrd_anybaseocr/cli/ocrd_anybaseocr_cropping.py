@@ -301,9 +301,13 @@ class OcrdAnybaseocrCropper(Processor):
             if not igroup.res: continue # already merged / to be deleted
             for j, jgroup in enumerate(groups[i+1:], i+1):
                 if not jgroup.res: continue # already merged / to be deleted
-                if not (0.9 < igroup.res.slope / (jgroup.res.slope or 1e-9) < 1.1 and
-                        abs(igroup.res.intercept - jgroup.res.intercept) < 0.01 * imgWidth):
+                if not (abs(igroup.res.intercept - jgroup.res.intercept) < 0.01 * imgWidth and
+                        abs(igroup.res.intercept - jgroup.res.intercept + \
+                            (igroup.res.slope - jgroup.res.slope) * imgWidth) < 0.01 * imgWidth):
                     # inconsistent directions
+                    # self.logger.debug("%s/%s:\ninconsistent %s/%s",
+                    #                   str(igroup.ind), str(jgroup.ind),
+                    #                   str(igroup.res), str(jgroup.res))
                     continue
                 iind = np.array(list(igroup.ind))
                 jind = np.array(list(jgroup.ind))
@@ -314,6 +318,9 @@ class OcrdAnybaseocrCropper(Processor):
                 if not (0 < jstart - iend < 0.1 * imgWidth or
                         0 < istart - jend < 0.1 * imgWidth):
                     # too large gap
+                    # self.logger.debug("%s/%s:\nlarge gap %d:%d/%d:%d",
+                    #                   str(igroup.ind), str(jgroup.ind),
+                    #                   istart, iend, jstart, jend)
                     continue
                 newind = igroup.ind.union(jgroup.ind)
                 points = np.concatenate([ipoints, jpoints])
@@ -324,6 +331,9 @@ class OcrdAnybaseocrCropper(Processor):
                 if (newres.stderr > 0.04 or
                     newres.stderr - igroup.res.stderr > 0.02 or
                     newres.stderr - jgroup.res.stderr > 0.02):
+                    # self.logger.debug("%s/%s:\nnoisy %f over %f/%f",
+                    #                   str(igroup.ind), str(jgroup.ind),
+                    #                   newres.stderr, igroup.res.stderr, jgroup.res.stderr)
                     continue # ignore line segments deviating in direction too much
                 #print("merging {} and {}".format(igroup.ind, jgroup.ind))
                 iind = np.array(list(igroup.ind))
@@ -354,6 +364,7 @@ class OcrdAnybaseocrCropper(Processor):
                     x2 = points.max()
                     y2 = group.res.slope * x2 + group.res.intercept
                 plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=max(1,int(group.wgt/2)), linestyle='dashed'))
+                #plt.gca().text(x1, y1, str(group.ind), bbox={'clip_box': [[x1,y1],[x2,y2]]})
             plt.legend(handles=[Patch(label='line groups')])
             plt.show()
         self.logger.debug("detected %d %s line groups", len(groups),
