@@ -433,7 +433,7 @@ class OcrdAnybaseocrCropper(Processor):
                                  group.pos < y1max, Hgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and y pos
-                          group.wgt * group.length * np.sqrt(group.pos))
+                          group.wgt * group.length * group.pos**0.1)
         if toplines:
             self.logger.info("found top margin (pos: %d, length: %d)",
                              toplines[0].pos, toplines[0].length)
@@ -445,7 +445,7 @@ class OcrdAnybaseocrCropper(Processor):
                                  group.pos > y2min, Hgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and h-y pos
-                          group.wgt * group.length * np.sqrt(imgHeight - group.pos))
+                          group.wgt * group.length * (imgHeight - group.pos)**0.1)
         if botlines:
             self.logger.info("found bottom margin (pos: %d, length: %d)",
                              botlines[0].pos, botlines[0].length)
@@ -457,7 +457,7 @@ class OcrdAnybaseocrCropper(Processor):
                                  group.pos < x1max, Vgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and x pos
-                          group.wgt * group.length * np.sqrt(group.pos))
+                          group.wgt * group.length * group.pos**0.1)
         if lftlines:
             self.logger.info("found left margin (pos: %d, length: %d)",
                              lftlines[0].pos, lftlines[0].length)
@@ -469,7 +469,7 @@ class OcrdAnybaseocrCropper(Processor):
                                  group.pos > x2min, Vgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and w-x pos
-                          group.wgt * group.length * np.sqrt(imgWidth - group.pos))
+                          group.wgt * group.length * (imgWidth - group.pos)**0.1)
         if rgtlines:
             self.logger.info("found right margin (pos: %d, length: %d)",
                              rgtlines[0].pos, rgtlines[0].length)
