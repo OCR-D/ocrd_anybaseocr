@@ -504,6 +504,7 @@ class OcrdAnybaseocrCropper(Processor):
                                           (vx1, vy1),
                                           (vx2, vy2))
                 intersectPoint.append([x, y])
+            lftline, rgtline = rgtline, lftline
         # FIXME: return confidence value (length and no fallback on each side)
         return intersectPoint, perfect
 
