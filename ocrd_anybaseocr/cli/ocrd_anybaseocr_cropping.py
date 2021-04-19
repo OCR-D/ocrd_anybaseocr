@@ -210,9 +210,9 @@ class OcrdAnybaseocrCropper(Processor):
             dx = abs(x1 - x2)
             dy = abs(y1 - y2)
             # consider line segments near margins and not too short
-            if dx > 15 and dy / dx < 0.05 and (y1 < y1max or y2 > y2min):
+            if dx > 15 and dy / dx < 0.15 and (y1 < y1max or y2 > y2min):
                 hlines.append([x1, y1, x2, y2, w])
-            if dy > 15 and dx / dy < 0.05 and (x1 < x1max or x2 > x2min):
+            if dy > 15 and dx / dy < 0.15 and (x1 < x1max or x2 > x2min):
                 vlines.append([x1, y1, x2, y2, w])
 
         return imgHeight, imgWidth, hlines, vlines
@@ -266,8 +266,8 @@ class OcrdAnybaseocrCropper(Processor):
         # merge nearby groups (with mutual points of small distance)
         for start, end in zip(*np.unravel_index(np.argsort(dist, None), dist.shape)):
             if start == end:
-                continue # ignore diagonals
-            if dist[start, end] > 15:
+                continue # ignore diagonals (line length)
+            if dist[start, end] > 30:
                 break # ignore points too far apart
             for i, igroup in enumerate(groups):
                 if not igroup.res: continue # already merged / to be deleted
