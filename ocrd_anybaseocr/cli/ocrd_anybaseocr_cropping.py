@@ -850,12 +850,9 @@ class OcrdAnybaseocrCropper(Processor):
         border = BorderType(Coords=CoordsType(border_points))
         page.set_Border(border)
         # get clipped relative coordinates for current image
-        border_polygon = coordinates_of_segment(border, page_image, page_xywh)
-        border_bbox = bbox_from_polygon(border_polygon)
-
-        page_image = crop_image(page_image, box=border_bbox)
-        page_xywh['features'] += ',cropped'
-
+        page_image, page_xywh, _ = self.workspace.image_from_page(
+            page, input_file.pageId,
+            fill='background', transparency=True)
         file_id = make_file_id(input_file, self.output_file_grp)
         file_path = self.workspace.save_image_file(page_image,
                                                    file_id + '.IMG-CROP',
