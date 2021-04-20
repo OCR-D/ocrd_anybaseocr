@@ -73,10 +73,21 @@ TOOL = 'ocrd-anybaseocr-crop'
 
 # enable to plot intermediate results interactively:
 DEBUG = False
+DEBUG_INTERACTIVE = False
 if DEBUG:
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
     from matplotlib.patches import Rectangle, Patch
+    from tempfile import mkstemp
+    def dshow(title):
+        if DEBUG_INTERACTIVE:
+            plt.legend(handles=[Patch(label=title)])
+            plt.show() # blocks
+        else:
+            fd, fname = mkstemp(suffix='_' + title.replace(' ', '_') + '.png')
+            plt.savefig(fname, dpi=600)
+            os.close(fd)
+            plt.clf()
 
 # originally from ocrolib (here also with alpha support):
 def pil2array(im,alpha=0):
@@ -169,8 +180,7 @@ class OcrdAnybaseocrCropper(Processor):
             cv2.rectangle(mask, (x-15, y-15), (x+w+20, y+h+20), 255, cv2.FILLED)
             if DEBUG:
                 plt.imshow(mask)
-                plt.legend(handles=[Patch(label='ruler mask')])
-                plt.show()
+                dshow('ruler mask')
             return mask
 
         return None
@@ -197,8 +207,7 @@ class OcrdAnybaseocrCropper(Processor):
             plt.imshow(arg)
             for x1, y1, x2, y2, _ in lines:
                 plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=2, linestyle='dashed'))
-            plt.legend(handles=[Patch(label='line segments')])
-            plt.show()
+            dshow('line segments')
         imgHeight, imgWidth, _ = arg.shape
         y1max = self.parameter['marginTop'] * imgHeight
         y2min = self.parameter['marginBottom'] * imgHeight
@@ -366,8 +375,7 @@ class OcrdAnybaseocrCropper(Processor):
                     y2 = group.res.slope * x2 + group.res.intercept
                 plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=max(1,int(group.wgt/2)), linestyle='dashed'))
                 #plt.gca().text(x1, y1, str(group.ind), bbox={'clip_box': [[x1,y1],[x2,y2]]})
-            plt.legend(handles=[Patch(label='line groups')])
-            plt.show()
+            dshow('line groups')
         self.logger.debug("detected %d %s line groups", len(groups),
                           "vertical" if is_vertical else "horizontal")
         for group in groups.copy():
@@ -426,8 +434,7 @@ class OcrdAnybaseocrCropper(Processor):
             for group in groups:
                 x1, y1, x2, y2 = group.line
                 plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=1, linestyle='-', color='red'))
-            plt.legend(handles=[Patch(label='line candidates')])
-            plt.show()
+            dshow('line candidates')
         return groups
 
     def select_borderLine(self, arg):
@@ -496,8 +503,7 @@ class OcrdAnybaseocrCropper(Processor):
             plt.imshow(arg)
             for x1, y1, x2, y2 in [topline, botline, lftline, rgtline]:
                 plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=2, linestyle='dotted'))
-            plt.legend(handles=[Patch(label='border lines')])
-            plt.show()
+            dshow('border lines')
         # intersect all sides
         intersectPoint = []
         for hx1, hy1, hx2, hy2 in [topline, botline]:
@@ -551,8 +557,7 @@ class OcrdAnybaseocrCropper(Processor):
         grad = cv2.morphologyEx(gray, cv2.MORPH_GRADIENT, kernel)
         if DEBUG:
             plt.imshow(grad)
-            plt.legend(handles=[Patch(label='morphological gradient')])
-            plt.show()
+            dshow('morphological gradient')
 
         _, bw = cv2.threshold(
             grad, 0.0, 255.0, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
@@ -560,8 +565,7 @@ class OcrdAnybaseocrCropper(Processor):
             bw[mask > 0] = 0
         if DEBUG:
             plt.imshow(bw)
-            plt.legend(handles=[Patch(label='binarized gradient')])
-            plt.show()
+            dshow('binarized gradient')
 
         # for x1, y1, x2, y2, w in lines:
         #     l = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
@@ -571,16 +575,14 @@ class OcrdAnybaseocrCropper(Processor):
         #         cv2.line(bw, (int(x1),int(y1)), (int(x2),int(y2)), 0, int(np.ceil(w / 2)))
         # if DEBUG:
         #     plt.imshow(bw)
-        #     plt.legend(handles=[Patch(label='without lines')])
-        #     plt.show()
+        #     dshow('without lines')
         
         kernel = cv2.getStructuringElement(
             cv2.MORPH_RECT, (10, 1))  # for historical docs
         connected = cv2.morphologyEx(bw, cv2.MORPH_CLOSE, kernel)
         if DEBUG:
             plt.imshow(connected)
-            plt.legend(handles=[Patch(label='horizontal closing')])
-            plt.show()
+            dshow('horizontal closing')
 
         contours, hierarchy = cv2.findContours(
             connected.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
@@ -607,15 +609,13 @@ class OcrdAnybaseocrCropper(Processor):
         if DEBUG:
             mask = cv2.applyColorMap(mask.astype(np.uint8), cv2.COLORMAP_JET)
             plt.imshow(mask)
-            plt.legend(handles=[Patch(label='contours')])
-            plt.show()
+            dshow('contours')
 
         if len(textboxes) > 1:
             textboxes = self.filter_noisebox(textboxes, height, width)
         if DEBUG:
             plt.imshow(res)
-            plt.legend(handles=[Patch(label='text boxes')])
-            plt.show()
+            dshow('text boxes')
 
         return textboxes
 
@@ -669,8 +669,7 @@ class OcrdAnybaseocrCropper(Processor):
             for x1, y1, x2, y2 in boxes:
                 plt.gca().add_patch(Rectangle((x1,y1), x2-x1, y2-y1,
                                               alpha=0.7, linewidth=2, linestyle='dashed'))
-            plt.legend(handles=[Patch(label='columns')])
-            plt.show()
+            dshow('columns')
 
         columns = np.unique(boxes, axis=0).tolist()
         # remove margin-only results
@@ -696,8 +695,7 @@ class OcrdAnybaseocrCropper(Processor):
             for x1, y1, x2, y2 in columns:
                 plt.gca().add_patch(Rectangle((x1,y1), x2-x1, y2-y1,
                                               alpha=0.7, linewidth=2, linestyle='dashed'))
-            plt.legend(handles=[Patch(label='minArea columns')])
-            plt.show()
+            dshow('minArea columns')
 
         if len(columns) > 0:
             columns = sorted(columns, key=self.get_area, reverse=True)
@@ -706,8 +704,7 @@ class OcrdAnybaseocrCropper(Processor):
             for x1, y1, x2, y2 in columns:
                 plt.gca().add_patch(Rectangle((x1,y1), x2-x1, y2-y1,
                                               alpha=0.7, linewidth=2, linestyle='dashed'))
-            plt.legend(handles=[Patch(label='merged columns')])
-            plt.show()
+            dshow('merged columns')
 
         return columns
 
