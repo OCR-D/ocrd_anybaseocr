@@ -460,7 +460,7 @@ class OcrdAnybaseocrCropper(Processor):
                                  group.pos > y2min, Hgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and h-y pos
-                          group.wgt * group.length * attenuate_pos((imgHeight - group.pos) / (1 - y2min)))
+                          group.wgt * group.length * attenuate_pos((imgHeight - group.pos) / (imgHeight - y2min)))
         if botlines:
             self.logger.info("found bottom margin (pos: %d, length: %d)",
                              botlines[0].pos, botlines[0].length)
@@ -484,7 +484,7 @@ class OcrdAnybaseocrCropper(Processor):
                                  group.pos > x2min, Vgroups),
                           reverse=True,
                           key=lambda group: # maximize product of length and w-x pos
-                          group.wgt * group.length * attenuate_pos((imgWidth - group.pos) / (1 - x2min)))
+                          group.wgt * group.length * attenuate_pos((imgWidth - group.pos) / (imgWidth - x2min)))
         if rgtlines:
             self.logger.info("found right margin (pos: %d, length: %d)",
                              rgtlines[0].pos, rgtlines[0].length)
