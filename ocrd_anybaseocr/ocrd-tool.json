@@ -48,7 +48,7 @@
     },
     "ocrd-anybaseocr-crop": {
       "executable": "ocrd-anybaseocr-crop",
-      "description": "Crops the input image to the page frame using non-linear processing and outputs a border polygon",
+      "description": "Detect the input images' page frame, annotate it as border polygon and add a cropped derived image.",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/cropping"],
       "input_file_grp": ["OCR-D-IMG-DESKEW"],
@@ -56,7 +56,7 @@
       "parameters": {
         "dpi": {
           "type": "number", "format": "float", "default": 0,
-          "description": "pixel density in dots per inch (overrides any meta-data in the images); disabled when zero or negative"},
+          "description": "pixel density in dots per inch (used to zoom/scale during processing; overrides any meta-data in the images); disabled when zero or negative"},
         "rulerRatioMax": {
           "type": "number", "format": "float", "default": 50.0,
           "description": "ruler detection and suppression: maximum aspect ratio of bbox"},
@@ -92,7 +92,7 @@
           "description": "ruler / edge / text detection: minimum x position to crop from right (as ratio of total image width)"},
         "padding": {
           "type": "number", "format": "integer", "default": 10,
-          "description": "extend resulting border by this many px in each direction"}
+          "description": "extend / shrink border resulting from edge detection / text detection by this many px in each direction"}
       }
     },
     "ocrd-anybaseocr-dewarp": {

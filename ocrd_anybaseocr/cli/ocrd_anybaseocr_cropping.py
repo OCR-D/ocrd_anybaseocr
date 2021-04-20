@@ -115,7 +115,6 @@ def pil2array(im,alpha=0):
 class OcrdAnybaseocrCropper(Processor):
 
     def __init__(self, *args, **kwargs):
-
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrCropper, self).__init__(*args, **kwargs)
@@ -709,7 +708,46 @@ class OcrdAnybaseocrCropper(Processor):
         return columns
 
     def process(self):
-        """Performs border detection on the workspace. """
+        """Performs heuristic page frame detection (cropping) on the workspace.
+        
+        Open and deserialize PAGE input files and their respective images.
+        (Input should be deskewed already.) Retrieve the raw (non-binarized,
+        uncropped) page image.
+        
+        Detect line segments via edge gradients, and cluster them into contiguous
+        horizontal and vertical lines if possible. If candidates which are located
+        at the margin and long enough (covering a large fraction of the page) exist
+        on all four sides, then pick the best (i.e. thickest, longest and inner-most)
+        one on each side and use their intersections as border points.
+        
+        Otherwise, first try to detect a ruler (i.e. image segment depicting a rule
+        placed on the scan/photo for scale references) via thresholding and contour
+        detection, identifying a single large rectangular region with a certain aspect
+        ratio. Suppress (mask) any such segment during further calculations.
+
+        Next in that line, try to detect text segments on the page. For that purpose,
+        get the gradient of grayscale image, threshold and morphologically close it,
+        then determine contours to define approximate text boxes. Merge these into
+        columns, filtering candidates too small or entirely in the margin areas.
+        Finally, merge the remaining columns across short gaps. If only one column
+        remains, and it covers a significant fraction of the page, pick that segment
+        as solution.
+        
+        Otherwise, keep the border points derived from line segments (intersecting
+        with the full image on each side without line candidates).
+        
+        Lastly, map coordinates to the original (undeskewed) image and intersect
+        the border polygon with the full image frame. Use that to define the page's
+        Border.
+        
+        Moreover, crop (and mask) the image accordingly, and reference the
+        resulting image file as AlternativeImage in the Page element.
+        Add the new image file to the workspace along with the output fileGrp,
+        and using a file ID with suffix ``.IMG-CROP`` along with further
+        identification of the input element.
+        
+        Produce new output files by serialising the resulting hierarchy.
+        """
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
 
@@ -820,7 +858,7 @@ class OcrdAnybaseocrCropper(Processor):
 
         file_id = make_file_id(input_file, self.output_file_grp)
         file_path = self.workspace.save_image_file(page_image,
-                                                   file_id + '-IMG',
+                                                   file_id + '.IMG-CROP',
                                                    page_id=input_file.pageId,
                                                    file_grp=self.output_file_grp)
         page.add_AlternativeImage(AlternativeImageType(
