@@ -85,10 +85,10 @@
           "type": "number", "format": "float", "default": 0.75,
           "description": "ruler / edge / text detection: minimum y position to crop from below (as ratio of total image height)"},
         "marginLeft": {
-          "type": "number", "format": "float", "default": 0.4,
+          "type": "number", "format": "float", "default": 0.3,
           "description": "ruler / edge / text detection: maximum x position to crop from left (as ratio of total image width)"},
         "marginRight": {
-          "type": "number", "format": "float", "default": 0.6,
+          "type": "number", "format": "float", "default": 0.7,
           "description": "ruler / edge / text detection: minimum x position to crop from right (as ratio of total image width)"},
         "padding": {
           "type": "number", "format": "integer", "default": 10,
