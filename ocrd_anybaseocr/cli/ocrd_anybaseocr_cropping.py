@@ -203,9 +203,9 @@ class OcrdAnybaseocrCropper(Processor):
             dx = abs(x1 - x2)
             dy = abs(y1 - y2)
             # consider line segments near margins and not too short
-            if dx > 15 and dy / dx < 0.05 and (y1 < y1max or y2 > y2min):
+            if dx > 15 and dy / dx < 0.15 and (y1 < y1max or y2 > y2min):
                 hlines.append([x1, y1, x2, y2, w])
-            if dy > 15 and dx / dy < 0.05 and (x1 < x1max or x2 > x2min):
+            if dy > 15 and dx / dy < 0.15 and (x1 < x1max or x2 > x2min):
                 vlines.append([x1, y1, x2, y2, w])
 
         return imgHeight, imgWidth, hlines, vlines
