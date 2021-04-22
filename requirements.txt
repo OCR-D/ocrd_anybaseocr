@@ -2,7 +2,7 @@ keras >= 2.3.0, < 2.4.0
 keras-preprocessing == 1.1.0
 numpy >= 1.15.4
 ocrd >= 2.22.3
-ocrd-fork-pylsd >= 0.0.3
+ocrd-fork-pylsd >= 0.0.4
 opencv-python-headless >= 3.4
 pandas
 scikit-image >= 0.17.2
