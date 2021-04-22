@@ -756,7 +756,7 @@ class OcrdAnybaseocrCropper(Processor):
             page = pcgts.get_Page()
             page_image, page_coords, page_image_info = self.workspace.image_from_page(
                 page, page_id, # should be deskewed already
-                feature_filter='cropped,binarized')
+                feature_filter='cropped,binarized,grayscale_normalized')
             if self.parameter['dpi'] > 0:
                 zoom = 300.0/self.parameter['dpi']
             elif page_image_info.resolution != 1:
@@ -783,12 +783,12 @@ class OcrdAnybaseocrCropper(Processor):
     def _process_page(self, page, page_image, page_xywh, input_file, zoom=1.0):
         padding = self.parameter['padding']
         img_array = pil2array(page_image)
-        height, width, _ = img_array.shape
-        size = height * width
-
         # ensure RGB image
         if len(img_array.shape) == 2:
             img_array = np.stack((img_array,)*3, axis=-1)
+        height, width, _ = img_array.shape
+        size = height * width
+        # zoom to 300 DPI (larger density: faster; most fixed parameters here expect 300)
         if zoom != 1.0:
             self.logger.info("scaling %dx%d image by %.2f", width, height, zoom)
             img_array = cv2.resize(img_array, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
