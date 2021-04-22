@@ -165,9 +165,9 @@ class OcrdAnybaseocrCropper(Processor):
             if DEBUG:
                 plt.imshow(mask)
                 dshow('ruler mask')
-            return mask
+            return mask, (x, y, w, h)
 
-        return None
+        return None, None
 
     def get_intersect(self, a1, a2, b1, b2):
         s = np.vstack([a1, a2, b1, b2])        # s for stacked
@@ -421,7 +421,7 @@ class OcrdAnybaseocrCropper(Processor):
             dshow('line candidates')
         return groups
 
-    def select_borderLine(self, arg):
+    def select_borderLine(self, arg, mask=None):
         imgHeight, imgWidth, Hlines, Vlines = self.detect_lines(arg)
         perfect = True
         y1max = self.parameter['marginTop'] * imgHeight
@@ -431,13 +431,41 @@ class OcrdAnybaseocrCropper(Processor):
         # connect consistent line segments and filter by position and length
         Hgroups = self.aggregate_lines(arg, Hlines, False, 0.2 * imgWidth, x1max, x2min, y1max, y2min)
         Vgroups = self.aggregate_lines(arg, Vlines, True, 0.2 * imgHeight, y1max, y2min, x1max, x2min)
+        # split horizontal lines into top and bottom candidates,
+        # split vertical lines into left and right candidates:
+        toplines = filter(lambda group: # y pos at top margin
+                          group.pos < y1max, Hgroups)
+        botlines = filter(lambda group: # y pos at bottom margin
+                          group.pos > y2min, Hgroups)
+        lftlines = filter(lambda group: # x pos at left margin
+                          group.pos < x1max, Vgroups)
+        rgtlines = filter(lambda group: # x pos at right margin
+                          group.pos > x2min, Vgroups)
+        if mask is not None:
+            # apply outer boundaries where ruler is:
+            mask_x, mask_y, mask_w, mask_h = mask
+            x2maxDist = mask_x - 0.5 * imgWidth
+            y2maxDist = mask_y - 0.5 * imgHeight
+            x1minDist = 0.5 * imgWidth - (mask_x + mask_w)
+            y1minDist = 0.5 * imgHeight - (mask_y + mask_h)
+            bestDist = max(x2maxDist, y2maxDist, x1minDist, y1minDist)
+            if bestDist == y1minDist:
+                toplines = filter(lambda group: # y pos below ruler
+                                  group.pos > mask_y + mask_h, toplines)
+            elif bestDist == y2maxDist:
+                botlines = filter(lambda group: # y pos above ruler
+                                  group.pos < mask_y, botlines)
+            elif bestDist == x1minDist:
+                lftlines = filter(lambda group: # x pos right of ruler
+                                  group.pos > mask_x + mask_w, lftlines)
+            elif bestDist == x2maxDist:
+                rgtlines = filter(lambda group: # x pos left of ruler
+                                  group.pos < mask_x, rgtlines)
         # select best (i.e. innermost longest) candidate (or fallback) on each side
         def attenuate_pos(x):
             x0 = 10 * x # peak at 10% max-margin (i.e. disprefer smaller and larger than that position)
             return x0 / np.exp(x0)
-        toplines = sorted(filter(lambda group: # y pos at top margin
-                                 group.pos < y1max, Hgroups),
-                          reverse=True,
+        toplines = sorted(toplines, reverse=True,
                           key=lambda group: # maximize product of length and y pos
                           group.wgt * group.length * attenuate_pos(group.pos / y1max))
         if toplines:
@@ -447,9 +475,7 @@ class OcrdAnybaseocrCropper(Processor):
         else:
             perfect = False
             topline = [0, 0, imgWidth, 0]
-        botlines = sorted(filter(lambda group: # y pos at bottom margin
-                                 group.pos > y2min, Hgroups),
-                          reverse=True,
+        botlines = sorted(botlines, reverse=True,
                           key=lambda group: # maximize product of length and h-y pos
                           group.wgt * group.length * attenuate_pos((imgHeight - group.pos) / (imgHeight - y2min)))
         if botlines:
@@ -459,9 +485,7 @@ class OcrdAnybaseocrCropper(Processor):
         else:
             perfect = False
             botline = [0, imgHeight, imgWidth, imgHeight]
-        lftlines = sorted(filter(lambda group: # x pos at left margin
-                                 group.pos < x1max, Vgroups),
-                          reverse=True,
+        lftlines = sorted(lftlines, reverse=True,
                           key=lambda group: # maximize product of length and x pos
                           group.wgt * group.length * attenuate_pos(group.pos / x1max))
         if lftlines:
@@ -471,9 +495,7 @@ class OcrdAnybaseocrCropper(Processor):
         else:
             perfect = False
             lftline = [0, 0, 0, imgHeight]
-        rgtlines = sorted(filter(lambda group: # x pos at right margin
-                                 group.pos > x2min, Vgroups),
-                          reverse=True,
+        rgtlines = sorted(rgtlines, reverse=True,
                           key=lambda group: # maximize product of length and w-x pos
                           group.wgt * group.length * attenuate_pos((imgWidth - group.pos) / (imgWidth - x2min)))
         if rgtlines:
@@ -793,7 +815,10 @@ class OcrdAnybaseocrCropper(Processor):
             self.logger.info("scaling %dx%d image by %.2f", width, height, zoom)
             img_array = cv2.resize(img_array, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
 
-        border_polygon, prefer_border = self.select_borderLine(img_array)
+        # detect rule placed in image next to page for scale reference:
+        mask_array, mask_box = self.detect_ruler(img_array)
+        # detect page frame via line segment detector:
+        border_polygon, prefer_border = self.select_borderLine(img_array, mask_box)
         border_polygon = np.array(border_polygon) / zoom # unzoom
         # pad inwards:
         border_polygon = Polygon(border_polygon).buffer(-padding).exterior.coords[:-1]
@@ -807,7 +832,6 @@ class OcrdAnybaseocrCropper(Processor):
             self.logger.info("Preferring line detector")
         else:
             self.logger.info("Falling back to text detector")
-            mask_array = self.detect_ruler(img_array)
             textboxes = self.detect_textboxes(img_array, mask_array)
             if len(textboxes) > 1:
                 textboxes = self.merge_boxes(textboxes, img_array)
