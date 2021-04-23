@@ -4,6 +4,12 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.4.1] - 2021-04-23
+
+Fixed:
+
+  * Re-introduce requirement on `ocrd-fork-ocropy`
+
 ## [1.4.0] - 2021-04-23
 
 Changed:
@@ -73,6 +79,7 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[1.4.1]: ../../compare/v1.4.1...v1.4.0
 [1.4.0]: ../../compare/v1.4.0...v1.3.0
 [1.3.0]: ../../compare/v1.1.0...v1.2.0
 [1.2.0]: ../../compare/v1.2.0...v1.1.0
