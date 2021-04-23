@@ -4,6 +4,12 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.4.0] - 2021-04-23
+
+Changed:
+
+  * Cropping rewritten, ht @bertsky, [improvements visualized](https://bertsky.github.io/ocrd_anybaseocr), #84
+
 ## [1.3.0] - 2021-01-28
 
 Changed:
@@ -67,6 +73,7 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[1.4.0]: ../../compare/v1.4.0...v1.3.0
 [1.3.0]: ../../compare/v1.1.0...v1.2.0
 [1.2.0]: ../../compare/v1.2.0...v1.1.0
 [1.1.0]: ../../compare/v1.1.0...v1.0.2
