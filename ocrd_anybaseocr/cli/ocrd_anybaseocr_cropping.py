@@ -463,11 +463,11 @@ class OcrdAnybaseocrCropper(Processor):
                                   group.pos < mask_x, rgtlines)
         # select best (i.e. innermost longest) candidate (or fallback) on each side
         def attenuate_pos(x):
-            x0 = 10 * x # peak at 10% max-margin (i.e. disprefer smaller and larger than that position)
+            x0 = 3 * x # peak at 30% max-margin (i.e. disprefer smaller and larger than that position)
             return x0 / np.exp(x0)
         toplines = sorted(toplines, reverse=True,
                           key=lambda group: # maximize product of length and y pos
-                          group.wgt * group.length * attenuate_pos(group.pos / y1max))
+                          group.wgt**2 * group.length * attenuate_pos(group.pos / y1max))
         if toplines:
             self.logger.info("found top margin (pos: %d, length: %d)",
                              toplines[0].pos, toplines[0].length)
@@ -477,7 +477,7 @@ class OcrdAnybaseocrCropper(Processor):
             topline = [0, 0, imgWidth, 0]
         botlines = sorted(botlines, reverse=True,
                           key=lambda group: # maximize product of length and h-y pos
-                          group.wgt * group.length * attenuate_pos((imgHeight - group.pos) / (imgHeight - y2min)))
+                          group.wgt**2 * group.length * attenuate_pos((imgHeight - group.pos) / (imgHeight - y2min)))
         if botlines:
             self.logger.info("found bottom margin (pos: %d, length: %d)",
                              botlines[0].pos, botlines[0].length)
@@ -487,7 +487,7 @@ class OcrdAnybaseocrCropper(Processor):
             botline = [0, imgHeight, imgWidth, imgHeight]
         lftlines = sorted(lftlines, reverse=True,
                           key=lambda group: # maximize product of length and x pos
-                          group.wgt * group.length * attenuate_pos(group.pos / x1max))
+                          group.wgt**2 * group.length * attenuate_pos(group.pos / x1max))
         if lftlines:
             self.logger.info("found left margin (pos: %d, length: %d)",
                              lftlines[0].pos, lftlines[0].length)
@@ -497,7 +497,7 @@ class OcrdAnybaseocrCropper(Processor):
             lftline = [0, 0, 0, imgHeight]
         rgtlines = sorted(rgtlines, reverse=True,
                           key=lambda group: # maximize product of length and w-x pos
-                          group.wgt * group.length * attenuate_pos((imgWidth - group.pos) / (imgWidth - x2min)))
+                          group.wgt**2 * group.length * attenuate_pos((imgWidth - group.pos) / (imgWidth - x2min)))
         if rgtlines:
             self.logger.info("found right margin (pos: %d, length: %d)",
                              rgtlines[0].pos, rgtlines[0].length)
