@@ -37,9 +37,9 @@ from ocrd_models.constants import (
     METS_XML_EMPTY,
 )
 
-from ..tensorflow_importer import tf, keras
-from keras.models import load_model
-from keras.preprocessing.image import ImageDataGenerator
+from ..tensorflow_importer import tf
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 TAG_METS_STRUCTLINK = '{%s}structLink' % NS['mets']
 TAG_METS_SMLINK = '{%s}smLink' % NS['mets']

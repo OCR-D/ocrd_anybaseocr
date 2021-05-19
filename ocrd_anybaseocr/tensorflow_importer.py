@@ -1,4 +1,4 @@
-__all__ = ['tf']
+__all__ = ['tf', 'keras']
 
 import os
 import warnings

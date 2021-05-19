@@ -21,10 +21,10 @@ import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 
 import tensorflow.keras as keras
-import keras.backend as K
-import keras.layers as KL
-import keras.engine as KE
-import keras.models as KM
+import tensorflow.keras.backend as K
+import tensorflow.keras.layers as KL
+import tensorflow.keras.engine as KE
+import tensorflow.keras.models as KM
 
 from ocrd_anybaseocr.mrcnn import utils
 
