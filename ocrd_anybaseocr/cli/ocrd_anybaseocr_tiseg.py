@@ -20,6 +20,7 @@ from scipy import ndimage
 import numpy as np
 import shapely
 import ocrolib
+from ..tensorflow_importer import keras
 from keras.models import load_model
 #from keras_segmentation.models.unet import resnet50_unet
 from ocrd import Processor
