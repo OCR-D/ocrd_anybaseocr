@@ -2,9 +2,8 @@ __all__ = ['tf']
 
 import os
 import warnings
-from ocrd_utils import initLogging, getLogger
-initLogging()
-getLogger('tensorflow').setLevel('ERROR')
+import logging
+logging.getLogger('tensorflow').setLevel('ERROR')
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # No prints from the tensorflow side
 warnings.filterwarnings('ignore', category=FutureWarning)
 #import tensorflow as tf
