@@ -117,11 +117,11 @@ class OcrdAnybaseocrTiseg(Processor):
 
             text_part = 255 * np.ones(out.shape, 'B')
             text_part[np.where(out==1)] = 0
-            LOG.info('text: %d%', 100 * (1 - np.count_nonzero(text_part) / np.prod(out.shape)))
+            LOG.info('text: %d percent', 100 * (1 - np.count_nonzero(text_part) / np.prod(out.shape)))
 
             image_part = 255 * np.ones(out.shape, 'B')
             image_part[np.where(out==2)] = 0
-            LOG.info('image: %d%', 100 * (1 - np.count_nonzero(image_part) / np.prod(out.shape)))
+            LOG.info('image: %d percent', 100 * (1 - np.count_nonzero(image_part) / np.prod(out.shape)))
 
             image_part = ocrolib.array2pil(image_part)
             text_part = ocrolib.array2pil(text_part)
@@ -153,8 +153,8 @@ class OcrdAnybaseocrTiseg(Processor):
             # Write Text and Non-Text images
             image_part = np.array(255*(1-I*Iseedfill), dtype='B')
             text_part = np.array(255*(1-I*(1-Iseedfill)), dtype='B')
-            LOG.info('text: %d%', 100 * (1 - np.count_nonzero(text_part) / np.prod(I.shape)))
-            LOG.info('image: %d%', 100 * (1 - np.count_nonzero(image_part) / np.prod(I.shape)))
+            LOG.info('text: %d percent', 100 * (1 - np.count_nonzero(text_part) / np.prod(I.shape)))
+            LOG.info('image: %d percent', 100 * (1 - np.count_nonzero(image_part) / np.prod(I.shape)))
 
             image_part = ocrolib.array2pil(image_part)
             text_part = ocrolib.array2pil(text_part)
