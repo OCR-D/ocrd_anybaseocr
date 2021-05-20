@@ -109,7 +109,7 @@ test: assets-clean assets
 
 # Run CLI tests
 cli-test: assets-clean assets \
-	test-binarize test-deskew test-crop test-tiseg test-block-segmentation test-textline test-layout-analysis
+	test-binarize test-deskew test-crop test-tiseg test-textline test-layout-analysis
 
 # Test binarization CLI
 test-binarize:
@@ -133,7 +133,7 @@ test-block-segmentation:
 
 # Test textline extraction CLI
 test-textline:
-	ocrd-anybaseocr-textline -m $(TESTDATA)/mets.xml -I OCR-D-BLOCK-SEGMENT -O TL-TEST
+	ocrd-anybaseocr-textline -m $(TESTDATA)/mets.xml -I TISEG-TEST -O TL-TEST
 
 # Test document structure analysis CLI
 test-layout-analysis:

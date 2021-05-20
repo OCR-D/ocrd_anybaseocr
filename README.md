@@ -131,6 +131,7 @@ ocrd-anybaseocr-textline \
    -O OCR-D-PAGE-TL
 ```
 
+<!--
 ## Block Segmenter
 
 ### Method Behaviour 
@@ -148,6 +149,7 @@ ocrd-anybaseocr-block-segmenter \
    -I OCR-IMG \
    -O OCR-D-PAGE-BLOCK
 ```
+-->
 
 ## Document Analyser
 
