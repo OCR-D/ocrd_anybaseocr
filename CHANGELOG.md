@@ -4,6 +4,12 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.6.0] - 2021-05-20
+
+Removed:
+
+  * `ocrd-anybaseocr-block-segmenation` was broken and caused spurious CI errors
+
 ## [1.5.0] - 2021-05-19
 
 Changed:
@@ -85,6 +91,7 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[1.6.0]: ../../compare/v1.6.0...v1.5.0
 [1.5.0]: ../../compare/v1.5.0...v1.4.1
 [1.4.1]: ../../compare/v1.4.1...v1.4.0
 [1.4.0]: ../../compare/v1.4.0...v1.3.0
