@@ -4,8 +4,8 @@ export
 
 CUDA_VISIBLE_DEVICES=0
 SHELL = /bin/bash
-PYTHON = python
-PIP = pip
+PYTHON ?= python
+PIP ?= pip
 PIP_INSTALL = $(PIP) install
 LOG_LEVEL = INFO
 PYTHONIOENCODING=utf8
@@ -19,6 +19,7 @@ DOCKER_TAG = ocrd/anybaseocr
 
 # BEGIN-EVAL makefile-parser --make-help Makefile
 
+.PHONY: help
 help:
 	@echo ""
 	@echo "  Targets"
@@ -46,6 +47,7 @@ help:
 # END-EVAL
 
 # Install python deps via pip
+.PHONY: deps
 deps:
 	$(PIP_INSTALL) -r requirements.txt
 
@@ -81,6 +83,7 @@ models:
 	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-layout-analysis '*'
 	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-tiseg '*'
 
+.PHONY: docker
 docker:
 	docker build -t '$(DOCKER_TAG)' .
 
@@ -90,51 +93,60 @@ repo/assets:
 	git clone https://github.com/OCR-D/assets "$@"
 
 # Remove assets
+.PHONY: assets-clean
 assets-clean:
 	rm -rf $(testdir)/assets
 
 # Setup test assets
-assets: repo/assets
+.PHONY: assets
+assets: repo/assets models
 	mkdir -p $(testdir)/assets
 	cp -r -t $(testdir)/assets repo/assets/data/*
-	$(MAKE) models
-	ln -sr ocrd-resources/* $(TESTDATA)/
 #
 # Tests
 #
 
 # Run unit tests
+.PHONY: test
 test: assets-clean assets
 	$(PYTHON) -m pytest --continue-on-collection-errors $(TESTS)
 
 # Run CLI tests
-cli-test: assets-clean assets \
-	test-binarize test-deskew test-crop test-tiseg test-textline test-layout-analysis
+.PHONY: cli-test
+cli-test: assets-clean assets
+cli-test: test-binarize test-deskew test-crop test-tiseg test-textline test-layout-analysis
 
 # Test binarization CLI
-test-binarize:
+.PHONY: test-binarize
+test-binarize: assets
 	ocrd-anybaseocr-binarize -m $(TESTDATA)/mets.xml -I MAX -O BIN-TEST
 
 # Test deskewing CLI
-test-deskew:
+.PHONY: test-deskew
+test-deskew: test-binarize
 	ocrd-anybaseocr-deskew -m $(TESTDATA)/mets.xml -I BIN-TEST -O DESKEW-TEST
 
 # Test cropping CLI
-test-crop:
+.PHONY: test-crop
+test-crop: test-deskew
 	ocrd-anybaseocr-crop -m $(TESTDATA)/mets.xml -I DESKEW-TEST -O CROP-TEST
 
 # Test text/non-text segmentation CLI
-test-tiseg:
+.PHONY: test-tiseg
+test-tiseg: test-crop
 	ocrd-anybaseocr-tiseg -m $(TESTDATA)/mets.xml --overwrite -I CROP-TEST -O TISEG-TEST
 
 # Test block segmentation CLI
-test-block-segmentation:
+.PHONY: test-block-segmentation
+test-block-segmentation: test-tiseg
 	ocrd-anybaseocr-block-segmentation -m $(TESTDATA)/mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT
 
 # Test textline extraction CLI
-test-textline:
+.PHONY: test-textline
+test-textline: test-tiseg
 	ocrd-anybaseocr-textline -m $(TESTDATA)/mets.xml -I TISEG-TEST -O TL-TEST
 
 # Test document structure analysis CLI
-test-layout-analysis:
+.PHONY: test-layout-analysis
+test-layout-analysis: test-binarize
 	ocrd-anybaseocr-layout-analysis -m $(TESTDATA)/mets.xml -I BIN-TEST -O LAYOUT
