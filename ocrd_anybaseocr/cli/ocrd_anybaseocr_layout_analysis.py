@@ -62,36 +62,47 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
         kwargs['version'] = OCRD_TOOL['version']
         super(OcrdAnybaseocrLayoutAnalyser, self).__init__(*args, **kwargs)
-                
-    def create_model(self, path ):#model_name='inception_v3', def_weights=True, num_classes=34, input_size=(600, 500, 1)):
+        if hasattr(self, 'output_file_grp') and hasattr(self, 'parameter'):
+            # processing context
+            self.setup()
 
-        ''' 
-            path: string containing path to model definition 
-        '''
-        model = load_model(path)
-        return model
+    def setup(self):
+        LOG = getLogger('OcrdAnybaseocrLayoutAnalyser')
+        model_path = Path(self.resolve_resource(self.parameter['model_path']))
+        class_mapper_path = Path(self.resolve_resource(self.parameter['class_mapping_path']))
+        if not model_path.exists():
+            LOG.critical("Layout classfication `model_path` was not found at '%s'", model_path)
+            sys.exit(1)
+        LOG.info('Loading model from file %s', str(model_path))
+        self.model = self.create_model(str(model_path))
+        # load the mapping
+        pickle_in = open(str(class_mapper_path), "rb")
+        class_indices = pickle.load(pickle_in)
+        self.label_mapping = dict((v,k) for k,v in class_indices.items())
 
-    def start_test(self, model, img_array, filename, labels):
-    
+    def create_model(self, path):
+        #model_name='inception_v3', def_weights=True, num_classes=34, input_size=(600, 500, 1)):
+        '''load Tensorflow model from path'''
+        return load_model(path)
+
+    def predict(self, img_array):
         # shape should be 1,600,500 for keras
-        pred = model.predict(img_array)
+        pred = self.model.predict(img_array)
         pred = np.array(pred)
         # multi-label predictions
         if len(pred.shape)>2:        
             pred = np.squeeze(pred)
             pred = pred.T
-
         preds = (pred>=0.5)
         predictions = []
         for index, cls in enumerate(preds):
             if cls:
-                predictions.append(labels[index])
+                predictions.append(self.label_mapping[index])
         
         if len(predictions) == 0:
             # if no prediction get the maximum one
-            predictions.append(labels[np.argmax(pred)])
+            predictions.append(self.label_mapping[np.argmax(pred)])
             #predictions.append('page') # default label
-     
         return predictions
 
     def img_resize(self, image_path):
@@ -207,49 +218,23 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         LOG = getLogger('OcrdAnybaseocrLayoutAnalyser')
         if not tf.test.is_gpu_available():
             LOG.error("Your system has no CUDA installed. No GPU detected.")
-            # sys.exit(1)
         assert_file_grp_cardinality(self.input_file_grp, 1)
         assert_file_grp_cardinality(self.output_file_grp, 1)
-        model_path = Path(self.resolve_resource(self.parameter['model_path']))
-        class_mapper_path = Path(self.resolve_resource(self.parameter['class_mapping_path']))
-        if not Path(model_path).is_file():
-            LOG.error("""\
-                Layout Classfication model was not found at '%s'. Make sure the `model_path` parameter
-                points to the local model path.
-                model can be downloaded from http://url
-                """ % model_path)
-            sys.exit(1)
-        else:
-            
-            LOG.info('Loading model from file %s', model_path)
-            model = self.create_model(str(model_path))
-            # load the mapping
-            pickle_in = open(str(class_mapper_path), "rb")
-            class_indices = pickle.load(pickle_in)
-            label_mapping = dict((v,k) for k,v in class_indices.items())    
-        
-            # print("INPUT FILE HERE",self.input_files)
-        for (n, input_file) in enumerate(self.input_files):
-            pcgts = page_from_file(self.workspace.download_file(input_file))
-            fname = pcgts.get_Page().imageFilename
+
+        for input_file in self.input_files:
             page_id = input_file.pageId or input_file.ID
-            size = 600, 500
-            
-            self.add_metadata(pcgts)
+            pcgts = page_from_file(self.workspace.download_file(input_file))
             page = pcgts.get_Page()
-            LOG.info("INPUT FILE %s", input_file.pageId or input_file.ID)
-            
-            page_image, page_xywh, page_image_info = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
-
-
+            LOG.info("INPUT FILE %s", page_id)
+            page_image, page_coords, _ = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
             img_array = ocrolib.pil2array(page_image.resize((500, 600), Image.ANTIALIAS))
-            img_array = img_array * 1./255.
+            img_array = img_array / 255
             img_array = img_array[np.newaxis, :, :, np.newaxis]            
-            results = self.start_test(model, img_array, fname, label_mapping)
+            results = self.predict(img_array)
             LOG.info(results)
-            self.workspace.mets.set_physical_page_for_file("PHYS_000" + str(n) , input_file)
+            #self.workspace.mets.set_physical_page_for_file(input_file.pageId, input_file)
             self.create_logmap_smlink(pcgts)
-            self.write_to_mets(results, "PHYS_000" + str(n))
+            self.write_to_mets(results, input_file.pageId)
 
 @click.command()
 @ocrd_cli_options
