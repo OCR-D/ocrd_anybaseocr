@@ -1,6 +1,6 @@
 {
   "git_url": "https://github.com/OCR-D/ocrd_anybaseocr",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "tools": {
     "ocrd-anybaseocr-binarize": {
       "executable": "ocrd-anybaseocr-binarize",
@@ -127,10 +127,10 @@
         "seg_weights": {
           "type":"string",
           "format":"uri",
-          "content-type": "application/x-hdf;subtype=bag",
+          "content-type": "text/directory",
           "cacheable": true,
-          "default":"seg_model.hdf5",
-          "description":"Path to weights file for deep learning model when use_deeplr is true."
+          "default":"seg_model",
+          "description":"Directory path to deep learning model when use_deeplr is true."
         }
       }
     },
@@ -173,8 +173,8 @@
       "description": "Generates a table-of-content like document structure of the whole document.",
       "parameters": {
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
-        "model_path":         { "type": "string", "default":"structure_analysis.h5", "required": false, "description": "Path to Layout Structure Classification Model"},
-        "class_mapping_path": { "type": "string", "default":"mapping_densenet.pickle","required": false, "description": "Path to Layout Structure Classes"}
+        "model_path":         { "type": "string", "format": "uri", "content-type": "text/directory", "cacheable": true, "default":"structure_analysis", "description": "Directory path to layout structure classification model"},
+        "class_mapping_path": { "type": "string", "format": "uri", "content-type": "application/python-pickle", "cacheable": true, "default":"mapping_densenet.pickle", "description": "File path to layout structure classes"}
       }
     },
     "ocrd-anybaseocr-block-segmentation": {
@@ -252,7 +252,7 @@
 	  "default": 0.2,
 	  "description": "Minimum required overlap (intersection over union) of mask-derived contour area between neighbours to merge prediction scoring worse"
 	}
-      }       
+      }
     }
   }
 }
