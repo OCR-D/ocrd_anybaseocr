@@ -4,14 +4,15 @@
 
 import sys
 import os
+from pathlib import Path
+from PIL import Image
+import click
+import torch
+import numpy as np
 
-from ..constants import OCRD_TOOL
-
+import ocrolib
 from ocrd import Processor
 from ocrd_models.ocrd_page import to_xml, AlternativeImageType
-
-import click
-
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 from ocrd_utils import (
     getLogger,
@@ -20,35 +21,42 @@ from ocrd_utils import (
     make_file_id
 )
 from ocrd_modelfactory import page_from_file
-from pylab import array
-from pathlib import Path
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 
-import torch
-import ocrolib
-
+from ..constants import OCRD_TOOL
 from ..pix2pixhd.options.test_options import TestOptions
 from ..pix2pixhd.models.models import create_model
-from ..pix2pixhd.data.data_loader import CreateDataLoader
+from ..pix2pixhd.data.base_dataset import BaseDataset, get_params, get_transform
+from ..pix2pixhd.util.util import tensor2im
 
 TOOL = 'ocrd-anybaseocr-dewarp'
 
+class TestDataset(BaseDataset):
+    # adopted from pix2pixhd.data.AlignDataset for our TestOptions
+    # but with in-memory Image
+    def __init__(self, opt, images):
+        super().__init__()
+        self.opt = opt
+        self.images = images
+    def __getitem__(self, index):
+        image = self.images[index]
+        param = get_params(self.opt, image.size)
+        trans = get_transform(self.opt, param)
+        tensor = trans(image.convert('RGB'))
+        return {'label': tensor, 'path': '',
+                'inst': 0, 'image': 0, 'feat': 0}
+    def __len__(self):
+        return len(self.images) // self.opt.batchSize * self.opt.batchSize
+
 def prepare_data(opt, page_img):
+    # todo: make asynchronous (all pages for continuous quasi-parallel decoding)
+    dataset = TestDataset(opt, [page_img])
+    return torch.utils.data.DataLoader(dataset,
+                                       batch_size=opt.batchSize,
+                                       shuffle=not opt.serial_batches,
+                                       num_workers=int(opt.nThreads))
 
-    # XXX this needs to be created or the CreateDataLoader(opt) call will fail
-    Path(opt.dataroot, 'test_A').mkdir()
-    data_loader = CreateDataLoader(opt)
-    print(dir(page_img))
-    data_loader.dataset.A_paths = [page_img.filename]
-    data_loader.dataset.dataset_size = len(data_loader.dataset.A_paths)
-    data_loader.dataloader = torch.utils.data.DataLoader(data_loader.dataset,
-                                                         batch_size=opt.batchSize,
-                                                         shuffle=not opt.serial_batches,
-                                                         num_workers=int(opt.nThreads))
-    dataset = data_loader.load_data()
-    return dataset
-
-def prepare_options(gpu_id, dataroot, model_path, resize_or_crop, loadSize, fineSize):
+def prepare_options(gpu_id, model_path, resize_or_crop, loadSize, fineSize):
     LOG = getLogger('OcrdAnybaseocrDewarper')
     # XXX https://github.com/OCR-D/ocrd_anybaseocr/pull/62#discussion_r450232164
     # The problem was with how BaseOptions.parse is implemented in pix2pixHD based on
