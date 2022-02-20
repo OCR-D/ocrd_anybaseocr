@@ -181,6 +181,11 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
                     if self.first is None:
                         self.first = 'chapter'
                         parent_node = self.log_map
+                    # rs: not sure about the remaining branches (cf. #73)
+                    elif self.first == i:
+                        parent_node = self.log_map
+                    else:
+                        parent_node = self.log_links[self.first]
                             
                     log_div = ET.SubElement(parent_node, TAG_METS_DIV)
                     log_div.set('TYPE', str(i))            
