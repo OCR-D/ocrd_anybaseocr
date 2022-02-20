@@ -23,7 +23,7 @@ class AnyocrDewarperTest(TestCase):
             pytest.skip('CUDA is not available, cannot test dewarping')
         with copy_of_directory(assets.path_to('dfki-testdata/data')) as wsdir:
             ws = Workspace(self.resolver, wsdir)
-            pagexml_before = len(ws.mets.find_files(mimetype=MIMETYPE_PAGE))
+            pagexml_before = len(ws.mets.find_all_files(mimetype=MIMETYPE_PAGE))
             run_processor(
                 OcrdAnybaseocrDewarper,
                 resolver=self.resolver,
@@ -33,7 +33,7 @@ class AnyocrDewarperTest(TestCase):
                 parameter={'model_path': str(self.model_path)}
             )
             ws.reload_mets()
-            pagexml_after = len(ws.mets.find_files(mimetype=MIMETYPE_PAGE))
+            pagexml_after = len(ws.mets.find_all_files(mimetype=MIMETYPE_PAGE))
             self.assertEqual(pagexml_after, pagexml_before + 1)
 
 if __name__ == "__main__":

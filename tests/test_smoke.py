@@ -31,7 +31,7 @@ class SmokeTest(TestCase):
         for cli in CLIS:
             exit_code, out, err = self.invoke_cli(cli, ['--help'])
             self.assertIn('--input-file-grp', out)
-            self.assertEquals(exit_code, 0)
+            self.assertEqual(exit_code, 0)
 
     def test_all_json(self):
         """
