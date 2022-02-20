@@ -18,9 +18,7 @@ class AnyocrDewarperTest(TestCase):
         self.resolver = Resolver()
         initLogging()
 
-    def test_crop(self):
-        if not torch.cuda.is_available():
-            pytest.skip('CUDA is not available, cannot test dewarping')
+    def test_dewarp(self):
         with copy_of_directory(assets.path_to('dfki-testdata/data')) as wsdir:
             ws = Workspace(self.resolver, wsdir)
             pagexml_before = len(ws.mets.find_all_files(mimetype=MIMETYPE_PAGE))
@@ -28,7 +26,7 @@ class AnyocrDewarperTest(TestCase):
                 OcrdAnybaseocrDewarper,
                 resolver=self.resolver,
                 mets_url=str(Path(wsdir, 'mets.xml')),
-                input_file_grp='BIN',
+                input_file_grp='CROP',
                 output_file_grp='DEWARP-TEST',
                 parameter={'model_path': str(self.model_path)}
             )
