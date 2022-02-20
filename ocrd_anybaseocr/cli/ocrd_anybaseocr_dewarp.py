@@ -175,16 +175,20 @@ class OcrdAnybaseocrDewarper(Processor):
     def _process_segment(self, model, dataset, page, page_xywh, page_id, input_file, orig_img_size, n):
         for _, data in enumerate(dataset):
             w, h = orig_img_size
-            generated = model.inference(
-                data['label'], data['inst'], data['image'])
-            dewarped = array(generated.data[0].permute(1, 2, 0).detach().cpu())
-            bin_array = array(255*(dewarped > ocrolib.midrange(dewarped)), 'B')
-            dewarped = ocrolib.array2pil(bin_array)
-            dewarped = dewarped.resize((w, h))
-
-            page_xywh['features'] += ',dewarped'
-
-            file_id = make_file_id(input_file, self.output_file_grp) + '-IMG'
+            generated = self.model.inference(data['label'], data['inst'], data['image'])
+            #dewarped = generated.data[0].permute(1, 2, 0).detach().cpu().numpy()
+            ## convert RGB float to uint8 (clipping negative)
+            #dewarped = Image.fromarray(np.array(np.maximum(0, dewarped) * 255, dtype=np.uint8))
+            # zzz: strictly, we should try to invert the dataset's input transform here
+            dewarped = Image.fromarray(tensor2im(generated.data[0]))
+            # resize using high-quality interpolation
+            dewarped = dewarped.resize((w, h), Image.BICUBIC)
+            # re-binarize
+            dewarped = np.array(dewarped)
+            dewarped = np.mean(dewarped, axis=2) > ocrolib.midrange(dewarped)
+            dewarped = Image.fromarray(dewarped)
+            coords['features'] += ',dewarped'
+            file_id = make_file_id(input_file, self.output_file_grp) + '.IMG-DEW'
             file_path = self.workspace.save_image_file(dewarped,
                                                        file_id,
                                                        page_id=input_file.pageId,
