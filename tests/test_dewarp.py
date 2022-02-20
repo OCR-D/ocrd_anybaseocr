@@ -3,7 +3,7 @@ from pathlib import Path
 
 from ocrd import Resolver, Workspace
 from ocrd.processor.base import run_processor
-from ocrd_utils import MIMETYPE_PAGE
+from ocrd_utils import MIMETYPE_PAGE, initLogging
 import torch
 import pytest
 
@@ -14,8 +14,9 @@ from .base import TestCase, assets, main, copy_of_directory
 class AnyocrDewarperTest(TestCase):
 
     def setUp(self):
-        self.model_path = Path(Path.cwd(), 'models/latest_net_G.pth')
+        self.model_path = Path(Path.cwd(), 'latest_net_G.pth')
         self.resolver = Resolver()
+        initLogging()
 
     def test_crop(self):
         if not torch.cuda.is_available():
