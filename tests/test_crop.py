@@ -7,7 +7,7 @@ from ocrd_utils import MIMETYPE_PAGE, initLogging
 
 from ocrd_anybaseocr.cli.ocrd_anybaseocr_cropping import OcrdAnybaseocrCropper
 
-from tests.base import TestCase, assets, main, copy_of_directory
+from .base import TestCase, assets, main, copy_of_directory
 
 
 class AnyocrCropperTest(TestCase):

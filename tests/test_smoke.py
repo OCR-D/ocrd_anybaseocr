@@ -1,6 +1,6 @@
 import json
 
-from tests.base import main, CapturingTestCase as TestCase
+from .base import main, CapturingTestCase as TestCase
 
 from ocrd_anybaseocr.cli.ocrd_anybaseocr_binarize import cli as OcrdAnybaseocrBinarizer
 from ocrd_anybaseocr.cli.ocrd_anybaseocr_block_segmentation import cli as OcrdAnybaseocrBlockSegmenter

@@ -7,9 +7,9 @@ from ocrd_utils import MIMETYPE_PAGE
 import torch
 import pytest
 
-from ocrd_anybaseocr.cli.ocrd_anybaseocr_dewarp import OcrdAnybaseocrDewarper # FIXME srsly y
+from ocrd_anybaseocr.cli.ocrd_anybaseocr_dewarp import OcrdAnybaseocrDewarper
 
-from tests.base import TestCase, assets, main, copy_of_directory
+from .base import TestCase, assets, main, copy_of_directory
 
 class AnyocrDewarperTest(TestCase):
 

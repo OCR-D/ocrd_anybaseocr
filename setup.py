@@ -14,7 +14,7 @@ setup(
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     install_requires=open('requirements.txt').read().split('\n'),
-    packages=find_packages(exclude=["work_dir", "src"]),
+    packages=find_packages(exclude=["work_dir", "src", "tests"]),
     package_data={
         '': ['*.json']
     },
