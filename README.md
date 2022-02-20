@@ -1,6 +1,8 @@
 # Document Preprocessing and Segmentation
 
 [![CircleCI](https://circleci.com/gh/OCR-D/ocrd_anybaseocr.svg?style=svg)](https://circleci.com/gh/OCR-D/ocrd_anybaseocr)
+[![PyPI](https://img.shields.io/pypi/v/ocrd_anybaseocr.svg)](https://pypi.org/project/ocrd_anybaseocr/)
+
 
 > Tools to preprocess and segment scanned images for OCR-D
 
@@ -19,6 +21,8 @@
 
 # Installing
 
+Requires Python >= 3.6.
+
 1. Create a new `venv` unless you already have one
 
         python3 -m venv venv
@@ -27,13 +31,19 @@
 
         source venv/bin/activate
 
-3. Install with `make`
+3. To install from source, get GNU make and do:
 
         make install
 
+   There are also prebuilds available on PyPI:
+
+        pip install ocrd_anybaseocr
+
+(This will install both PyTorch and TensorFlow, along with their dependents.)
+
 # Tools
 
-All tools, also called _processors_, abide by the [CLI specifications]((https://ocr-d.de/en/spec/cli)) for [OCR-D](https://ocr-d.de), which roughly looks like:
+All tools, also called _processors_, abide by the [CLI specifications](https://ocr-d.de/en/spec/cli) for [OCR-D](https://ocr-d.de), which roughly looks like:
 
     ocrd-<processor-name> [-m <path to METs input file>] -I <input group> -O <output group> [-p <path to parameter file>]* [-P <param name> <param value>]*
 
@@ -84,6 +94,10 @@ The input image has to be binarized for the module to work, and should be croppe
 
 Implemented via data-driven methods (neural GAN conditional image model trained with pix2pixHD/Pytorch).
  
+### Models
+
+    ocrd resmgr download ocrd-anybaseocr-dewarp '*'
+
 ### Example
 
     ocrd-anybaseocr-dewarp -I OCR-D-CROP -O OCR-D-DEWARP -P resize_mode none -P gpu_id -1
@@ -97,6 +111,10 @@ The input image has to be binarized for the module to work, and should be croppe
 
 Implemented via data-driven methods (neural pixel classifier model trained with Tensorflow/Keras).
  
+### Models
+
+    ocrd resmgr download ocrd-anybaseocr-tiseg '*'
+
 ### Example
 
     ocrd-anybaseocr-tiseg -I OCR-D-DEWARP -O OCR-D-TISEG -P use_deeplr true
@@ -110,9 +128,13 @@ The input image need not be binarized, but should be deskewed for the module to 
 
 Implemented via data-driven methods (neural Mask-RCNN instance segmentation model trained with Tensorflow/Keras).
  
+### Models
+
+    ocrd resmgr download ocrd-anybaseocr-block-segmentation '*'
+
 ### Example
 
-    ocrd-anybaseocr-block-segmenter -I OCR-D-TISEG -O OCR-D-BLOCK -P active_classes '["page-number", "paragraph", "heading", "drop-capital", "marginalia", "caption"]' -P min_confidence 0.8 -P post_process true
+    ocrd-anybaseocr-block-segmentation -I OCR-D-TISEG -O OCR-D-BLOCK -P active_classes '["page-number", "paragraph", "heading", "drop-capital", "marginalia", "caption"]' -P min_confidence 0.8 -P post_process true
 
 ## Textline Segmenter
 
@@ -133,7 +155,13 @@ Implemented via rule-based methods (gradient and morphology based line estimatio
 For the whole document, this processor takes all the cropped page images and their corresponding text regions as input and computes the logical structure (page types and sections).
 
 The input image should be binarized and segmented for this module to work.
- 
+
+Implemented via data-driven methods (neural Inception-V3 image classification model trained with Tensorflow/Keras).
+
+### Models
+
+    ocrd resmgr download ocrd-anybaseocr-layout-analysis '*'
+
 ### Example
 
     ocrd-anybaseocr-layout-analysis -I OCR-D-LINE -O OCR-D-STRUCT
