@@ -37,8 +37,9 @@ help:
 	@echo "    test-crop                             Test cropping CLI"
 	@echo "    test-tiseg                            Test text/non-text segmentation CLI"
 	@echo "    test-block-segmentation               Test block segmentation CLI"
-	@echo "    test-textline                         Test textline extraction CLI"
+	@echo "    test-textline                         Test textline segmentation CLI"
 	@echo "    test-layout-analysis                  Test document structure analysis CLI"
+	@echo "    test-dewarp                           Test page dewarping CLI"
 	@echo ""
 	@echo "  Variables"
 	@echo ""
@@ -114,7 +115,7 @@ test: assets-clean assets
 # Run CLI tests
 .PHONY: cli-test
 cli-test: assets-clean assets
-cli-test: test-binarize test-deskew test-crop test-tiseg test-textline test-layout-analysis
+cli-test: test-binarize test-deskew test-crop test-tiseg test-textline test-layout-analysis test-dewarp
 
 # Test binarization CLI
 .PHONY: test-binarize
@@ -141,10 +142,15 @@ test-tiseg: test-crop
 test-block-segmentation: test-tiseg
 	ocrd-anybaseocr-block-segmentation -m $(TESTDATA)/mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT
 
-# Test textline extraction CLI
+# Test textline segmentation CLI
 .PHONY: test-textline
 test-textline: test-tiseg
 	ocrd-anybaseocr-textline -m $(TESTDATA)/mets.xml -I TISEG-TEST -O TL-TEST
+
+# Test page dewarping CLI
+.PHONY: test-dewarp
+test-dewarp: test-crop
+	ocrd-anybaseocr-dewarp -m $(TESTDATA)/mets.xml -I CROP-TEST -O DEWARP-TEST
 
 # Test document structure analysis CLI
 .PHONY: test-layout-analysis
