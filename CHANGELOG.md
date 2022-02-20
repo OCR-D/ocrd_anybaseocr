@@ -4,6 +4,20 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+Fixed:
+
+* Makefile/tests: fix tests, update to resmgr cwd semantics, add dewarp
+* layout-analysis: use correct pageId
+* tiseg/layout-analysis: use TF SavedFormat instead of HDF5
+* dewarp/layout-analysis: load during init (`setup` instead of `process`)
+* dewarp: fix image input (in-memory instead of file-based)
+* dewarp: fix image output (resizing with better quality)
+* dewarp: fix/update pix2pixHD for CPU-only and newer PyTorch
+* dewarp: rename parameters (now `resize_{mode,width,height}`)
+* dewarp: fix oplevel region, update to ocrd_mets changes
+* update requirements
+* improve README
+
 ## [1.6.0] - 2021-05-20
 
 Removed:
