@@ -1,6 +1,6 @@
 {
   "git_url": "https://github.com/OCR-D/ocrd_anybaseocr",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "tools": {
     "ocrd-anybaseocr-binarize": {
       "executable": "ocrd-anybaseocr-binarize",
