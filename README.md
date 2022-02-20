@@ -2,182 +2,160 @@
 
 [![CircleCI](https://circleci.com/gh/OCR-D/ocrd_anybaseocr.svg?style=svg)](https://circleci.com/gh/OCR-D/ocrd_anybaseocr)
 
-> Tools for preprocessing scanned images for OCR
+> Tools to preprocess and segment scanned images for OCR-D
+
+   * [Installing](#installing)
+   * [Tools](#tools)
+      * [Binarizer](#binarizer)
+      * [Deskewer](#deskewer)
+      * [Cropper](#cropper)
+      * [Dewarper](#dewarper)
+      * [Text/Non-Text Segmenter](#textnon-text-segmenter)
+      * [Block Segmenter](#block-segmenter)
+      * [Textline Segmenter](#textline-segmenter)
+      * [Document Analyser](#document-analyser)
+   * [Testing](#testing)
+   * [License](#license)
 
 # Installing
 
-- 1. Create a new `venv` unless you already have one
+1. Create a new `venv` unless you already have one
 
-    $ python3 -m venv venv
+        python3 -m venv venv
 
-* 2. Activate the `venv`
+2. Activate the `venv`
 
-    $ source venv/bin/activate
+        source venv/bin/activate
 
-* 3. Install with `make`
+3. Install with `make`
 
-    $ make install
+        make install
 
-#Tools
+# Tools
+
+All tools, also called _processors_, abide by the [CLI specifications]((https://ocr-d.de/en/spec/cli)) for [OCR-D](https://ocr-d.de), which roughly looks like:
+
+    ocrd-<processor-name> [-m <path to METs input file>] -I <input group> -O <output group> [-p <path to parameter file>]* [-P <param name> <param value>]*
 
 ## Binarizer
 
 ### Method Behaviour 
- This function takes a scanned colored /gray scale document image as input and do the black and white binarize image.
- 
- #### Usage:
-```sh
-ocrd-anybaseocr-binarize -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
-```
+For each page (or sub-segment), this processor takes a scanned colored / gray scale document image as input and computes a binarized (black and white) image.
 
-#### Example: 
-```sh
-ocrd-anybaseocr-binarize \
-   -m mets.xml \
-   -I OCR-D-IMG \
-   -O OCR-D-PAGE-BIN
-```
+Implemented via rule-based methods (percentile based adaptive background estimation in Ocrolib).
+ 
+### Example
+
+    ocrd-anybaseocr-binarize -I OCR-D-IMG -O OCR-D-BIN -P operation_level line -P threshold 0.3
+
 
 ## Deskewer
 
 ### Method Behaviour 
- This function takes a document image as input and do the skew correction of that document. The input images have to be binarized for this module to work.
- 
- #### Usage:
-```sh
-ocrd-anybaseocr-deskew -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
-```
+For each page (or sub-segment), this processor takes a document image as input and computes the skew angle of that. It also annotates a deskewed image. 
 
-#### Example: 
-```sh
-ocrd-anybaseocr-deskew \
-  -m mets.xml \
-  -I OCR-D-PAGE-BIN \
-  -O OCR-D-PAGE-DESKEW
-```
+The input images have to be binarized for this module to work.
+
+Implemented via rule-based methods (binary projection profile entropy maximization in Ocrolib).
+ 
+### Example
+
+    ocrd-anybaseocr-deskew -I OCR-D-BIN -O OCR-D-DESKEW -P maxskew 5.0 -P skewsteps 20 -P operation_level page
 
 ## Cropper
 
 ### Method Behaviour 
- This function takes a document image as input and crops/selects the page content area only (that's mean remove textual noise as well as any other noise around page content area). The input image need not be binarized but should be deskewed for the module to work optimally. 
+For each page, this processor takes a document image as input and computes the border around the page content area (i.e. removes textual noise as well as any other noise around the page frame). It also annotates a cropped image.
+
+The input image need not be binarized, but should be deskewed for the module to work optimally.
+
+Implemented via rule-based methods (gradient-based line segment detection and morphology based textline detection).
  
- #### Usage:
-```sh
-ocrd-anybaseocr-crop -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
-```
+### Example:
 
-#### Example: 
-```sh
-ocrd-anybaseocr-crop \
-   -m mets.xml \
-   -I OCR-D-PAGE-DESKEW \
-   -O OCR-D-PAGE-CROP
-```
-
+    ocrd-anybaseocr-crop -I OCR-D-DESKEW -O OCR-D-CROP -P rulerAreaMax 0 -P marginLeft 0.1
 
 ## Dewarper
 
 ### Method Behaviour 
- This function takes a document image as input and make the text line straight if its curved. The input image has to be binarized for the module to work.
+For each page, this processor takes a document image as input and computes a morphed image which will make the text lines straight if they are curved.
+
+The input image has to be binarized for the module to work, and should be cropped and deskewed for optimal quality.
+
+Implemented via data-driven methods (neural GAN conditional image model trained with pix2pixHD/Pytorch).
  
- #### Usage:
-```sh
-ocrd-anybaseocr-dewarp -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
-```
+### Example
 
-
-#### Example: 
-```sh
-CUDA_VISIBLE_DEVICES=0 ocrd-anybaseocr-dewarp \
-   -m mets.xml \
-   -I OCR-D-PAGE-CROP \
-   -O OCR-D-PAGE-DEWARP
-```
+    ocrd-anybaseocr-dewarp -I OCR-D-CROP -O OCR-D-DEWARP -P resize_mode none -P gpu_id -1
 
 ## Text/Non-Text Segmenter
 
 ### Method Behaviour 
- This function takes a document image as an input and separates the text and non-text part from the input document image. 
- The module outputs 2 AlternativeImages instead of document regions, which are clipped (binarized) versions of the input image, containing either only text or only non-text components.
- 
- #### Usage:
-```sh
-ocrd-anybaseocr-tiseg -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
-```
+For each page, this processor takes a document image as an input and computes two images, separating the text and non-text parts.
 
-#### Example: 
-```sh
-ocrd-anybaseocr-tiseg \
-   -m mets.xml \
-   -I OCR-D-PAGE-CROP \
-   -O OCR-D-PAGE-TISEG
-```
+The input image has to be binarized for the module to work, and should be cropped and deskewed for optimal quality.
+
+Implemented via data-driven methods (neural pixel classifier model trained with Tensorflow/Keras).
+ 
+### Example
+
+    ocrd-anybaseocr-tiseg -I OCR-D-DEWARP -O OCR-D-TISEG -P use_deeplr true
+
+## Block Segmenter
+
+### Method Behaviour 
+For each page, this processor takes the raw document image as an input and computes a text region segmentation for it (distinguishing various types of text blocks).
+
+The input image need not be binarized, but should be deskewed for the module to work optimally.
+
+Implemented via data-driven methods (neural Mask-RCNN instance segmentation model trained with Tensorflow/Keras).
+ 
+### Example
+
+    ocrd-anybaseocr-block-segmenter -I OCR-D-TISEG -O OCR-D-BLOCK -P active_classes '["page-number", "paragraph", "heading", "drop-capital", "marginalia", "caption"]' -P min_confidence 0.8 -P post_process true
 
 ## Textline Segmenter
 
 ### Method Behaviour 
- This function takes a cropped document image as an input and segment the image into textline images. The input image should be binarized and deskewed for the module to work. 
+For each page (or region), this processor takes a cropped document image as an input and computes a textline segmentation for it.
+
+The input image should be binarized and deskewed for the module to work. 
+
+Implemented via rule-based methods (gradient and morphology based line estimation in Ocrolib).
  
- #### Usage:
-```sh
-ocrd-anybaseocr-textline -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
-```
+### Example
 
-#### Example: 
-```sh
-ocrd-anybaseocr-textline \
-   -m mets.xml \
-   -I OCR-D-PAGE-TISEG \
-   -O OCR-D-PAGE-TL
-```
-
-<!--
-## Block Segmenter
-
-### Method Behaviour 
- This function takes raw document image as an input and segments the image into the different text blocks.
- 
- #### Usage:
-```sh
-ocrd-anybaseocr-block-segmenter -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
-```
-
-#### Example: 
-```sh
-ocrd-anybaseocr-block-segmenter \
-   -m mets.xml \
-   -I OCR-IMG \
-   -O OCR-D-PAGE-BLOCK
-```
--->
+    ocrd-anybaseocr-textline -I OCR-D-BLOCK -O OCR-D-LINE -P operation_level region
 
 ## Document Analyser
 
 ### Method Behaviour 
- This function takes all the cropped document images of a single book and its corresponding text regions as input and generates the logical structure on the book level. The input image should be binarized for this module to work.
+For the whole document, this processor takes all the cropped page images and their corresponding text regions as input and computes the logical structure (page types and sections).
+
+The input image should be binarized and segmented for this module to work.
  
- #### Usage:
-```sh
-ocrd-anybaseocr-layout-analysis -m (path to METs input file) -I (Input group name) -O (Output group name) [-p (path to parameter file) -o (METs output filename)]
-```
+### Example
 
-#### Example: 
-```sh
-ocrd-anybaseocr-layout-analysis \
-   -m mets.xml \
-   -I OCR-IMG \
-   -O OCR-D-PAGE-BLOCK
-```
-
+    ocrd-anybaseocr-layout-analysis -I OCR-D-LINE -O OCR-D-STRUCT
 
 ## Testing
 
-To test the tools, download [OCR-D/assets](https://github.com/OCR-D/assets). In
-particular, the code is tested with the
-[dfki-testdata](https://github.com/OCR-D/assets/tree/master/data/dfki-testdata)
+To test the tools under realistic conditions (on OCR-D workspaces),
+download [OCR-D/assets](https://github.com/OCR-D/assets). In particular,
+the code is tested with the [dfki-testdata](https://github.com/OCR-D/assets/tree/master/data/dfki-testdata)
 dataset.
 
-Run `make test` to run all tests.
+To download the data:
+
+    make assets
+
+To run module tests:
+
+    make test
+
+To run processor/workflow tests:
+
+    make cli-test
 
 ## License
 
@@ -194,4 +172,4 @@ Run `make test` to run all tests.
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
- ```
+```
