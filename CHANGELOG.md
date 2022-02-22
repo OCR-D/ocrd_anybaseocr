@@ -4,6 +4,8 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.7.0] - 2022-02-22
+
 Fixed:
 
 * Makefile/tests: fix tests, update to resmgr cwd semantics, add dewarp
@@ -105,6 +107,7 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[1.7.0]: ../../compare/v1.7.0...v1.6.0
 [1.6.0]: ../../compare/v1.6.0...v1.5.0
 [1.5.0]: ../../compare/v1.5.0...v1.4.1
 [1.4.1]: ../../compare/v1.4.1...v1.4.0
