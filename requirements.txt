@@ -1,7 +1,7 @@
 keras
 keras-preprocessing
 numpy >= 1.15.4
-ocrd >= 2.30
+ocrd >= 2.31
 ocrd-fork-pylsd >= 0.0.4
 ocrd-fork-ocropy >= 1.4.0a4 # Python3 ocrolib
 opencv-python-headless >= 3.4
