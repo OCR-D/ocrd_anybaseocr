@@ -26,7 +26,7 @@ help:
 	@echo ""
 	@echo "    deps                                  Install python deps via pip"
 	@echo "    install                               Install"
-	@echo "    patch-pix2pixhd                       Patch pix2pixhd to trick it into thinking it was part of this mess"
+	@echo "    ocrd_anybaseocr/pix2pixhd             Checkout pix2pixhd submodule"
 	@echo "    repo/assets                           Clone OCR-D/assets to ./repo/assets"
 	@echo "    assets-clean                          Remove assets"
 	@echo "    assets                                Setup test assets"
@@ -53,23 +53,11 @@ deps:
 	$(PIP_INSTALL) -r requirements.txt
 
 # Install
-install: patch-pix2pixhd
+install: ocrd_anybaseocr/pix2pixhd
 	$(PIP_INSTALL) .
-.PHONY: patch-pix2pixhd
 
-# Patch pix2pixhd to trick it into thinking it was part of this mess
-PIX2PIX_FILES = ocrd_anybaseocr/pix2pixhd/*/*.py ocrd_anybaseocr/pix2pixhd/*.py
-patch-pix2pixhd: pix2pixhd
-	touch ocrd_anybaseocr/pix2pixhd/__init__.py
-	sed -i 's,^from util,from ..util,' $(PIX2PIX_FILES)
-	sed -i 's,^import util,import ..util,' $(PIX2PIX_FILES)
-	sed -i 's,^\(\s*\)from data,\1from .data,' ocrd_anybaseocr/pix2pixhd/*.py
-	sed -i 's,^\(\s*\)from data,\1from ..data,' ocrd_anybaseocr/pix2pixhd/*/*.py
-	# string exceptions, srsly y
-	sed -i "s,raise('\([^']*\)',raise(Exception('\1')," $(PIX2PIX_FILES)
-
-pix2pixhd:
-	git submodule update --init
+ocrd_anybaseocr/pix2pixhd:
+	git submodule update --init $@
 
 #
 # Assets
