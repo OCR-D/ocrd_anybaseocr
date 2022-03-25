@@ -13,3 +13,4 @@ shapely
 tensorflow
 torch>=1.1.0
 torchvision >= 0.6.1
+pix2pixhd # @ ./ocrd_anybaseocr/pix2pixhd

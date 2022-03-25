@@ -195,7 +195,7 @@ class OcrdAnybaseocrDewarper(Processor):
             dewarped = np.mean(dewarped, axis=2) > ocrolib.midrange(dewarped)
             dewarped = Image.fromarray(dewarped)
             coords['features'] += ',dewarped'
-            file_id = make_file_id(input_file, self.output_file_grp) + '.IMG-DEW'
+            file_id = make_file_id(input_file, self.output_file_grp) + '_' + segment.id + '.IMG-DEW'
             file_path = self.workspace.save_image_file(dewarped,
                                                        file_id,
                                                        page_id=input_file.pageId,
