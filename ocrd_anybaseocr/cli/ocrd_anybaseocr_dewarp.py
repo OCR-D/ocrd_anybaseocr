@@ -24,10 +24,10 @@ from ocrd_modelfactory import page_from_file
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 
 from ..constants import OCRD_TOOL
-from ..pix2pixhd.options.test_options import TestOptions
-from ..pix2pixhd.models.models import create_model
-from ..pix2pixhd.data.base_dataset import BaseDataset, get_params, get_transform
-from ..pix2pixhd.util.util import tensor2im
+from pix2pixhd.options.test_options import TestOptions
+from pix2pixhd.models.models import create_model
+from pix2pixhd.data.base_dataset import BaseDataset, get_params, get_transform
+from pix2pixhd.util.util import tensor2im
 
 TOOL = 'ocrd-anybaseocr-dewarp'
 
