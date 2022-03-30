@@ -142,6 +142,7 @@ class OcrdAnybaseocrDewarper(Processor):
         oplevel = self.parameter['operation_level']
         for input_file in self.input_files:
             page_id = input_file.pageId or input_file.ID
+            file_id = make_file_id(input_file, self.output_file_grp)
             LOG.info("INPUT FILE %s", page_id)
 
             pcgts = page_from_file(self.workspace.download_file(input_file))
@@ -154,7 +155,9 @@ class OcrdAnybaseocrDewarper(Processor):
                 feature_filter='dewarped', feature_selector='binarized')
             if oplevel == 'page':
                 self._process_segment(
-                    prepare_data(self.opt, page_image), page, page_xywh, page_image.size, input_file)
+                    prepare_data(self.opt, page_image), page, page_xywh, page_image.size, 
+                                 input_file.pageId,
+                                 make_file_id(input_file, self.output_file_grp) + '.IMG-DEW')
             else:
                 regions = page.get_TextRegion() + page.get_TableRegion()  # get all regions?
                 if not regions:
@@ -164,11 +167,11 @@ class OcrdAnybaseocrDewarper(Processor):
                         region, page_image, page_xywh,
                         # images SHOULD be deskewed and cropped, and MUST be binarized
                         feature_filter='dewarped', feature_selector='binarized')
-                    # TODO: not tested on regions
                     self._process_segment(
-                        prepare_data(self.opt, region_image), region, region_xywh, region_image.size, input_file)
+                        prepare_data(self.opt, region_image), region, region_xywh, region_image.size,
+                                     input_file.pageId, 
+                                     make_file_id(input_file, self.output_file_grp) + '_' + region.id + '.IMG-DEW')
 
-            file_id = make_file_id(input_file, self.output_file_grp)
             pcgts.set_pcGtsId(file_id)
             self.workspace.add_file(
                 ID=file_id,
@@ -179,7 +182,7 @@ class OcrdAnybaseocrDewarper(Processor):
                 content=to_xml(pcgts).encode('utf-8')
             )
 
-    def _process_segment(self, dataset, segment, coords, orig_img_size, input_file):
+    def _process_segment(self, dataset, segment, coords, orig_img_size, page_id, file_id):
         for _, data in enumerate(dataset):
             w, h = orig_img_size
             generated = self.model.inference(data['label'], data['inst'], data['image'])
@@ -195,10 +198,9 @@ class OcrdAnybaseocrDewarper(Processor):
             dewarped = np.mean(dewarped, axis=2) > ocrolib.midrange(dewarped)
             dewarped = Image.fromarray(dewarped)
             coords['features'] += ',dewarped'
-            file_id = make_file_id(input_file, self.output_file_grp) + '_' + segment.id + '.IMG-DEW'
             file_path = self.workspace.save_image_file(dewarped,
                                                        file_id,
-                                                       page_id=input_file.pageId,
+                                                       page_id=page_id,
                                                        file_grp=self.output_file_grp,
             )
             segment.add_AlternativeImage(AlternativeImageType(
