@@ -9,7 +9,7 @@ jobs:
       version:
         type: string
     docker:
-      - image: cimg/python:<< parameters.version >>
+      - image: circleci/python:<< parameters.version >>
     working_directory: '~/repo'
     steps:
       - checkout
