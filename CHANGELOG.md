@@ -4,6 +4,12 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.8.2] - 2022-03-25
+
+Fixed:
+
+  * dewarping: IDs must not contain `/`, #94
+
 ## [1.8.1] - 2022-03-25
 
 Fixed:
@@ -119,7 +125,8 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
-[1.8.0]: ../../compare/v1.8.0...v1.7.0
+[1.8.2]: ../../compare/v1.8.2...v1.8.1
+[1.8.1]: ../../compare/v1.8.1...v1.8.0
 [1.7.0]: ../../compare/v1.7.0...v1.6.0
 [1.6.0]: ../../compare/v1.6.0...v1.5.0
 [1.5.0]: ../../compare/v1.5.0...v1.4.1
