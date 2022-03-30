@@ -24,7 +24,8 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.test.txt
             pip install -r requirements.txt
-            apt-get install imagemagick
+            sudo apt-get update -y
+            sudo apt-get install -y imagemagick
             make models
       - save_cache:
           paths:
