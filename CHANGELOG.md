@@ -4,6 +4,12 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.8.1] - 2022-03-25
+
+Fixed:
+
+  * Import pix2pixhd as package, not submodule, #93
+
 ## [1.8.0] - 2022-03-25
 
 Changed:
