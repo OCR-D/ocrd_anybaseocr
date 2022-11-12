@@ -166,7 +166,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
         LOG.info('found %d candidates on page "%s"', len(r['rois']), page_id)
 
         th = self.parameter['th']
-        # check for existing semgentation mask
+        # check for existing segmentation mask
         # this code executes only when the workflow had tiseg run before with use_deeplr=true
         if mask:
             mask = ocrolib.pil2array(mask)

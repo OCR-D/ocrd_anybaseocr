@@ -17,7 +17,7 @@
 # License: ocropus-nlbin.py (from https://github.com/tmbdev/ocropy/) contains both functionalities: binarization and skew correction.
 # This method (ocrd-anyBaseOCR-binarize.py) only contains the binarization functionality of ocropus-nlbin.py.
 # It still has the same licenses as ocropus-nlbin, i.e Apache 2.0. ((the ocropy license details are pasted below).
-# This file is dependend on ocrolib library which comes from https://github.com/tmbdev/ocropy/.
+# This file is dependent on ocrolib library which comes from https://github.com/tmbdev/ocropy/.
 
 # Copyright 2014 Thomas M. Breuel
 
