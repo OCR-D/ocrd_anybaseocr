@@ -141,7 +141,15 @@
           "default": "page",
           "description": "PAGE XML hierarchy level to operate on (should match what model was trained on!)"
         }
-      }
+      },
+      "resources": [
+        {
+          "url": "https://s3.gwdg.de/ocr-d/models/dfki/dewarping/latest_net_G.pth",
+          "name": "latest_net_G.pth",
+          "description": "dewarping model for anybaseocr",
+          "size": 805292230
+        }
+      ]
     },
     "ocrd-anybaseocr-tiseg": {
       "executable": "ocrd-anybaseocr-tiseg",
@@ -164,7 +172,17 @@
           "default":"seg_model",
           "description":"Directory path to deep learning model when use_deeplr is true."
         }
-      }
+      },
+      "resources": [
+        {
+          "url": "https://ocr-d.kba.cloud/seg_model.tar.gz",
+          "name": "seg_model",
+          "description": "text image segmentation model for anybaseocr",
+          "type": "archive",
+          "path_in_archive": "seg_model",
+          "size": 61388872
+        }
+      ]
     },
     "ocrd-anybaseocr-textline": {
       "executable": "ocrd-anybaseocr-textline",
@@ -207,7 +225,23 @@
         "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
         "model_path":         { "type": "string", "format": "uri", "content-type": "text/directory", "cacheable": true, "default":"structure_analysis", "description": "Directory path to layout structure classification model"},
         "class_mapping_path": { "type": "string", "format": "uri", "content-type": "application/python-pickle", "cacheable": true, "default":"mapping_densenet.pickle", "description": "File path to layout structure classes"}
-      }
+      },
+      "resources": [
+        {
+          "url": "https://ocr-d.kba.cloud/structure_analysis.tar.gz",
+          "name": "structure_analysis",
+          "description": "structure analysis model for anybaseocr",
+          "type": "archive",
+          "path_in_archive": "structure_analysis",
+          "size": 29002514
+        },
+        {
+          "url": "https://s3.gwdg.de/ocr-d/models/dfki/layoutAnalysis/mapping_densenet.pickle",
+          "name": "mapping_densenet.pickle",
+          "description": "mapping model for anybaseocr",
+          "size": 374
+        }
+      ]
     },
     "ocrd-anybaseocr-block-segmentation": {
       "executable": "ocrd-anybaseocr-block-segmentation",
@@ -216,75 +250,83 @@
       "categories": ["Layout analysis"],
       "steps": ["layout/segmentation/region"],
       "description": "Segments and classifies regions in each single page and annotates the the region polygons and classes.",
-      "parameters": {     
+      "parameters": {
         "block_segmentation_weights": {
-	  "type": "string",
+          "type": "string",
           "format":"uri",
           "content-type": "application/x-hdf;subtype=bag",
           "cacheable": true,
-	  "default":"block_segmentation_weights.h5",
-	  "description": "Path to model weights"
-	},
+          "default":"block_segmentation_weights.h5",
+          "description": "Path to model weights"
+        },
         "overwrite": {
-	  "type": "boolean",
-	  "default": false,
-	  "description": "whether to delete existing text lines prior to segmentation"
-	},
+          "type": "boolean",
+          "default": false,
+          "description": "whether to delete existing text lines prior to segmentation"
+        },
         "th": {
-	  "type": "integer",
-	  "default": 15,
-	  "description": "num of pixels to include in the area region (when applying text/non-text mask from tiseg)"
-	},
-	"active_classes": {
-	  "type": "array",
-	  "items": {
-	    "type": "string",
-	    "enum": ["page-number", "paragraph", "catch-word", "heading", "drop-capital", "signature-mark", "header", "marginalia", "footnote", "footnote-continued", "caption", "endnote", "footer", "keynote", "image", "table", "graphics"]
-	  },
-	  "default": ["page-number", "paragraph", "catch-word", "heading", "drop-capital", "signature-mark", "marginalia", "caption"],
-	  "description": "Restrict types of regions to be detected."
-	},
+          "type": "integer",
+          "default": 15,
+          "description": "num of pixels to include in the area region (when applying text/non-text mask from tiseg)"
+        },
+        "active_classes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["page-number", "paragraph", "catch-word", "heading", "drop-capital", "signature-mark", "header", "marginalia", "footnote", "footnote-continued", "caption", "endnote", "footer", "keynote", "image", "table", "graphics"]
+          },
+          "default": ["page-number", "paragraph", "catch-word", "heading", "drop-capital", "signature-mark", "marginalia", "caption"],
+          "description": "Restrict types of regions to be detected."
+        },
         "post_process": {
-	  "type": "boolean",
-	  "default": true,
-	  "description": "whether to apply non-maximum suppression (across classes) on the detections"
-	},
+          "type": "boolean",
+          "default": true,
+          "description": "whether to apply non-maximum suppression (across classes) on the detections"
+        },
         "use_masks": {
-	  "type": "boolean",
-	  "default": true,
-	  "description": "whether to segment from the mask as polygon instead of just the bbox"
-	},
+          "type": "boolean",
+          "default": true,
+          "description": "whether to segment from the mask as polygon instead of just the bbox"
+        },
         "min_confidence": {
-	  "type": "number",
-	  "format": "float",
-	  "default": 0.9,
-	  "description": "Confidence threshold for region detections"
-	},
-	"min_share_drop": {
-	  "type": "number",
-	  "format": "float",
-	  "default": 0.9,
-	  "description": "Minimum required overlap (intersection over single) of mask-derived contour area between neighbours to suppress smaller prediction"
-	},
-	"min_share_merge": {
-	  "type": "number",
-	  "format": "float",
-	  "default": 0.8,
-	  "description": "Minimum required overlap (intersection over single) of mask-derived contour area between neighbours to merge smaller prediction"
-	},
-	"min_iou_drop": {
-	  "type": "number",
-	  "format": "float",
-	  "default": 0.8,
-	  "description": "Minimum required overlap (intersection over union) of mask-derived contour area between neighbours to suppress prediction scoring worse"
-	},
-	"min_iou_merge": {
-	  "type": "number",
-	  "format": "float",
-	  "default": 0.2,
-	  "description": "Minimum required overlap (intersection over union) of mask-derived contour area between neighbours to merge prediction scoring worse"
-	}
-      }
+          "type": "number",
+          "format": "float",
+          "default": 0.9,
+          "description": "Confidence threshold for region detections"
+        },
+        "min_share_drop": {
+          "type": "number",
+          "format": "float",
+          "default": 0.9,
+          "description": "Minimum required overlap (intersection over single) of mask-derived contour area between neighbours to suppress smaller prediction"
+        },
+        "min_share_merge": {
+          "type": "number",
+          "format": "float",
+          "default": 0.8,
+          "description": "Minimum required overlap (intersection over single) of mask-derived contour area between neighbours to merge smaller prediction"
+        },
+        "min_iou_drop": {
+          "type": "number",
+          "format": "float",
+          "default": 0.8,
+          "description": "Minimum required overlap (intersection over union) of mask-derived contour area between neighbours to suppress prediction scoring worse"
+        },
+        "min_iou_merge": {
+          "type": "number",
+          "format": "float",
+          "default": 0.2,
+          "description": "Minimum required overlap (intersection over union) of mask-derived contour area between neighbours to merge prediction scoring worse"
+        }
+      },
+      "resources": [
+        {
+          "url": "https://s3.gwdg.de/ocr-d/models/dfki/segmentation/block_segmentation_weights.h5",
+          "name": "block_segmentation_weights.h5",
+          "description": "block segmentation model for anybaseocr",
+          "size": 256139800
+        }
+      ]
     }
   }
 }
