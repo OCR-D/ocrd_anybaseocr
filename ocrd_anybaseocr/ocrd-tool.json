@@ -265,7 +265,8 @@
           "description": "whether to delete existing text lines prior to segmentation"
         },
         "th": {
-          "type": "integer",
+          "type": "number",
+          "format": "integer",
           "default": 15,
           "description": "num of pixels to include in the area region (when applying text/non-text mask from tiseg)"
         },
