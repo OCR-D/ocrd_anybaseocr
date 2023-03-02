@@ -175,7 +175,7 @@
       },
       "resources": [
         {
-          "url": "https://ocr-d.kba.cloud/seg_model.tar.gz",
+          "url": "https://s3.gwdg.de/ocr-d/models/seg_model.tar.gz",
           "name": "seg_model",
           "description": "text image segmentation model for anybaseocr",
           "type": "archive",
@@ -228,7 +228,7 @@
       },
       "resources": [
         {
-          "url": "https://ocr-d.kba.cloud/structure_analysis.tar.gz",
+          "url": "https://s3.gwdg.de/ocr-d/models/structure_analysis.tar.gz",
           "name": "structure_analysis",
           "description": "structure analysis model for anybaseocr",
           "type": "archive",
