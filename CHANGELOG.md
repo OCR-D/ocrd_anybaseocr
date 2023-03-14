@@ -4,6 +4,14 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+Fixed:
+
+  * `block-segmentation`: fix type of `th` parameter
+
+Added:
+
+  * Resources now described in `ocrd-tool.json`, #100
+
 ## [1.8.2] - 2022-03-25
 
 Fixed:
