@@ -4,6 +4,8 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.9.0] - 2022-03-14
+
 Fixed:
 
   * `block-segmentation`: fix type of `th` parameter
