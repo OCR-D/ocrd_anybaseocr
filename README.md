@@ -77,7 +77,7 @@ Implemented via rule-based methods (binary projection profile entropy maximizati
 ### Method Behaviour 
 For each page, this processor takes a document image as input and computes the border around the page content area (i.e. removes textual noise as well as any other noise around the page frame). It also annotates a cropped image.
 
-The input image need not be binarized, but should be deskewed for the module to work optimally.
+The input image does not need to be binarized, but should be deskewed for the module to work optimally.
 
 Implemented via rule-based methods (gradient-based line segment detection and morphology based textline detection).
  
