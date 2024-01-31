@@ -1,13 +1,12 @@
-FROM nvcr.io/nvidia/tensorflow:19.10-py3
-MAINTAINER OCR-D
-ENV DEBIAN_FRONTEND noninteractive
-ENV PYTHONIOENCODING utf8
+FROM ocrd/core:v2.62.0 AS base
 
-WORKDIR /build-layouterkennung
+WORKDIR /build-ocrd
 COPY setup.py .
+COPY ocrd_anybaseocr/ocrd-tool.json .
+COPY ocrd_anybaseocr ./ocrd_anybaseocr
 COPY requirements.txt .
 COPY README.md .
-COPY ocrd_anybaseocr ./ocrd_anybaseocr
-RUN pip3 install .
+RUN pip install . \
+	&& rm -rf /build-ocrd
 
-ENTRYPOINT ["/bin/sh", "-c"]
+WORKDIR /data
