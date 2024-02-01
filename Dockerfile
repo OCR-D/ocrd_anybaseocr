@@ -7,6 +7,7 @@ COPY ocrd_anybaseocr ./ocrd_anybaseocr
 COPY requirements.txt .
 COPY README.md .
 RUN pip install . \
-	&& rm -rf /build-ocrd_anybaseocr
+	&& rm -rf /build-ocrd_anybaseocr \
+	&& pip cache purge
 
 WORKDIR /data
