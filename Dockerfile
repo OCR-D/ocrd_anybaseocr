@@ -1,4 +1,4 @@
-FROM ocrd/core:v2.62.0 AS base
+FROM ocrd/core-cuda:v2.62.0 AS base
 ARG VCS_REF
 ARG BUILD_DATE
 LABEL \
@@ -7,15 +7,14 @@ LABEL \
     org.label-schema.vcs-url="https://github.com/OCR-D/ocrd_anybaseocr" \
     org.label-schema.build-date=$BUILD_DATE
 
-WORKDIR /build-ocrd_anybaseocr
+WORKDIR /build
 COPY setup.py .
 COPY ocrd_anybaseocr/ocrd-tool.json .
 COPY ocrd_anybaseocr ./ocrd_anybaseocr
 COPY requirements.txt .
 COPY README.md .
 RUN pip install . \
-	&& rm -rf /build-ocrd_anybaseocr \
-	&& pip cache purge
+	&& rm -rf /build
 
 WORKDIR /data
 VOLUME ["/data"]
