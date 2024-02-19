@@ -4,6 +4,12 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [1.10.0] - 2024-02-19
+
+Fixed:
+
+  * Docker setup, #102
+
 ## [1.9.0] - 2022-03-14
 
 Fixed:
@@ -135,6 +141,8 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[1.10.0]: ../../compare/v1.10.0...v1.9.0
+[1.9.0]: ../../compare/v1.9.0...v1.8.2
 [1.8.2]: ../../compare/v1.8.2...v1.8.1
 [1.8.1]: ../../compare/v1.8.1...v1.8.0
 [1.7.0]: ../../compare/v1.7.0...v1.6.0
