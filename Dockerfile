@@ -1,4 +1,4 @@
-FROM ocrd/core-cuda:v2.62.0 AS base
+FROM ocrd/core-cuda:v2.63.0 AS base
 ARG VCS_REF
 ARG BUILD_DATE
 LABEL \
