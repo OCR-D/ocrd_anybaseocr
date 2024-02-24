@@ -366,7 +366,7 @@ class OcrdAnybaseocrBlockSegmenter(Processor):
                         elif max_x_i < min_x_j:
                             partial_order[i, j] = 1
         def _topsort(po):
-            visited = np.zeros(po.shape[0], np.bool)
+            visited = np.zeros(po.shape[0], bool)
             result = list()
             def _visit(k):
                 if visited[k]:

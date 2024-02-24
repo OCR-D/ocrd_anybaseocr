@@ -108,7 +108,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
     def img_resize(self, image_path):
         size = 600, 500
         img = Image.open(image_path)
-        return img.thumbnail(size, Image.ANTIALIAS)    
+        return img.thumbnail(size, Image.LANCZOS)    
     
     def write_to_mets(self, result, pageID):  
         
@@ -232,7 +232,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             page = pcgts.get_Page()
             LOG.info("INPUT FILE %s", page_id)
             page_image, page_coords, _ = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
-            img_array = ocrolib.pil2array(page_image.resize((500, 600), Image.ANTIALIAS))
+            img_array = ocrolib.pil2array(page_image.resize((500, 600), Image.LANCZOS))
             img_array = img_array / 255
             img_array = img_array[np.newaxis, :, :, np.newaxis]            
             results = self.predict(img_array)
