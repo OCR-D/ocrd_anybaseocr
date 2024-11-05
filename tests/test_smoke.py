@@ -8,7 +8,6 @@ from ocrd_anybaseocr.cli.ocrd_anybaseocr_deskew import cli as OcrdAnybaseocrDesk
 from ocrd_anybaseocr.cli.ocrd_anybaseocr_dewarp import cli as OcrdAnybaseocrDewarper
 from ocrd_anybaseocr.cli.ocrd_anybaseocr_layout_analysis import cli as OcrdAnybaseocrLayoutAnalyser
 from ocrd_anybaseocr.cli.ocrd_anybaseocr_textline import cli as OcrdAnybaseocrTextline
-from ocrd_anybaseocr.cli.ocrd_anybaseocr_tiseg import cli as OcrdAnybaseocrTiseg
 
 CLIS = [
         OcrdAnybaseocrBinarizer,
@@ -17,7 +16,6 @@ CLIS = [
         OcrdAnybaseocrDewarper,
         OcrdAnybaseocrLayoutAnalyser,
         OcrdAnybaseocrTextline,
-        OcrdAnybaseocrTiseg
 ]
 
 class SmokeTest(TestCase):
