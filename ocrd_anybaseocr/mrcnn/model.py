@@ -31,9 +31,9 @@ import h5py
 from ocrd_anybaseocr.mrcnn import utils
 
 # Requires TensorFlow 1.3+ and Keras 2.0.8+.
-from distutils.version import LooseVersion
-assert LooseVersion(tf.__version__) >= LooseVersion("1.3")
-assert LooseVersion(keras.__version__) >= LooseVersion('2.0.8')
+from packaging.version import Version, parse
+assert parse(tf.__version__) >= Version("1.3")
+assert parse(keras.__version__) >= Version('2.0.8')
 
 
 ############################################################
