@@ -25,14 +25,14 @@ jobs:
       - restore_cache:
           keys:
             # ocrd-resources depends on the model files registered under ocrd_anybaseocr/ocrd-tool.json
-            - v1-models-{{ checksum "ocrd_anybaseocr/ocrd-tool.json" }}
+            - v2-models-{{ checksum "ocrd_anybaseocr/ocrd-tool.json" }}
       - run:
           name: download models
           command: make models
       - save_cache:
           paths:
             - ~/.local/share/ocrd-resources
-          key: v1-models-{{ checksum "ocrd_anybaseocr/ocrd-tool.json" }}
+          key: v2-models-{{ checksum "ocrd_anybaseocr/ocrd-tool.json" }}
       - run:
           name: run unit tests
           command: make test
