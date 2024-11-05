@@ -68,7 +68,6 @@ ocrd_anybaseocr/pix2pixhd:
 .PHONY: models
 models:
 	ocrd resmgr download --location cwd ocrd-anybaseocr-dewarp '*'
-	ocrd resmgr download --location cwd ocrd-anybaseocr-block-segmentation '*'
 	ocrd resmgr download --location cwd ocrd-anybaseocr-layout-analysis '*'
 	ocrd resmgr download --location cwd ocrd-anybaseocr-tiseg '*'
 
