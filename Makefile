@@ -67,10 +67,10 @@ ocrd_anybaseocr/pix2pixhd:
 # Download sample model TODO Add other models here
 .PHONY: models
 models:
-	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-dewarp '*'
-	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-block-segmentation '*'
-	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-layout-analysis '*'
-	ocrd resmgr download --allow-uninstalled --location cwd ocrd-anybaseocr-tiseg '*'
+	ocrd resmgr download --location cwd ocrd-anybaseocr-dewarp '*'
+	ocrd resmgr download --location cwd ocrd-anybaseocr-block-segmentation '*'
+	ocrd resmgr download --location cwd ocrd-anybaseocr-layout-analysis '*'
+	ocrd resmgr download --location cwd ocrd-anybaseocr-tiseg '*'
 
 .PHONY: docker
 docker:
