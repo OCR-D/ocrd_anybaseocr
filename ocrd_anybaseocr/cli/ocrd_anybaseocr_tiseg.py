@@ -101,7 +101,7 @@ class OcrdAnybaseocrTiseg(Processor):
 
         if self.model:
 
-            I = ocrolib.pil2array(page_image.resize((800, 1024), Image.ANTIALIAS))
+            I = ocrolib.pil2array(page_image.resize((800, 1024), Image.LANCZOS))
             I = np.array(I)[np.newaxis, :, :, :]
             LOG.info('I shape %s', I.shape)
             if len(I.shape)<3:
