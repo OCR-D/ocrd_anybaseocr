@@ -67,8 +67,8 @@ ocrd_anybaseocr/pix2pixhd:
 # Download sample model TODO Add other models here
 .PHONY: models
 models:
-	ocrd resmgr download --location cwd ocrd-anybaseocr-dewarp '*'
-	ocrd resmgr download --location cwd ocrd-anybaseocr-layout-analysis '*'
+	ocrd resmgr download ocrd-anybaseocr-dewarp '*'
+	ocrd resmgr download ocrd-anybaseocr-layout-analysis '*'
 
 .PHONY: docker
 docker:
