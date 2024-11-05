@@ -14,7 +14,7 @@ from .base import TestCase, assets, main, copy_of_directory
 class AnyocrDewarperTest(TestCase):
 
     def setUp(self):
-        self.model_path = Path(Path.cwd(), 'latest_net_G.pth')
+        self.model_path = 'latest_net_G.pth'
         self.resolver = Resolver()
         initLogging()
 
