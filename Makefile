@@ -69,7 +69,6 @@ ocrd_anybaseocr/pix2pixhd:
 models:
 	ocrd resmgr download --location cwd ocrd-anybaseocr-dewarp '*'
 	ocrd resmgr download --location cwd ocrd-anybaseocr-layout-analysis '*'
-	ocrd resmgr download --location cwd ocrd-anybaseocr-tiseg '*'
 
 .PHONY: docker
 docker:
@@ -105,7 +104,7 @@ test: assets-clean assets
 # Run CLI tests
 .PHONY: cli-test
 cli-test: assets-clean assets
-cli-test: test-binarize test-deskew test-crop test-tiseg test-textline test-layout-analysis test-dewarp
+cli-test: test-binarize test-deskew test-crop test-textline test-layout-analysis test-dewarp
 
 # Test binarization CLI
 .PHONY: test-binarize
@@ -134,8 +133,8 @@ test-block-segmentation: test-tiseg
 
 # Test textline segmentation CLI
 .PHONY: test-textline
-test-textline: test-tiseg
-	ocrd-anybaseocr-textline -m $(TESTDATA)/mets.xml -I TISEG-TEST -O TL-TEST
+test-textline: test-crop
+	ocrd-anybaseocr-textline -m $(TESTDATA)/mets.xml -I CROP-TEST -O TL-TEST
 
 # Test page dewarping CLI
 .PHONY: test-dewarp
