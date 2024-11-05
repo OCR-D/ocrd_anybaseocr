@@ -7,14 +7,14 @@ LABEL \
     org.label-schema.vcs-url="https://github.com/OCR-D/ocrd_anybaseocr" \
     org.label-schema.build-date=$BUILD_DATE
 
-WORKDIR /build
+WORKDIR /build/ocrd_anybaseocr
 COPY setup.py .
 COPY ocrd_anybaseocr/ocrd-tool.json .
 COPY ocrd_anybaseocr ./ocrd_anybaseocr
 COPY requirements.txt .
 COPY README.md .
 RUN pip install . \
-	&& rm -rf /build
+	&& rm -rf /build/ocrd_anybaseocr
 
 WORKDIR /data
 VOLUME ["/data"]
