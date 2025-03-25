@@ -1,4 +1,4 @@
-keras
+keras < 3.0
 keras-preprocessing
 numpy >= 1.15.4
 ocrd >= 2.31
@@ -10,7 +10,7 @@ scikit-image >= 0.17.2
 scipy >= 1.4.1
 setuptools >= 41.0.0
 shapely
-tensorflow
+tensorflow < 2.16
 torch>=1.1.0
 torchvision >= 0.6.1
 pix2pixhd # @ ./ocrd_anybaseocr/pix2pixhd

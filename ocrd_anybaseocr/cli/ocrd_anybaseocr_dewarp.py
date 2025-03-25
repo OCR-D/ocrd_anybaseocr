@@ -107,7 +107,7 @@ class OcrdAnybaseocrDewarper(Processor):
             sys.exit(1)
         self.opt, self.model = prepare_options(
             gpu_id=self.parameter['gpu_id'],
-            model_path=model_path,
+            model_path=model_path.absolute(),
             resize_or_crop=self.parameter['resize_mode'],
             loadSize=self.parameter['resize_height'],
             fineSize=self.parameter['resize_width'],
