@@ -1,11 +1,18 @@
-FROM ocrd/core-cuda-tf2:v2.70.0 AS base
+ARG DOCKER_BASE_IMAGE
+FROM $DOCKER_BASE_IMAGE
 ARG VCS_REF
 ARG BUILD_DATE
 LABEL \
-    maintainer="https://github.com/OCR-D/ocrd_anybaseocr/issues" \
+    maintainer="https://ocr-d.de/kontakt" \
     org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.vcs-url="https://github.com/OCR-D/ocrd_anybaseocr" \
-    org.label-schema.build-date=$BUILD_DATE
+    org.opencontainers.image.vendor="DFG-Funded Initiative for Optical Character Recognition Development" \
+    org.opencontainers.image.title="ocrd_anybaseocr" \
+    org.opencontainers.image.source="https://github.com/OCR-D/ocrd_anybaseocr" \
+    org.opencontainers.image.documentation="https://github.com/OCR-D/ocrd_anybaseocr/blob/${VCS_REF}/README.md" \
+    org.opencontainers.image.revision=$VCS_REF \
+    org.opencontainers.image.created=$BUILD_DATE
 
 WORKDIR /build/ocrd_anybaseocr
 COPY setup.py .
