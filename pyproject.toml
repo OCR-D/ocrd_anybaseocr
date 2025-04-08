@@ -35,8 +35,8 @@ ocrd-anybaseocr-crop = "ocrd_anybaseocr.cli.ocrd_anybaseocr_cropping:cli"
 dependencies = {file = ["requirements.txt"]}
 optional-dependencies.test = {file = ["requirements.test.txt"]}
 
-[tool.setuptools]
-packages = ["ocrd_anybaseocr"]
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.yml", "*.xml", "*.xsd"]
