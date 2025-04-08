@@ -29,3 +29,4 @@ lib64
 *.jpg
 ocrd_anybaseocr/pix2pixhd
 /models
+/venv

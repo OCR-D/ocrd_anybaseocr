@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "setuptools-ocrd"]
+
+[project]
+name = "ocrd-anybaseocr"
+authors = [
+    {name = "Saqib Bukhari", email = "Saqib.Bukhari@dfki.de"},
+    {name = "Mohammad Mohsin Reza", email = "Mohammad_mohsin.reza@dfki.de"},
+]
+readme = "README.md"
+license.file = "LICENSE"
+requires-python = ">=3.8"
+keywords = ["document layout analysis", "image segmentation"]
+
+dynamic = ["dependencies", "version"]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+
+[project.urls]
+Homepage = "https://github.com/OCR-D/ocrd_anybaseocr"
+Repository = "https://github.com/OCR-D/ocrd__anybaseocr.git"
+
+[project.scripts]
+ocrd-anybaseocr-binarize           = "ocrd_anybaseocr.cli.ocrd_anybaseocr_binarize:cli"
+ocrd-anybaseocr-deskew             = "ocrd_anybaseocr.cli.ocrd_anybaseocr_deskew:cli"
+ocrd-anybaseocr-crop               = "ocrd_anybaseocr.cli.ocrd_anybaseocr_cropping:cli"
+ocrd-anybaseocr-dewarp             = "ocrd_anybaseocr.cli.ocrd_anybaseocr_dewarp:cli"
+ocrd-anybaseocr-tiseg              = "ocrd_anybaseocr.cli.ocrd_anybaseocr_tiseg:cli"
+ocrd-anybaseocr-textline           = "ocrd_anybaseocr.cli.ocrd_anybaseocr_textline:cli"
+ocrd-anybaseocr-layout-analysis    = "ocrd_anybaseocr.cli.ocrd_anybaseocr_layout_analysis:cli"
+ocrd-anybaseocr-block-segmentation = "ocrd_anybaseocr.cli.ocrd_anybaseocr_block_segmentation:cli"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies.test = {file = ["requirements.test.txt"]}
+
+[tool.setuptools.packages.find]
+where = ["ocrd_anybaseocr"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.yml", "*.xml", "*.xsd"]

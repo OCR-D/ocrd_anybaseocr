@@ -17,44 +17,31 @@
 # Licensed works, modifications, and larger works may be distributed under
 # different terms and without source code.
 
+from functools import cached_property
 import os
 from types import SimpleNamespace
+
+import click
 import numpy as np
 from pylsd.lsd import lsd
 from shapely.geometry import Polygon
 import cv2
-from PIL import Image
 from scipy.spatial import distance_matrix
 from scipy.stats import linregress
 
-import click
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
-
-from ..constants import OCRD_TOOL
-from ocrd import Processor
-from ocrd_modelfactory import page_from_file
+from ocrd import Processor, OcrdPageResult, OcrdPageResultImage
 from ocrd_utils import (
-    getLogger,
-    crop_image,
-    make_file_id,
-    assert_file_grp_cardinality,
-    concat_padded, 
-    MIMETYPE_PAGE, 
     coordinates_for_segment,
-    coordinates_of_segment,
     bbox_from_points,
-    bbox_from_polygon,
     points_from_polygon,
     polygon_from_bbox
 )
 from ocrd_models.ocrd_page import (
+    BorderType,
     CoordsType,
     AlternativeImageType,
-    to_xml,
 )
-from ocrd_models.ocrd_page_generateds import BorderType
-
-TOOL = 'ocrd-anybaseocr-crop'
 
 # enable to plot intermediate results interactively:
 DEBUG = False
@@ -99,11 +86,143 @@ def pil2array(im,alpha=0):
 
 class OcrdAnybaseocrCropper(Processor):
 
-    def __init__(self, *args, **kwargs):
-        kwargs['ocrd_tool'] = OCRD_TOOL['tools'][TOOL]
-        kwargs['version'] = OCRD_TOOL['version']
-        super(OcrdAnybaseocrCropper, self).__init__(*args, **kwargs)
-        self.logger = None
+    @cached_property
+    def executable(self):
+        return 'ocrd-anybaseocr-crop'
+
+    #def _process_page(self, page, page_image, page_xywh, input_file, zoom=1.0):
+    def process_page_pcgts(self, *input_pcgts: Optional[OcrdPage], page_id: Optional[str] = None) -> OcrdPageResult:
+        """Performs heuristic page frame detection (cropping) on the workspace.
+        
+        Open and deserialize PAGE input files and their respective images.
+        (Input should be deskewed already.) Retrieve the raw (non-binarized,
+        uncropped) page image.
+        
+        Detect line segments via edge gradients, and cluster them into contiguous
+        horizontal and vertical lines if possible. If candidates which are located
+        at the margin and long enough (covering a large fraction of the page) exist
+        on all four sides, then pick the best (i.e. thickest, longest and inner-most)
+        one on each side and use their intersections as border points.
+        
+        Otherwise, first try to detect a ruler (i.e. image segment depicting a rule
+        placed on the scan/photo for scale references) via thresholding and contour
+        detection, identifying a single large rectangular region with a certain aspect
+        ratio. Suppress (mask) any such segment during further calculations.
+
+        Next in that line, try to detect text segments on the page. For that purpose,
+        get the gradient of grayscale image, threshold and morphologically close it,
+        then determine contours to define approximate text boxes. Merge these into
+        columns, filtering candidates too small or entirely in the margin areas.
+        Finally, merge the remaining columns across short gaps. If only one column
+        remains, and it covers a significant fraction of the page, pick that segment
+        as solution.
+        
+        Otherwise, keep the border points derived from line segments (intersecting
+        with the full image on each side without line candidates).
+        
+        Lastly, map coordinates to the original (undeskewed) image and intersect
+        the border polygon with the full image frame. Use that to define the page's
+        Border.
+        
+        Moreover, crop (and mask) the image accordingly, and reference the
+        resulting image file as AlternativeImage in the Page element.
+        Add the new image file to the workspace along with the output fileGrp,
+        and using a file ID with suffix ``.IMG-CROP`` along with further
+        identification of the input element.
+        
+        Produce new output files by serialising the resulting hierarchy.
+        """
+        assert self.parameter # to convince pyright that self.parameter is not None
+        pcgts = input_pcgts[0]
+        result = OcrdPageResult(pcgts)
+        page = pcgts.get_Page()
+        page_image, page_xywh, page_image_info = self.workspace.image_from_page(
+            page, page_id, # should be deskewed already
+            feature_filter='cropped,binarized,grayscale_normalized')
+
+        # Check for existing Border --> already cropped
+        border = page.get_Border()
+        if border:
+            left, top, right, bottom = bbox_from_points(
+                border.get_Coords().points)
+            self.logger.warning('Overwriting existing Border: %i:%i,%i:%i',
+                                left, top, right, bottom)
+        # determine zoom
+        if self.parameter['dpi'] > 0:
+            zoom = 300.0/self.parameter['dpi']
+        elif page_image_info.resolution != 1:
+            dpi = page_image_info.resolution
+            if page_image_info.resolutionUnit == 'cm':
+                dpi *= 2.54
+            self.logger.info('Page "%s" uses %f DPI', page_id, dpi)
+            zoom = 300.0/dpi
+        else:
+            zoom = 1
+
+        padding = self.parameter['padding']
+        img_array = pil2array(page_image)
+        # ensure RGB image
+        if len(img_array.shape) == 2:
+            img_array = np.stack((img_array,)*3, axis=-1)
+        height, width, _ = img_array.shape
+        size = height * width
+        # zoom to 300 DPI (larger density: faster; most fixed parameters here expect 300)
+        if zoom != 1.0:
+            self.logger.info("scaling %dx%d image by %.2f", width, height, zoom)
+            img_array = cv2.resize(img_array, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
+
+        # detect rule placed in image next to page for scale reference:
+        mask_array, mask_box = self.detect_ruler(img_array)
+        # detect page frame via line segment detector:
+        border_polygon, prefer_border = self.select_borderLine(img_array, mask_box)
+        border_polygon = np.array(border_polygon) / zoom # unzoom
+        # pad inwards:
+        border_polygon = Polygon(border_polygon).buffer(-padding).exterior.coords[:-1]
+        # get the bounding box from the border polygon:
+        # min_x, min_y = border_polygon.min(axis=0)
+        # max_x, max_y = border_polygon.max(axis=0)
+        # get the inner rectangle from the border polygon:
+        # _, min_x, max_x, _ = np.sort(border_polygon[:,0])
+        # _, min_y, max_y, _ = np.sort(border_polygon[:,1])
+        if prefer_border:
+            self.logger.info("Preferring line detector")
+        else:
+            self.logger.info("Falling back to text detector")
+            textboxes = self.detect_textboxes(img_array, mask_array)
+            if len(textboxes) > 1:
+                textboxes = self.merge_boxes(textboxes, img_array)
+            textboxes = np.array(textboxes) / zoom # unzoom
+
+            if (len(textboxes) == 1 and
+                self.parameter['columnAreaMin'] * size < self.get_area(textboxes[0])):
+                self.logger.info("Using text area (%d%% area)",
+                                 100 * self.get_area(textboxes[0]) / size)
+                min_x, min_y, max_x, max_y = textboxes[0]
+                # pad outwards
+                border_polygon = polygon_from_bbox(min_x - padding,
+                                                   min_y - padding,
+                                                   max_x + padding,
+                                                   max_y + padding)
+
+        def clip(point):
+            x, y = point
+            x = max(0, min(page_image.width, x))
+            y = max(0, min(page_image.height, y))
+            return x, y
+        border_polygon = coordinates_for_segment(border_polygon, page_image, page_xywh)
+        border_polygon = list(map(clip, border_polygon))
+        border_points = points_from_polygon(border_polygon)
+        border = BorderType(Coords=CoordsType(border_points))
+        page.set_Border(border)
+
+        # get clipped relative coordinates for current image (because of the
+        # Border now set, image_from_page will return updated image and coords?)
+        cropped_image, cropped_page_xywh, _ = self.workspace.image_from_page(
+            page, page_id, fill='background', transparency=True)
+        alt_image = AlternativeImageType(comments=page_xywh['features'] + ',cropped') # TODO: does `image_from_page` set cropped feature when Border exists?
+        page.add_AlterativeImage(alt_image)
+        result.images.append(OcrdPageResultImage(page_image, '.IMG-CROP', alt_image))
+        return result
 
     def detect_ruler(self, arg):
         gray = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
@@ -714,161 +833,6 @@ class OcrdAnybaseocrCropper(Processor):
 
         return columns
 
-    def process(self):
-        """Performs heuristic page frame detection (cropping) on the workspace.
-        
-        Open and deserialize PAGE input files and their respective images.
-        (Input should be deskewed already.) Retrieve the raw (non-binarized,
-        uncropped) page image.
-        
-        Detect line segments via edge gradients, and cluster them into contiguous
-        horizontal and vertical lines if possible. If candidates which are located
-        at the margin and long enough (covering a large fraction of the page) exist
-        on all four sides, then pick the best (i.e. thickest, longest and inner-most)
-        one on each side and use their intersections as border points.
-        
-        Otherwise, first try to detect a ruler (i.e. image segment depicting a rule
-        placed on the scan/photo for scale references) via thresholding and contour
-        detection, identifying a single large rectangular region with a certain aspect
-        ratio. Suppress (mask) any such segment during further calculations.
-
-        Next in that line, try to detect text segments on the page. For that purpose,
-        get the gradient of grayscale image, threshold and morphologically close it,
-        then determine contours to define approximate text boxes. Merge these into
-        columns, filtering candidates too small or entirely in the margin areas.
-        Finally, merge the remaining columns across short gaps. If only one column
-        remains, and it covers a significant fraction of the page, pick that segment
-        as solution.
-        
-        Otherwise, keep the border points derived from line segments (intersecting
-        with the full image on each side without line candidates).
-        
-        Lastly, map coordinates to the original (undeskewed) image and intersect
-        the border polygon with the full image frame. Use that to define the page's
-        Border.
-        
-        Moreover, crop (and mask) the image accordingly, and reference the
-        resulting image file as AlternativeImage in the Page element.
-        Add the new image file to the workspace along with the output fileGrp,
-        and using a file ID with suffix ``.IMG-CROP`` along with further
-        identification of the input element.
-        
-        Produce new output files by serialising the resulting hierarchy.
-        """
-        assert_file_grp_cardinality(self.input_file_grp, 1)
-        assert_file_grp_cardinality(self.output_file_grp, 1)
-
-        self.logger = getLogger('processor.AnybaseocrCropper')
-
-        for (n, input_file) in enumerate(self.input_files):
-            page_id = input_file.pageId or input_file.ID
-            self.logger.info("INPUT FILE %i / %s", n, page_id)
-
-            pcgts = page_from_file(self.workspace.download_file(input_file))
-            self.add_metadata(pcgts)
-            page = pcgts.get_Page()
-            # Check for existing Border --> already cropped
-            border = page.get_Border()
-            if border:
-                left, top, right, bottom = bbox_from_points(
-                    border.get_Coords().points)
-                self.logger.warning('Overwriting existing Border: %i:%i,%i:%i',
-                                    left, top, right, bottom)
-
-            page = pcgts.get_Page()
-            page_image, page_coords, page_image_info = self.workspace.image_from_page(
-                page, page_id, # should be deskewed already
-                feature_filter='cropped,binarized,grayscale_normalized')
-            if self.parameter['dpi'] > 0:
-                zoom = 300.0/self.parameter['dpi']
-            elif page_image_info.resolution != 1:
-                dpi = page_image_info.resolution
-                if page_image_info.resolutionUnit == 'cm':
-                    dpi *= 2.54
-                self.logger.info('Page "%s" uses %f DPI', page_id, dpi)
-                zoom = 300.0/dpi
-            else:
-                zoom = 1
-
-            self._process_page(page, page_image, page_coords, input_file, zoom)
-            file_id = make_file_id(input_file, self.output_file_grp)
-            pcgts.set_pcGtsId(file_id)
-            self.workspace.add_file(
-                ID=file_id,
-                file_grp=self.output_file_grp,
-                pageId=input_file.pageId,
-                mimetype=MIMETYPE_PAGE,
-                local_filename=os.path.join(self.output_file_grp, file_id + '.xml'),
-                content=to_xml(pcgts).encode('utf-8')
-            )
-
-    def _process_page(self, page, page_image, page_xywh, input_file, zoom=1.0):
-        padding = self.parameter['padding']
-        img_array = pil2array(page_image)
-        # ensure RGB image
-        if len(img_array.shape) == 2:
-            img_array = np.stack((img_array,)*3, axis=-1)
-        height, width, _ = img_array.shape
-        size = height * width
-        # zoom to 300 DPI (larger density: faster; most fixed parameters here expect 300)
-        if zoom != 1.0:
-            self.logger.info("scaling %dx%d image by %.2f", width, height, zoom)
-            img_array = cv2.resize(img_array, None, fx=zoom, fy=zoom, interpolation=cv2.INTER_CUBIC)
-
-        # detect rule placed in image next to page for scale reference:
-        mask_array, mask_box = self.detect_ruler(img_array)
-        # detect page frame via line segment detector:
-        border_polygon, prefer_border = self.select_borderLine(img_array, mask_box)
-        border_polygon = np.array(border_polygon) / zoom # unzoom
-        # pad inwards:
-        border_polygon = Polygon(border_polygon).buffer(-padding).exterior.coords[:-1]
-        # get the bounding box from the border polygon:
-        # min_x, min_y = border_polygon.min(axis=0)
-        # max_x, max_y = border_polygon.max(axis=0)
-        # get the inner rectangle from the border polygon:
-        # _, min_x, max_x, _ = np.sort(border_polygon[:,0])
-        # _, min_y, max_y, _ = np.sort(border_polygon[:,1])
-        if prefer_border:
-            self.logger.info("Preferring line detector")
-        else:
-            self.logger.info("Falling back to text detector")
-            textboxes = self.detect_textboxes(img_array, mask_array)
-            if len(textboxes) > 1:
-                textboxes = self.merge_boxes(textboxes, img_array)
-            textboxes = np.array(textboxes) / zoom # unzoom
-
-            if (len(textboxes) == 1 and
-                self.parameter['columnAreaMin'] * size < self.get_area(textboxes[0])):
-                self.logger.info("Using text area (%d%% area)",
-                                 100 * self.get_area(textboxes[0]) / size)
-                min_x, min_y, max_x, max_y = textboxes[0]
-                # pad outwards
-                border_polygon = polygon_from_bbox(min_x - padding,
-                                                   min_y - padding,
-                                                   max_x + padding,
-                                                   max_y + padding)
-
-        def clip(point):
-            x, y = point
-            x = max(0, min(page_image.width, x))
-            y = max(0, min(page_image.height, y))
-            return x, y
-        border_polygon = coordinates_for_segment(border_polygon, page_image, page_xywh)
-        border_polygon = list(map(clip, border_polygon))
-        border_points = points_from_polygon(border_polygon)
-        border = BorderType(Coords=CoordsType(border_points))
-        page.set_Border(border)
-        # get clipped relative coordinates for current image
-        page_image, page_xywh, _ = self.workspace.image_from_page(
-            page, input_file.pageId,
-            fill='background', transparency=True)
-        file_id = make_file_id(input_file, self.output_file_grp)
-        file_path = self.workspace.save_image_file(page_image,
-                                                   file_id + '.IMG-CROP',
-                                                   page_id=input_file.pageId,
-                                                   file_grp=self.output_file_grp)
-        page.add_AlternativeImage(AlternativeImageType(
-            filename=file_path, comments=page_xywh['features']))
 
 @click.command()
 @ocrd_cli_options
