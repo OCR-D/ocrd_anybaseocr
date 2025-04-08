@@ -64,12 +64,6 @@ ocrd_anybaseocr/pix2pixhd:
 #
 
 
-# Download sample model TODO Add other models here
-.PHONY: models
-models:
-	ocrd resmgr download ocrd-anybaseocr-dewarp '*'
-	ocrd resmgr download ocrd-anybaseocr-layout-analysis '*'
-
 .PHONY: docker
 docker:
 	docker build \
@@ -89,7 +83,7 @@ assets-clean:
 
 # Setup test assets
 .PHONY: assets
-assets: repo/assets models
+assets: repo/assets
 	mkdir -p $(testdir)/assets
 	cp -r -t $(testdir)/assets repo/assets/data/*
 #
@@ -104,44 +98,9 @@ test: assets-clean assets
 # Run CLI tests
 .PHONY: cli-test
 cli-test: assets-clean assets
-cli-test: test-binarize test-deskew test-crop test-textline test-layout-analysis test-dewarp
-
-# Test binarization CLI
-.PHONY: test-binarize
-test-binarize: assets
-	ocrd-anybaseocr-binarize -m $(TESTDATA)/mets.xml -I MAX -O BIN-TEST
-
-# Test deskewing CLI
-.PHONY: test-deskew
-test-deskew: test-binarize
-	ocrd-anybaseocr-deskew -m $(TESTDATA)/mets.xml -I BIN-TEST -O DESKEW-TEST
+cli-test: test-crop
 
 # Test cropping CLI
 .PHONY: test-crop
 test-crop: test-deskew
 	ocrd-anybaseocr-crop -m $(TESTDATA)/mets.xml -I DESKEW-TEST -O CROP-TEST
-
-# Test text/non-text segmentation CLI
-.PHONY: test-tiseg
-test-tiseg: test-crop
-	ocrd-anybaseocr-tiseg -m $(TESTDATA)/mets.xml --overwrite -I CROP-TEST -O TISEG-TEST
-
-# Test block segmentation CLI
-.PHONY: test-block-segmentation
-test-block-segmentation: test-tiseg
-	ocrd-anybaseocr-block-segmentation -m $(TESTDATA)/mets.xml -I TISEG-TEST -O OCR-D-BLOCK-SEGMENT
-
-# Test textline segmentation CLI
-.PHONY: test-textline
-test-textline: test-crop
-	ocrd-anybaseocr-textline -m $(TESTDATA)/mets.xml -I CROP-TEST -O TL-TEST
-
-# Test page dewarping CLI
-.PHONY: test-dewarp
-test-dewarp: test-crop
-	ocrd-anybaseocr-dewarp -m $(TESTDATA)/mets.xml -I CROP-TEST -O DEWARP-TEST
-
-# Test document structure analysis CLI
-.PHONY: test-layout-analysis
-test-layout-analysis: test-binarize
-	ocrd-anybaseocr-layout-analysis -m $(TESTDATA)/mets.xml -I BIN-TEST -O LAYOUT

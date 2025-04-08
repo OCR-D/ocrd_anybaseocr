@@ -1,10 +1,10 @@
-# Document Preprocessing and Segmentation
+# Document Croppnig
 
 [![CircleCI](https://circleci.com/gh/OCR-D/ocrd_anybaseocr.svg?style=svg)](https://circleci.com/gh/OCR-D/ocrd_anybaseocr)
 [![PyPI](https://img.shields.io/pypi/v/ocrd_anybaseocr.svg)](https://pypi.org/project/ocrd_anybaseocr/)
 
 
-> Tools to preprocess and segment scanned images for OCR-D
+> Tools to crop scanned images for OCR-D
 
    * [Installing](#installing)
    * [Tools](#tools)
@@ -39,38 +39,11 @@ Requires Python >= 3.6.
 
         pip install ocrd_anybaseocr
 
-(This will install both PyTorch and TensorFlow, along with their dependents.)
-
 # Tools
 
 All tools, also called _processors_, abide by the [CLI specifications](https://ocr-d.de/en/spec/cli) for [OCR-D](https://ocr-d.de), which roughly looks like:
 
     ocrd-<processor-name> [-m <path to METs input file>] -I <input group> -O <output group> [-p <path to parameter file>]* [-P <param name> <param value>]*
-
-## Binarizer
-
-### Method Behaviour 
-For each page (or sub-segment), this processor takes a scanned colored / gray scale document image as input and computes a binarized (black and white) image.
-
-Implemented via rule-based methods (percentile based adaptive background estimation in Ocrolib).
- 
-### Example
-
-    ocrd-anybaseocr-binarize -I OCR-D-IMG -O OCR-D-BIN -P operation_level line -P threshold 0.3
-
-
-## Deskewer
-
-### Method Behaviour 
-For each page (or sub-segment), this processor takes a document image as input and computes the skew angle of that. It also annotates a deskewed image. 
-
-The input images have to be binarized for this module to work.
-
-Implemented via rule-based methods (binary projection profile entropy maximization in Ocrolib).
- 
-### Example
-
-    ocrd-anybaseocr-deskew -I OCR-D-BIN -O OCR-D-DESKEW -P maxskew 5.0 -P skewsteps 20 -P operation_level page
 
 ## Cropper
 
@@ -84,87 +57,6 @@ Implemented via rule-based methods (gradient-based line segment detection and mo
 ### Example:
 
     ocrd-anybaseocr-crop -I OCR-D-DESKEW -O OCR-D-CROP -P rulerAreaMax 0 -P marginLeft 0.1
-
-## Dewarper
-
-### Method Behaviour 
-For each page, this processor takes a document image as input and computes a morphed image which will make the text lines straight if they are curved.
-
-The input image has to be binarized for the module to work, and should be cropped and deskewed for optimal quality.
-
-Implemented via data-driven methods (neural GAN conditional image model trained with pix2pixHD/Pytorch).
- 
-### Models
-
-    ocrd resmgr download ocrd-anybaseocr-dewarp '*'
-
-### Example
-
-    ocrd-anybaseocr-dewarp -I OCR-D-CROP -O OCR-D-DEWARP -P resize_mode none -P gpu_id -1
-
-## Text/Non-Text Segmenter
-
-### Method Behaviour 
-For each page, this processor takes a document image as an input and computes two images, separating the text and non-text parts.
-
-The input image has to be binarized for the module to work, and should be cropped and deskewed for optimal quality.
-
-Implemented via data-driven methods (neural pixel classifier model trained with Tensorflow/Keras).
- 
-### Models
-
-    ocrd resmgr download ocrd-anybaseocr-tiseg '*'
-
-### Example
-
-    ocrd-anybaseocr-tiseg -I OCR-D-DEWARP -O OCR-D-TISEG -P use_deeplr true
-
-## Block Segmenter
-
-### Method Behaviour 
-For each page, this processor takes the raw document image as an input and computes a text region segmentation for it (distinguishing various types of text blocks).
-
-The input image need not be binarized, but should be deskewed for the module to work optimally.
-
-Implemented via data-driven methods (neural Mask-RCNN instance segmentation model trained with Tensorflow/Keras).
- 
-### Models
-
-    ocrd resmgr download ocrd-anybaseocr-block-segmentation '*'
-
-### Example
-
-    ocrd-anybaseocr-block-segmentation -I OCR-D-TISEG -O OCR-D-BLOCK -P active_classes '["page-number", "paragraph", "heading", "drop-capital", "marginalia", "caption"]' -P min_confidence 0.8 -P post_process true
-
-## Textline Segmenter
-
-### Method Behaviour 
-For each page (or region), this processor takes a cropped document image as an input and computes a textline segmentation for it.
-
-The input image should be binarized and deskewed for the module to work. 
-
-Implemented via rule-based methods (gradient and morphology based line estimation in Ocrolib).
- 
-### Example
-
-    ocrd-anybaseocr-textline -I OCR-D-BLOCK -O OCR-D-LINE -P operation_level region
-
-## Document Analyser
-
-### Method Behaviour 
-For the whole document, this processor takes all the cropped page images and their corresponding text regions as input and computes the logical structure (page types and sections).
-
-The input image should be binarized and segmented for this module to work.
-
-Implemented via data-driven methods (neural Inception-V3 image classification model trained with Tensorflow/Keras).
-
-### Models
-
-    ocrd resmgr download ocrd-anybaseocr-layout-analysis '*'
-
-### Example
-
-    ocrd-anybaseocr-layout-analysis -I OCR-D-LINE -O OCR-D-STRUCT
 
 ## Testing
 

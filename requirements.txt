@@ -1,16 +1,3 @@
-keras < 3.0
-keras-preprocessing
-numpy >= 1.15.4
-ocrd >= 2.31
+ocrd >= 3.3.0
 ocrd-fork-pylsd >= 0.0.4
-ocrd-fork-ocropy >= 1.4.0a4 # Python3 ocrolib
-opencv-python-headless >= 3.4
-pandas
-scikit-image >= 0.17.2
 scipy >= 1.4.1
-setuptools >= 41.0.0
-shapely
-tensorflow < 2.16
-torch>=1.1.0
-torchvision >= 0.6.1
-pix2pixhd # @ ./ocrd_anybaseocr/pix2pixhd
