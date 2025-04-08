@@ -26,7 +26,6 @@ help:
 	@echo ""
 	@echo "    deps                                  Install python deps via pip"
 	@echo "    install                               Install"
-	@echo "    ocrd_anybaseocr/pix2pixhd             Checkout pix2pixhd submodule"
 	@echo "    repo/assets                           Clone OCR-D/assets to ./repo/assets"
 	@echo "    assets-clean                          Remove assets"
 	@echo "    assets                                Setup test assets"
@@ -53,11 +52,8 @@ deps:
 	$(PIP_INSTALL) -r requirements.txt
 
 # Install
-install: ocrd_anybaseocr/pix2pixhd
+install:
 	$(PIP_INSTALL) .
-
-ocrd_anybaseocr/pix2pixhd:
-	git submodule update --init $@
 
 #
 # Assets
