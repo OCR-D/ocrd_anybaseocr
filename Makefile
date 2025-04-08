@@ -102,5 +102,5 @@ cli-test: test-crop
 
 # Test cropping CLI
 .PHONY: test-crop
-test-crop: test-deskew
-	ocrd-anybaseocr-crop -m $(TESTDATA)/mets.xml -I DESKEW-TEST -O CROP-TEST
+test-crop:
+	ocrd-anybaseocr-crop -m $(TESTDATA)/mets.xml -I DESKEW -O CROP-TEST
