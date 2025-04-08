@@ -20,6 +20,7 @@
 from functools import cached_property
 import os
 from types import SimpleNamespace
+from typing import Optional
 
 import click
 import numpy as np
@@ -30,7 +31,7 @@ from scipy.spatial import distance_matrix
 from scipy.stats import linregress
 
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
-from ocrd import Processor, OcrdPageResult, OcrdPageResultImage
+from ocrd import OcrdPage, Processor, OcrdPageResult, OcrdPageResultImage
 from ocrd_utils import (
     coordinates_for_segment,
     bbox_from_points,
@@ -64,20 +65,20 @@ if DEBUG:
 # originally from ocrolib (here also with alpha support):
 def pil2array(im,alpha=0):
     if im.mode=="L":
-        a = np.fromstring(im.tobytes(),'B')
+        a = np.frombuffer(im.tobytes(),'B')
         a.shape = im.height, im.width
         return a
     if im.mode=="LA":
-        a = np.fromstring(im.tobytes(),'B')
+        a = np.frombuffer(im.tobytes(),'B')
         a.shape = im.height, im.width, 2
         if not alpha: a = a[:,:,0]
         return a
     if im.mode=="RGB":
-        a = np.fromstring(im.tobytes(),'B')
+        a = np.frombuffer(im.tobytes(),'B')
         a.shape = im.height, im.width, 3
         return a
     if im.mode=="RGBA":
-        a = np.fromstring(im.tobytes(),'B')
+        a = np.frombuffer(im.tobytes(),'B')
         a.shape = im.height, im.width, 4
         if not alpha: a = a[:,:,:3]
         return a
@@ -90,7 +91,6 @@ class OcrdAnybaseocrCropper(Processor):
     def executable(self):
         return 'ocrd-anybaseocr-crop'
 
-    #def _process_page(self, page, page_image, page_xywh, input_file, zoom=1.0):
     def process_page_pcgts(self, *input_pcgts: Optional[OcrdPage], page_id: Optional[str] = None) -> OcrdPageResult:
         """Performs heuristic page frame detection (cropping) on the workspace.
         
@@ -134,6 +134,7 @@ class OcrdAnybaseocrCropper(Processor):
         """
         assert self.parameter # to convince pyright that self.parameter is not None
         pcgts = input_pcgts[0]
+        assert pcgts
         result = OcrdPageResult(pcgts)
         page = pcgts.get_Page()
         page_image, page_xywh, page_image_info = self.workspace.image_from_page(
@@ -219,9 +220,9 @@ class OcrdAnybaseocrCropper(Processor):
         # Border now set, image_from_page will return updated image and coords?)
         cropped_image, cropped_page_xywh, _ = self.workspace.image_from_page(
             page, page_id, fill='background', transparency=True)
-        alt_image = AlternativeImageType(comments=page_xywh['features'] + ',cropped') # TODO: does `image_from_page` set cropped feature when Border exists?
-        page.add_AlterativeImage(alt_image)
-        result.images.append(OcrdPageResultImage(page_image, '.IMG-CROP', alt_image))
+        alt_image = AlternativeImageType(comments=cropped_page_xywh['features'])
+        page.add_AlternativeImage(alt_image)
+        result.images.append(OcrdPageResultImage(cropped_image, '.IMG-CROP', alt_image))
         return result
 
     def detect_ruler(self, arg):
@@ -231,6 +232,7 @@ class OcrdAnybaseocrCropper(Processor):
 
         height, width, _ = arg.shape
         imgArea = height * width
+        assert self.parameter # to convince pyright that self.parameter is not None
         minArea = imgArea * self.parameter['rulerAreaMin']
         maxArea = imgArea * self.parameter['rulerAreaMax']
 
@@ -312,6 +314,7 @@ class OcrdAnybaseocrCropper(Processor):
                 plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=2, linestyle='dashed'))
             dshow('line segments')
         imgHeight, imgWidth, _ = arg.shape
+        assert self.parameter # to convince pyright that self.parameter is not None
         y1max = self.parameter['marginTop'] * imgHeight
         y2min = self.parameter['marginBottom'] * imgHeight
         x1max = self.parameter['marginLeft'] * imgWidth
@@ -543,6 +546,7 @@ class OcrdAnybaseocrCropper(Processor):
     def select_borderLine(self, arg, mask=None):
         imgHeight, imgWidth, Hlines, Vlines = self.detect_lines(arg)
         perfect = True
+        assert self.parameter # to convince pyright that self.parameter is not None
         y1max = self.parameter['marginTop'] * imgHeight
         y2min = self.parameter['marginBottom'] * imgHeight
         x1max = self.parameter['marginLeft'] * imgWidth
@@ -759,6 +763,7 @@ class OcrdAnybaseocrCropper(Processor):
 
     def merge_boxes(self, textboxes, img):
         height, width, _ = img.shape
+        assert self.parameter # to convince pyright that self.parameter is not None
         y1max = self.parameter['marginTop'] * height
         y2min = self.parameter['marginBottom'] * height
         x1max = self.parameter['marginLeft'] * width

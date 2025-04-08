@@ -30,3 +30,4 @@ lib64
 ocrd_anybaseocr/pix2pixhd
 /models
 /venv
+/build

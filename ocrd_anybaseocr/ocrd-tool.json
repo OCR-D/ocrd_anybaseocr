@@ -8,8 +8,8 @@
       "description": "Detect the input images' page frame, annotate it as border polygon and add a cropped derived image.",
       "categories": ["Image preprocessing"],
       "steps": ["preprocessing/optimization/cropping"],
-      "input_file_grp": ["OCR-D-IMG-DESKEW"],
-      "output_file_grp": ["OCR-D-IMG-CROP"],
+      "input_file_grp_cardinality": 1,
+      "output_file_grp_cardinality": 1,
       "parameters": {
         "dpi": {
           "type": "number", "format": "float", "default": 0,
