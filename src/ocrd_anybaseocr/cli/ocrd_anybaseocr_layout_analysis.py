@@ -1,9 +1,11 @@
 from functools import cached_property
+import os
 import sys
 import pickle
-from typing import Optional
+from typing import Dict, List, Optional, Union
 import numpy as np 
 import warnings
+from ocrd.mets_server import ClientSideOcrdMets
 
 from ocrd_models import OcrdFileType
 warnings.filterwarnings('ignore',category=FutureWarning) 
@@ -12,7 +14,7 @@ from collections import defaultdict
 import click
 from ocrd.decorators import ocrd_cli_options, ocrd_cli_wrap_processor
 
-from ocrd import OcrdPage, OcrdPageResult, Processor
+from ocrd import OcrdPage, OcrdPageResult, Processor, Workspace
 from ocrd_modelfactory import page_from_file
 from ocrd_utils import getLogger, resource_filename
 
@@ -46,13 +48,6 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         if not tf.config.list_physical_devices('GPU'):
             self.logger.error("Your system has no CUDA installed. No GPU detected.")
 
-        self.last_result = [] 
-        self.logID = 0 # counter for new key
-        self.logIDs = defaultdict(int) # dict to keep track of previous keys for labels other then chapter or section
-        self.log_id = 0 # var to keep the current ongoing key
-        self.log_links = {}
-        self.first = None
-        
         assert self.parameter
         model_path = Path(self.resolve_resource(self.parameter['model_path']))
         class_mapper_path = Path(self.resolve_resource(self.parameter['class_mapping_path']))
@@ -61,38 +56,55 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         # load the mapping
         with open(str(class_mapper_path), "rb") as pickle_in:
             class_indices = pickle.load(pickle_in)
-        self.label_mapping = dict((v,k) for k,v in class_indices.items())
+        self.label_mapping: Dict[int, str] = dict((v,k) for k,v in class_indices.items())
+        self.reset()
+
+    def reset(self):
+        self.last_result = [] 
+        self.logID = 0 # counter for new key
+        self.logIDs = defaultdict(int) # dict to keep track of previous keys for labels other then chapter or section
+        self.log_id = 0 # var to keep the current ongoing key
+        self.log_links = {}
+        self.first = None
+        self.page_labels: Dict[str, List[str]] = {} # Mapping of page_id to  detected labels
+
+    def process_workspace(self, workspace: Workspace) -> None:
+        super().process_workspace(workspace)
+        writeable_workspace = workspace
+        if isinstance(workspace.mets, ClientSideOcrdMets):
+            # instantiate (read and parse) METS from disk (read-only, metadata are constant)
+            writeable_workspace = Workspace(workspace.resolver, workspace.directory,
+                           mets_basename=os.path.basename(workspace.mets_target))
+        self.create_logmap_smlink(writeable_workspace)
+        for page_id, labels in self.page_labels.items():
+            self.write_to_mets(labels, page_id)
+        if isinstance(workspace.mets, ClientSideOcrdMets):
+            workspace.mets.reload()
 
     def process_page_file(self, *input_files : Optional[OcrdFileType]) -> None:
         self.logger.info("Overridden process_page_file")
-        for input_file in input_files:
-            pcgts = page_from_file(input_file)
-            # No output, just METS modified, so ignore OcrdPageResult
-            _ = self.process_page_pcgts(pcgts, page_id=input_file.pageId)
-
-    def process_page_pcgts(self, *input_pcgts: Optional[OcrdPage], page_id: Optional[str] = None) -> OcrdPageResult:
-        pcgts = input_pcgts[0]
-        assert pcgts
-        result = OcrdPageResult(pcgts)
+        assert len(input_files) == 1 and input_files[0]
+        input_file = input_files[0]
+        page_id = input_file.pageId
+        pcgts = page_from_file(input_file)
         page = pcgts.get_Page()
         self.logger.info("INPUT FILE %s", page_id)
         page_image, _, _ = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
         img_array = pil2array(page_image.resize((500, 600), Image.Resampling.LANCZOS))
         img_array = img_array / 255
         img_array = img_array[np.newaxis, :, :, np.newaxis]            
-        results = self._predict(img_array)
-        self.logger.info(results)
-        #self.workspace.mets.set_physical_page_for_file(input_file.pageId, input_file)
-        self.create_logmap_smlink(pcgts)
-        self.write_to_mets(results, page_id)
-        return result
+        self.page_labels[page_id] = self._predict(img_array)
+
+    def shutdown(self) -> None:
+        self.reset()
+        return super().shutdown()
 
     def create_model(self, path):
         #model_name='inception_v3', def_weights=True, num_classes=34, input_size=(600, 500, 1)):
         '''load Tensorflow model from path'''
         return load_model(path)
 
-    def _predict(self, img_array):
+    def _predict(self, img_array) -> List[str]:
         # shape should be 1,600,500 for keras
         pred = self.model.predict(img_array)
         pred = np.array(pred)
@@ -202,7 +214,8 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
     
     def create_logmap_smlink(self, workspace):
         self.logger = getLogger('OcrdAnybaseocrLayoutAnalyser')
-        el_root = self.workspace.mets._tree.getroot()
+        # NOTE: workspace is not necessarily self.workspace here due to METS Server
+        el_root = workspace.mets._tree.getroot()
         log_map = el_root.find('mets:structMap[@TYPE="LOGICAL"]', NS)
         if log_map is None:
             log_map = ET.SubElement(el_root, TAG_METS_STRUCTMAP)
