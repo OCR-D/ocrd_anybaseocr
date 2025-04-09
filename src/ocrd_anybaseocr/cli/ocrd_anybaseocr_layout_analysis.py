@@ -131,7 +131,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         img = Image.open(image_path)
         return img.thumbnail(size, Image.Resampling.LANCZOS)    
     
-    def write_to_mets(self, result: list[str], pageID: str):  
+    def write_to_mets(self, result: List[str], pageID: str):  
         
         for i in result:   
             create_new_logical = False
