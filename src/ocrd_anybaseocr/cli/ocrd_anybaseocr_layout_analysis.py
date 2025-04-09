@@ -59,9 +59,6 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
 
         model_path = Path(self.resolve_resource(self.parameter['model_path']))
         class_mapper_path = Path(self.resolve_resource(self.parameter['class_mapping_path']))
-        if not model_path.exists():
-            self.logger.critical("Layout classfication `model_path` was not found at '%s'", model_path)
-            sys.exit(1)
         self.logger.info('Loading model from file %s', str(model_path))
         self.model = self.create_model(str(model_path))
         # load the mapping
