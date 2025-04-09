@@ -87,7 +87,7 @@ assets: repo/assets
 # Run unit tests
 .PHONY: test
 test: assets-clean assets
-	$(PYTHON) -m pytest --continue-on-collection-errors $(TESTS)
+	$(PYTHON) -m pytest --continue-on-collection-errors $(TESTS) -vv
 
 # Run CLI tests
 .PHONY: cli-test
