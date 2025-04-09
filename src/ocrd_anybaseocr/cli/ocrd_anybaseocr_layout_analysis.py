@@ -46,7 +46,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
 
     def setup(self):
         if not tf.config.list_physical_devices('GPU'):
-            self.logger.error("Your system has no CUDA installed. No GPU detected.")
+            self.logger.warning("Your system has no CUDA installed. No GPU detected.")
 
         assert self.parameter
         model_path = Path(self.resolve_resource(self.parameter['model_path']))
@@ -80,6 +80,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             self.write_to_mets(labels, page_id)
         if isinstance(workspace.mets, ClientSideOcrdMets):
             workspace.mets.reload()
+        self.reset()
 
     def process_page_file(self, *input_files : Optional[OcrdFileType]) -> None:
         self.logger.info("Overridden process_page_file")
@@ -96,7 +97,8 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         self.page_labels[page_id] = self._predict(img_array)
 
     def shutdown(self) -> None:
-        self.reset()
+        del self.model
+        del self.label_mapping
         return super().shutdown()
 
     def create_model(self, path):
@@ -129,7 +131,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         img = Image.open(image_path)
         return img.thumbnail(size, Image.Resampling.LANCZOS)    
     
-    def write_to_mets(self, result, pageID):  
+    def write_to_mets(self, result: list[str], pageID: str):  
         
         for i in result:   
             create_new_logical = False
