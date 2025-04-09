@@ -196,9 +196,9 @@ class OcrdAnybaseocrCropper(Processor):
 
         # get clipped relative coordinates for current image (because of the
         # Border now set, image_from_page will return updated image and coords?)
-        cropped_image, cropped_page_xywh, _ = self.workspace.image_from_page(
+        cropped_image, cropped_coords, _ = self.workspace.image_from_page(
             page, page_id, fill='background', transparency=True)
-        alt_image = AlternativeImageType(comments=cropped_page_xywh['features'])
+        alt_image = AlternativeImageType(comments=cropped_coords['features'])
         page.add_AlternativeImage(alt_image)
         result.images.append(OcrdPageResultImage(cropped_image, '.IMG-CROP', alt_image))
         return result
