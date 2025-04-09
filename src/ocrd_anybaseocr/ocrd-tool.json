@@ -106,7 +106,6 @@
       "description": "Generates a table-of-content like document structure of the whole document.",
       "input_file_grp_cardinality": 1,
       "output_file_grp_cardinality": 0,
-      "resource_locations": ["module"],
       "parameters": {
         "batch_size": {
           "type": "number",
