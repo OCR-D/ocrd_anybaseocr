@@ -40,4 +40,4 @@ optional-dependencies.test = {file = ["requirements.test.txt"]}
 where = ["src"]
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "variables.data*", "variables.index", '*.pickle']
+"*" = ["*.json", "*.pb", "variables.data*", "variables.index", '*.pickle']

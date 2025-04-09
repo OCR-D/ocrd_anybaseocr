@@ -41,7 +41,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         return 'ocrd-anybaseocr-layout-analysis'
 
     def setup(self):
-        if not tf.test.is_gpu_available():
+        if not tf.config.list_physical_devices('GPU'):
             self.logger.error("Your system has no CUDA installed. No GPU detected.")
 
         self.last_result = [] 
