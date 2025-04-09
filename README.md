@@ -8,13 +8,7 @@
 
    * [Installing](#installing)
    * [Tools](#tools)
-      * [Binarizer](#binarizer)
-      * [Deskewer](#deskewer)
       * [Cropper](#cropper)
-      * [Dewarper](#dewarper)
-      * [Text/Non-Text Segmenter](#textnon-text-segmenter)
-      * [Block Segmenter](#block-segmenter)
-      * [Textline Segmenter](#textline-segmenter)
       * [Document Analyser](#document-analyser)
    * [Testing](#testing)
    * [License](#license)
@@ -57,6 +51,20 @@ Implemented via rule-based methods (gradient-based line segment detection and mo
 ### Example:
 
     ocrd-anybaseocr-crop -I OCR-D-DESKEW -O OCR-D-CROP -P rulerAreaMax 0 -P marginLeft 0.1
+
+## Document Analyser
+
+### Method Behaviour 
+For the whole document, this processor takes all the cropped page images and their corresponding text regions as input and computes the logical structure (page types and sections).
+
+The input image should be binarized and segmented for this module to work.
+
+Implemented via data-driven methods (neural Inception-V3 image classification model trained with Tensorflow/Keras).
+
+
+### Example
+
+    ocrd-anybaseocr-layout-analysis -I OCR-D-LINE -O OCR-D-STRUCT
 
 ## Testing
 

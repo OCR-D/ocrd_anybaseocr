@@ -51,6 +51,19 @@
           "type": "number", "format": "integer", "default": 10,
           "description": "extend / shrink border resulting from edge detection / text detection by this many px in each direction"}
       }
+    },
+    "ocrd-anybaseocr-layout-analysis": {
+      "executable": "ocrd-anybaseocr-layout-analysis",
+      "categories": ["Layout analysis"],
+      "steps": ["layout/analysis"],
+      "description": "Generates a table-of-content like document structure of the whole document.",
+      "input_file_grp_cardinality": 1,
+      "output_file_grp_cardinality": 0,
+      "parameters": {
+        "batch_size":         {"type": "number", "format": "integer", "default": 4, "description": "Batch size for generating test images"},
+        "model_path":         { "type": "string", "format": "uri", "content-type": "text/directory", "cacheable": true, "description": "Directory path to layout structure classification model, use builtin model if not specified"},
+        "class_mapping_path": { "type": "string", "format": "uri", "content-type": "application/python-pickle", "cacheable": true, "description": "File path to layout structure classes, use builtin mapping if not specified"}
+      }
     }
   }
 }

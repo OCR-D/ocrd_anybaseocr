@@ -30,6 +30,7 @@ Repository = "https://github.com/OCR-D/ocrd__anybaseocr.git"
 
 [project.scripts]
 ocrd-anybaseocr-crop = "ocrd_anybaseocr.cli.ocrd_anybaseocr_cropping:cli"
+ocrd-anybaseocr-layout-analysis = "ocrd_anybaseocr.cli.ocrd_anybaseocr_layout_analysis:cli"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
@@ -39,4 +40,4 @@ optional-dependencies.test = {file = ["requirements.test.txt"]}
 where = ["src"]
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "*.yml", "*.xml", "*.xsd"]
+"*" = ["*.json", "variables.data*", "variables.index", '*.pickle']

@@ -31,14 +31,8 @@ help:
 	@echo "    assets                                Setup test assets"
 	@echo "    test                                  Run unit tests"
 	@echo "    cli-test                              Run CLI tests"
-	@echo "    test-binarize                         Test binarization CLI"
-	@echo "    test-deskew                           Test deskewing CLI"
 	@echo "    test-crop                             Test cropping CLI"
-	@echo "    test-tiseg                            Test text/non-text segmentation CLI"
-	@echo "    test-block-segmentation               Test block segmentation CLI"
-	@echo "    test-textline                         Test textline segmentation CLI"
 	@echo "    test-layout-analysis                  Test document structure analysis CLI"
-	@echo "    test-dewarp                           Test page dewarping CLI"
 	@echo ""
 	@echo "  Variables"
 	@echo ""
@@ -54,6 +48,10 @@ deps:
 # Install
 install:
 	$(PIP_INSTALL) .
+
+# Install
+install-dev: PIP_INSTALL = $(PIP) install -e
+install-dev: install
 
 #
 # Assets
@@ -94,9 +92,14 @@ test: assets-clean assets
 # Run CLI tests
 .PHONY: cli-test
 cli-test: assets-clean assets
-cli-test: test-crop
+cli-test: test-crop test-layout
 
 # Test cropping CLI
 .PHONY: test-crop
 test-crop:
 	ocrd-anybaseocr-crop -m $(TESTDATA)/mets.xml -I DESKEW -O CROP-TEST
+
+# Test layout-analysis CLI
+.PHONY: test-layout
+test-layout:
+	ocrd-anybaseocr-layout-analysis -m $(TESTDATA)/mets.xml -I CROP -O LAYOUT-TEST
