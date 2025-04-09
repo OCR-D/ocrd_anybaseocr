@@ -64,12 +64,6 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         self.reset()
 
     def reset(self):
-        self.last_result = [] 
-        self.logID = 0 # counter for new key
-        self.logIDs = defaultdict(int) # dict to keep track of previous keys for labels other then chapter or section
-        self.log_id = 0 # var to keep the current ongoing key
-        self.log_links = {}
-        self.first = None
         self.page_labels: Dict[str, List[str]] = {} # Mapping of page_id to  detected labels
 
     def process_workspace(self, workspace: Workspace) -> None:
@@ -82,8 +76,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             writeable_workspace = Workspace(workspace.resolver, workspace.directory,
                            mets_basename=os.path.basename(workspace.mets_target))
         self.create_logmap_smlink(writeable_workspace)
-        for page_id, labels in self.page_labels.items():
-            self.write_to_mets(labels, page_id)
+        self.add_log_divs()
         writeable_workspace.save_mets()
         if isinstance(workspace.mets, ClientSideOcrdMets):
             workspace.mets.reload()
@@ -141,80 +134,81 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         img = Image.open(image_path)
         return img.thumbnail(size, Image.Resampling.LANCZOS)
 
-    def write_to_mets(self, labels: List[str], pageID: str):
-        for label in labels:
-            create_new_logical = False
-            # check if label is page skip 
-            if label !="page":
-                # if not page, chapter and section then its something old
-                if label!="chapter" and label!="section":
-                    if label in self.last_result:
-                        self.log_id = self.logIDs[label]
-                    else:
-                        create_new_logical = True
+    def add_log_divs(self):
+        # counter for new logical mets:div key
+        logID = 0
+        # dict from label into counter:
+        # keep track of previous keys for labels other then chapter or section
+        logIDs = defaultdict(int)
+        # dict from label into div elements:
+        # keep track of previous keys
+        log_divs = {}
+        first = None
+        prev_labels = []
+        for page_id, labels in self.page_labels.items():
+            for label in labels:
+                # key to use for current page (create new mets:div if negative)
+                page_logID = -1
+                # check if label is page skip
+                if label != "page":
+                    # if not page, chapter and section then it's something old
+                    if label not in ["chapter", "section"]:
+                        if label in prev_labels:
+                            # continue with div from previous page
+                            page_logID = logIDs[label]
 
-                    if label =='binding':
-                        parent_node = self.log_map
-
-                    if label=='cover' or label=='endsheet' or label=='paste_down':
-                        # get the link for master node
-                        parent_node = self.log_links['binding']
-                    else:
-                        if self.first is not None and label!='title_page':
-                            parent_node = self.log_links[self.first]
+                        if label == 'binding':
+                            parent_node = self.log_map
+                        elif label in ['cover', 'endsheet', 'paste_down']:
+                            # get the link for master node
+                            parent_node = log_divs['binding']
+                        elif label != 'title_page' and first is not None:
+                            parent_node = log_divs[first]
                         else:
                             parent_node = self.log_map
-
+                    else:
+                        if first is None:
+                            first = label
+                            parent_node = self.log_map
+                        elif first == label:
+                            parent_node = self.log_map
+                        else:
+                            parent_node = log_divs[first]
                 else:
-                    create_new_logical = True
+                    # label is (normal / follow-up content) page
+                    if logIDs['chapter'] > logIDs['section']:
+                        page_logID = logIDs['chapter']
+                    if logIDs['section'] > logIDs['chapter']:
+                        page_logID = logIDs['section']
+                    if logIDs['chapter']==0 and logIDs['section']==0:
 
-                    if self.first is None:
-                        self.first = label
-                        parent_node = self.log_map
-                    else:
-                        if self.first == label:
+                        # if both chapter and section dont exist
+                        if first is None:
+                            first = 'chapter'
+                            parent_node = self.log_map
+                        # rs: not sure about the remaining branches (cf. 0bbcb66b in #73)
+                        elif first == label:
                             parent_node = self.log_map
                         else:
-                            parent_node = self.log_links[self.first]
+                            parent_node = log_divs[first]
 
-            else:
-                if self.logIDs['chapter'] > self.logIDs['section']:
-                    self.log_id = self.logIDs['chapter']
+                if page_logID < 0:
+                    log_div = ET.SubElement(parent_node, TAG_METS_DIV)
+                    log_div.set('TYPE', str(label))
+                    log_div.set('ID', "LOG_%04d" % logID)
+                    log_divs[label] = log_div # store the link
+                    #if label!='chapter' and label!='section':
+                    logIDs[label] = logID
+                    page_logID = logID
+                    logID += 1
+                    self.logger.debug("added %s to %s", "LOG_%04d" % page_logID, parent_node)
 
-                if self.logIDs['section'] > self.logIDs['chapter']:
-                    self.log_id = self.logIDs['section']
+                smLink = ET.SubElement(self.link, TAG_METS_SMLINK)
+                smLink.set('{'+NS['xlink']+'}'+'from', "LOG_%04d" % page_logID)
+                smLink.set('{'+NS['xlink']+'}'+'to', page_id)
+                self.logger.debug("smlinked %s → %s", "LOG_%04d" % page_logID, page_id)
 
-                if self.logIDs['chapter']==0 and self.logIDs['section']==0:
-
-                    create_new_logical = True
-
-                    # if both chapter and section dont exist
-                    if self.first is None:
-                        self.first = 'chapter'
-                        parent_node = self.log_map
-                    # rs: not sure about the remaining branches (cf. #73)
-                    elif self.first == label:
-                        parent_node = self.log_map
-                    else:
-                        parent_node = self.log_links[self.first]
-
-            if create_new_logical:
-                log_div = ET.SubElement(parent_node, TAG_METS_DIV)
-                log_div.set('TYPE', str(label))
-                log_div.set('ID', "LOG_%04d" % self.logID)
-                self.log_links[label] = log_div # store the link 
-                #if label!='chapter' and label!='section':
-                self.logIDs[label] = self.logID
-                self.log_id = self.logID
-                self.logID += 1
-                self.logger.debug("added %s to %s", "LOG_%04d" % self.log_id, parent_node)
-
-            smLink = ET.SubElement(self.link, TAG_METS_SMLINK)
-            smLink.set('{'+NS['xlink']+'}'+'to', pageID)
-            smLink.set('{'+NS['xlink']+'}'+'from', "LOG_%04d" % self.log_id)
-            self.logger.debug("smlinked %s → %s", "LOG_%04d" % self.log_id, pageID)
-
-        self.last_result = labels
+            prev_labels = labels
 
     def create_logmap_smlink(self, workspace):
         # NOTE: workspace is not necessarily self.workspace here due to METS Server
