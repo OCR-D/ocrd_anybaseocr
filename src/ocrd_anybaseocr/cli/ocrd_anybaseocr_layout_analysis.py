@@ -35,7 +35,9 @@ TAG_METS_STRUCTLINK = '{%s}structLink' % NS['mets']
 TAG_METS_SMLINK = '{%s}smLink' % NS['mets']
 
 class OcrdAnybaseocrLayoutAnalyser(Processor):
+
     max_workers = 1 # Tensorflow context cannot be shared across forked workers
+
     @cached_property
     def executable(self):
         return 'ocrd-anybaseocr-layout-analysis'
@@ -52,11 +54,6 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         self.first = None
         
         assert self.parameter
-        if 'model_path' not in self.parameter:
-            self.parameter = {'model_path': str(resource_filename(f'ocrd_anybaseocr.models', 'structure_analysis')), **self.parameter}
-        if 'class_mapping_path' not in self.parameter:
-            self.parameter = {'class_mapping_path': str(resource_filename(f'ocrd_anybaseocr.models', 'mapping_densenet.pickle')), **self.parameter}
-
         model_path = Path(self.resolve_resource(self.parameter['model_path']))
         class_mapper_path = Path(self.resolve_resource(self.parameter['class_mapping_path']))
         self.logger.info('Loading model from file %s', str(model_path))
@@ -118,7 +115,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
     def img_resize(self, image_path):
         size = 600, 500
         img = Image.open(image_path)
-        return img.thumbnail(size, Image.LANCZOS)    
+        return img.thumbnail(size, Image.Resampling.LANCZOS)    
     
     def write_to_mets(self, result, pageID):  
         
