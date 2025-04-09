@@ -35,7 +35,7 @@ TAG_METS_STRUCTLINK = '{%s}structLink' % NS['mets']
 TAG_METS_SMLINK = '{%s}smLink' % NS['mets']
 
 class OcrdAnybaseocrLayoutAnalyser(Processor):
-    
+    max_workers = 1 # Tensorflow context cannot be shared across forked workers
     @cached_property
     def executable(self):
         return 'ocrd-anybaseocr-layout-analysis'
@@ -83,7 +83,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         page = pcgts.get_Page()
         self.logger.info("INPUT FILE %s", page_id)
         page_image, _, _ = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
-        img_array = pil2array(page_image.resize((500, 600), Image.LANCZOS))
+        img_array = pil2array(page_image.resize((500, 600), Image.Resampling.LANCZOS))
         img_array = img_array / 255
         img_array = img_array[np.newaxis, :, :, np.newaxis]            
         results = self._predict(img_array)
