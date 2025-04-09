@@ -4,6 +4,7 @@
 #
 version: 2.1
 jobs:
+
   test:
     parameters:
       version:
@@ -11,6 +12,7 @@ jobs:
     docker:
       - image: cimg/python:<< parameters.version >>
     working_directory: '~/repo'
+    resource_class: 'large'
     steps:
       - checkout
       - run:
