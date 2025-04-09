@@ -72,12 +72,15 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         super().process_workspace(workspace)
         writeable_workspace = workspace
         if isinstance(workspace.mets, ClientSideOcrdMets):
+            # (changes could have accumulated in prior processing step)
+            workspace.save_mets()
             # instantiate (read and parse) METS from disk (read-only, metadata are constant)
             writeable_workspace = Workspace(workspace.resolver, workspace.directory,
                            mets_basename=os.path.basename(workspace.mets_target))
         self.create_logmap_smlink(writeable_workspace)
         for page_id, labels in self.page_labels.items():
             self.write_to_mets(labels, page_id)
+        writeable_workspace.save_mets()
         if isinstance(workspace.mets, ClientSideOcrdMets):
             workspace.mets.reload()
         self.reset()
