@@ -97,8 +97,10 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         self.page_labels[page_id] = self._predict(img_array)
 
     def shutdown(self) -> None:
-        del self.model
-        del self.label_mapping
+        if hasattr(self, 'model'):
+            del self.model
+        if hasattr(self, 'label_mapping'):
+            del self.label_mapping
         return super().shutdown()
 
     def create_model(self, path):
