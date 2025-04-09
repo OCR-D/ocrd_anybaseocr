@@ -62,8 +62,8 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         self.logger.info('Loading model from file %s', str(model_path))
         self.model = self.create_model(str(model_path))
         # load the mapping
-        pickle_in = open(str(class_mapper_path), "rb")
-        class_indices = pickle.load(pickle_in)
+        with open(str(class_mapper_path), "rb") as pickle_in:
+            class_indices = pickle.load(pickle_in)
         self.label_mapping = dict((v,k) for k,v in class_indices.items())
 
     def process_page_file(self, *input_files : Optional[OcrdFileType]) -> None:
