@@ -1,18 +1,13 @@
-testdir = tests
-
 export
 
-CUDA_VISIBLE_DEVICES=0
 SHELL = /bin/bash
 PYTHON ?= python
 PIP ?= pip
 PIP_INSTALL = $(PIP) install
-LOG_LEVEL = INFO
 PYTHONIOENCODING=utf8
 
-TESTDATA = $(testdir)/assets/dfki-testdata/data
-
-TESTS=tests
+TESTDATA = tests/assets/dfki-testdata/data
+PYTEST_ARGS ?= -vv
 
 # Tag to publish docker image to
 DOCKER_TAG = ocrd/anybaseocr
@@ -25,26 +20,33 @@ help:
 	@echo ""
 	@echo "  Targets"
 	@echo ""
-	@echo "    deps                                  Install python deps via pip"
-	@echo "    install                               Install"
-	@echo "    repo/assets                           Clone OCR-D/assets to ./repo/assets"
-	@echo "    assets-clean                          Remove assets"
-	@echo "    assets                                Setup test assets"
-	@echo "    test                                  Run unit tests"
-	@echo "    cli-test                              Run CLI tests"
-	@echo "    test-crop                             Test cropping CLI"
-	@echo "    test-layout-analysis                  Test document structure analysis CLI"
+	@echo "    deps                      Install Python dependencies via pip"
+	@echo "    deps-test                 Install Python dependencies for test"
+	@echo "    install                   Install Python package via pip"
+	@echo "    install-dev               Install Python package in editable mode"
+	@echo "    build                     Build Python package binary and source dist"
+	@echo "    docker                    Build Docker image"
+	@echo "    repo/assets               Clone OCR-D/assets to ./repo/assets"
+	@echo "    tests/assets              Setup test data from repo/assets"
+	@echo "    assets-clean              Remove tests/assets"
+	@echo "    test                      Run unit tests via Pytest"
+	@echo "    cli-test                  Run CLI tests"
+	@echo "    test-crop                 Test cropping CLI"
+	@echo "    test-layout-analysis      Test document structure analysis CLI"
 	@echo ""
 	@echo "  Variables"
 	@echo ""
-	@echo "    DOCKER_TAG  Tag to publish docker image to"
+	@echo "    DOCKER_TAG                Tag name to build Docker image for [$(DOCKER_TAG)]"
+	@echo "    PYTEST_ARGS               Pytest options for test [$(PYTEST_ARGS)]"
 
 # END-EVAL
 
 # Install python deps via pip
-.PHONY: deps
+.PHONY: deps deps-test
 deps:
 	$(PIP_INSTALL) -r requirements.txt
+deps-test:
+	$(PIP_INSTALL) -r requirements.test.txt
 
 # Install
 install:
@@ -75,25 +77,24 @@ repo/assets:
 # Remove assets
 .PHONY: assets-clean
 assets-clean:
-	rm -rf $(testdir)/assets
+	rm -rf tests/assets
 
 # Setup test assets
-.PHONY: assets
-assets: repo/assets
-	mkdir -p $(testdir)/assets
-	cp -r -t $(testdir)/assets repo/assets/data/*
+tests/assets: repo/assets
+	mkdir -p $@
+	cp -r -t $@ $</data/*
 #
 # Tests
 #
 
 # Run unit tests
 .PHONY: test
-test: assets-clean assets
-	$(PYTHON) -m pytest --continue-on-collection-errors $(TESTS) -vv
+test: assets-clean tests/assets
+	$(PYTHON) -m pytest --continue-on-collection-errors --durations=0 tests $(PYTEST_ARGS)
 
 # Run CLI tests
 .PHONY: cli-test
-cli-test: assets-clean assets
+cli-test: assets-clean tests/assets
 cli-test: test-crop test-layout
 
 # Test cropping CLI
