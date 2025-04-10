@@ -141,9 +141,14 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         # keep track of previous keys for labels other then chapter or section
         logIDs = defaultdict(int)
         # dict from label into div elements:
-        # keep track of previous keys
-        log_divs = {}
-        first = None
+        # keep track of previous keys (and init from existing divs)
+        log_divs = [div
+                    for div in self.log_map.iterdescendants(TAG_METS_DIV)
+                    # get existing non-structural divs (i.e. top-level like volume/issue/monograph):
+                    if (div_type := div.get('TYPE')) not in self.label_mapping.values()]
+        first = log_divs[-1].get('TYPE').lower() if log_divs else None
+        log_divs = {div.get('TYPE').lower(): div
+                    for div in log_divs}
         prev_labels = []
         for page_id, labels in self.page_labels.items():
             for label in labels:
@@ -214,14 +219,12 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
     def create_logmap_smlink(self, workspace):
         # NOTE: workspace is not necessarily self.workspace here due to METS Server
         el_root = workspace.mets._tree.getroot()
-        log_map = el_root.find('mets:structMap[@TYPE="LOGICAL"]', NS)
-        if log_map is None:
+        if (log_map := el_root.find(TAG_METS_STRUCTMAP + '[@TYPE="LOGICAL"]')) is None:
             log_map = ET.SubElement(el_root, TAG_METS_STRUCTMAP)
             log_map.set('TYPE', 'LOGICAL')
         else:
             self.logger.info('LOGICAL structMap already exists, adding to it')
-        link = el_root.find('mets:structLink', NS)
-        if link is None:
+        if (link := el_root.find(TAG_METS_STRUCTLINK)) is None:
             link = ET.SubElement(el_root, TAG_METS_STRUCTLINK)
         self.link = link
         self.log_map = log_map
