@@ -16,6 +16,7 @@ TESTS=tests
 
 # Tag to publish docker image to
 DOCKER_TAG = ocrd/anybaseocr
+DOCKER_BASE_IMAGE = docker.io/ocrd/core-cuda-tf2:v3.3.0
 
 # BEGIN-EVAL makefile-parser --make-help Makefile
 
@@ -61,6 +62,7 @@ install-dev: install
 .PHONY: docker
 docker:
 	docker build \
+	--build-arg DOCKER_BASE_IMAGE=$(DOCKER_BASE_IMAGE) \
 	--build-arg VCS_REF=$$(git rev-parse --short HEAD) \
 	--build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
 	-t '$(DOCKER_TAG)' .
