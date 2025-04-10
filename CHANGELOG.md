@@ -4,6 +4,8 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+## [2.0.0] - 2025-04-10
+
 Changed:
 
   * :fire: Port the processors (`ocrd-anybaseocr-crop` and `ocrd-anybaseocr-layout-analysis`) to OCR-D/core v3 API, #112, #113
@@ -156,6 +158,7 @@ Fixed:
   * Graceful degradation to CPU processing if CUDA not available, #56
 
 <!-- link-labels -->
+[2.0.0]: ../../compare/v2.0.0...v1.10.0
 [1.10.0]: ../../compare/v1.10.0...v1.9.0
 [1.9.0]: ../../compare/v1.9.0...v1.8.2
 [1.8.2]: ../../compare/v1.8.2...v1.8.1
