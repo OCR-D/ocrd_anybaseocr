@@ -44,8 +44,15 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
     def executable(self):
         return 'ocrd-anybaseocr-layout-analysis'
 
+    @property
+    def moduledir(self):
+        return resource_filename(self.module, 'models')
+
     def setup(self):
-        if not tf.config.list_physical_devices('GPU'):
+        devices = tf.config.list_physical_devices('GPU')
+        for device in devices:
+            tf.config.experimental.set_memory_growth(device, True)
+        if not devices:
             self.logger.warning("Your system has no CUDA installed. No GPU detected.")
 
         assert self.parameter
@@ -60,40 +67,36 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         self.reset()
 
     def reset(self):
-        self.last_result = [] 
-        self.logID = 0 # counter for new key
-        self.logIDs = defaultdict(int) # dict to keep track of previous keys for labels other then chapter or section
-        self.log_id = 0 # var to keep the current ongoing key
-        self.log_links = {}
-        self.first = None
         self.page_labels: Dict[str, List[str]] = {} # Mapping of page_id to  detected labels
 
     def process_workspace(self, workspace: Workspace) -> None:
         super().process_workspace(workspace)
         writeable_workspace = workspace
         if isinstance(workspace.mets, ClientSideOcrdMets):
+            # (changes could have accumulated in prior processing step)
+            workspace.save_mets()
             # instantiate (read and parse) METS from disk (read-only, metadata are constant)
             writeable_workspace = Workspace(workspace.resolver, workspace.directory,
                            mets_basename=os.path.basename(workspace.mets_target))
         self.create_logmap_smlink(writeable_workspace)
-        for page_id, labels in self.page_labels.items():
-            self.write_to_mets(labels, page_id)
+        self.add_log_divs()
+        writeable_workspace.save_mets()
         if isinstance(workspace.mets, ClientSideOcrdMets):
             workspace.mets.reload()
         self.reset()
 
     def process_page_file(self, *input_files : Optional[OcrdFileType]) -> None:
-        self.logger.info("Overridden process_page_file")
         assert len(input_files) == 1 and input_files[0]
         input_file = input_files[0]
         page_id = input_file.pageId
+        self._base_logger.info("processing page %s", page_id)
+        self._base_logger.info(f"parsing file {input_file.ID} for page {page_id}")
         pcgts = page_from_file(input_file)
         page = pcgts.get_Page()
-        self.logger.info("INPUT FILE %s", page_id)
         page_image, _, _ = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
         img_array = pil2array(page_image.resize((500, 600), Image.Resampling.LANCZOS))
         img_array = img_array / 255
-        img_array = img_array[np.newaxis, :, :, np.newaxis]            
+        img_array = img_array[np.newaxis, :, :, np.newaxis]
         self.page_labels[page_id] = self._predict(img_array)
 
     def shutdown(self) -> None:
@@ -113,124 +116,121 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         pred = self.model.predict(img_array)
         pred = np.array(pred)
         # multi-label predictions
-        if len(pred.shape)>2:        
+        if len(pred.shape) > 2:
             pred = np.squeeze(pred)
             pred = pred.T
         preds = (pred>=0.5)
         predictions = []
         for index, cls in enumerate(preds):
+            #self.logger.debug("%d[%s]: %f", index, self.label_mapping[index], cls)
             if cls:
                 predictions.append(self.label_mapping[index])
-        
         if len(predictions) == 0:
             # if no prediction get the maximum one
             predictions.append(self.label_mapping[np.argmax(pred)])
             #predictions.append('page') # default label
+        self.logger.info(predictions)
         return predictions
 
     def img_resize(self, image_path):
         size = 600, 500
         img = Image.open(image_path)
-        return img.thumbnail(size, Image.Resampling.LANCZOS)    
-    
-    def write_to_mets(self, result: List[str], pageID: str):  
-        
-        for i in result:   
-            create_new_logical = False
-            # check if label is page skip 
-            if i !="page":
-                
-                # if not page, chapter and section then its something old
-                if i!="chapter" and i!="section":
-                    if i in self.last_result:
-                        self.log_id = self.logIDs[i]
-                    else:
-                        create_new_logical = True
+        return img.thumbnail(size, Image.Resampling.LANCZOS)
 
-                    if i =='binding':
-                        parent_node = self.log_map
-                    
-                    if i=='cover' or i=='endsheet' or i=='paste_down':
-                        # get the link for master node
-                        parent_node = self.log_links['binding']
-                    else:
-                        if self.first is not None and i!='title_page':
-                            parent_node = self.log_links[self.first]
+    def add_log_divs(self):
+        # counter for new logical mets:div key
+        logID = 0
+        # dict from label into counter:
+        # keep track of previous keys for labels other then chapter or section
+        logIDs = defaultdict(int)
+        # dict from label into div elements:
+        # keep track of previous keys (and init from existing divs)
+        log_divs = [div
+                    for div in self.log_map.iterdescendants(TAG_METS_DIV)
+                    # get existing non-structural divs (i.e. top-level like volume/issue/monograph):
+                    if (div_type := div.get('TYPE')) not in self.label_mapping.values()]
+        first = log_divs[-1].get('TYPE').lower() if log_divs else None
+        log_divs = {div.get('TYPE').lower(): div
+                    for div in log_divs}
+        prev_labels = []
+        for page_id, labels in self.page_labels.items():
+            for label in labels:
+                # key to use for current page (create new mets:div if negative)
+                page_logID = -1
+                # check if label is page skip
+                if label != "page":
+                    # if not page, chapter and section then it's something old
+                    if label not in ["chapter", "section"]:
+                        if label in prev_labels:
+                            # continue with div from previous page
+                            page_logID = logIDs[label]
+
+                        if label == 'binding':
+                            parent_node = self.log_map
+                        elif label in ['cover', 'endsheet', 'paste_down']:
+                            # get the link for master node
+                            parent_node = log_divs['binding']
+                        elif label != 'title_page' and first is not None:
+                            parent_node = log_divs[first]
                         else:
                             parent_node = self.log_map
-                            
+                    else:
+                        if first is None:
+                            first = label
+                            parent_node = self.log_map
+                        elif first == label:
+                            parent_node = self.log_map
+                        else:
+                            parent_node = log_divs[first]
                 else:
-                    create_new_logical = True
-                    
-                    if self.first is None:
-                        self.first = i
-                        parent_node = self.log_map
-                    else:
-                        if self.first == i:
+                    # label is (normal / follow-up content) page
+                    if logIDs['chapter'] > logIDs['section']:
+                        page_logID = logIDs['chapter']
+                    if logIDs['section'] > logIDs['chapter']:
+                        page_logID = logIDs['section']
+                    if logIDs['chapter']==0 and logIDs['section']==0:
+
+                        # if both chapter and section dont exist
+                        if first is None:
+                            first = 'chapter'
+                            parent_node = self.log_map
+                        # rs: not sure about the remaining branches (cf. 0bbcb66b in #73)
+                        elif first == label:
                             parent_node = self.log_map
                         else:
-                            parent_node = self.log_links[self.first]
-                    
-                if create_new_logical:
+                            parent_node = log_divs[first]
+
+                if page_logID < 0:
                     log_div = ET.SubElement(parent_node, TAG_METS_DIV)
-                    log_div.set('TYPE', str(i))            
-                    log_div.set('ID', "LOG_"+str(self.logID))
-                    self.log_links[i] = log_div # store the link 
-                    #if i!='chapter' and i!='section':
-                    self.logIDs[i] = self.logID
-                    self.log_id = self.logID
-                    self.logID += 1
-                                        
-            else:
-                if self.logIDs['chapter'] > self.logIDs['section']:
-                    self.log_id = self.logIDs['chapter']
-                 
-                if self.logIDs['section'] > self.logIDs['chapter']:
-                    self.log_id = self.logIDs['section']
-                    
-                if self.logIDs['chapter']==0 and self.logIDs['section']==0:
-                    
-                    # if both chapter and section dont exist
-                    if self.first is None:
-                        self.first = 'chapter'
-                        parent_node = self.log_map
-                    # rs: not sure about the remaining branches (cf. #73)
-                    elif self.first == i:
-                        parent_node = self.log_map
-                    else:
-                        parent_node = self.log_links[self.first]
-                            
-                    log_div = ET.SubElement(parent_node, TAG_METS_DIV)
-                    log_div.set('TYPE', str(i))            
-                    log_div.set('ID', "LOG_"+str(self.logID))
-                      
-                    self.log_links[i] = log_div # store the link 
-                    #if i!='chapter' and i!='section':
-                    self.logIDs[i] = self.logID
-                    self.log_id = self.logID
-                    self.logID += 1                    
-                
-            smLink = ET.SubElement(self.link, TAG_METS_SMLINK)
-            smLink.set('{'+NS['xlink']+'}'+'to', pageID)
-            smLink.set('{'+NS['xlink']+'}'+'from', "LOG_"+str(self.log_id))
-        
-        self.last_result = result
-    
+                    log_div.set('TYPE', str(label))
+                    log_div.set('ID', "LOG_%04d" % logID)
+                    log_divs[label] = log_div # store the link
+                    #if label!='chapter' and label!='section':
+                    logIDs[label] = logID
+                    page_logID = logID
+                    logID += 1
+                    self.logger.info("added %s[%s] to %s[%s]", "LOG_%04d" % page_logID, label,
+                                     parent_node.get('ID'), parent_node.get('TYPE'))
+
+                smLink = ET.SubElement(self.link, TAG_METS_SMLINK)
+                smLink.set('{'+NS['xlink']+'}'+'from', "LOG_%04d" % page_logID)
+                smLink.set('{'+NS['xlink']+'}'+'to', page_id)
+                self.logger.debug("smlinked %s → %s", "LOG_%04d" % page_logID, page_id)
+
+            prev_labels = labels
+
     def create_logmap_smlink(self, workspace):
-        self.logger = getLogger('OcrdAnybaseocrLayoutAnalyser')
         # NOTE: workspace is not necessarily self.workspace here due to METS Server
         el_root = workspace.mets._tree.getroot()
-        log_map = el_root.find('mets:structMap[@TYPE="LOGICAL"]', NS)
-        if log_map is None:
+        if (log_map := el_root.find(TAG_METS_STRUCTMAP + '[@TYPE="LOGICAL"]')) is None:
             log_map = ET.SubElement(el_root, TAG_METS_STRUCTMAP)
             log_map.set('TYPE', 'LOGICAL')
         else:
             self.logger.info('LOGICAL structMap already exists, adding to it')
-        link = el_root.find('mets:structLink', NS)
-        if link is None:
+        if (link := el_root.find(TAG_METS_STRUCTLINK)) is None:
             link = ET.SubElement(el_root, TAG_METS_STRUCTLINK)
         self.link = link
-        self.log_map = log_map                        
+        self.log_map = log_map
 
 @click.command()
 @ocrd_cli_options

@@ -28,8 +28,8 @@ def test_layout(processor_kwargs):
     ws  = processor_kwargs['workspace']
     readable_workspace = Workspace(ws.resolver, ws.directory,
                                     mets_basename=os.path.basename(ws.mets_target))
-    mets_xml_len_before = len(readable_workspace.mets.to_xml())
-    assert b'mets:structMap TYPE="LOGICAL"' not in readable_workspace.mets.to_xml()
+    mets_xml_before = readable_workspace.mets.to_xml(xmllint=True).decode('utf-8')
+    assert 'mets:structMap TYPE="LOGICAL"' not in mets_xml_before, mets_xml_before
     run_processor(
         OcrdAnybaseocrLayoutAnalyser,
         input_file_grp='CROP',
@@ -37,9 +37,8 @@ def test_layout(processor_kwargs):
         parameter={},
         **processor_kwargs
     )
-    readable_workspace = Workspace(ws.resolver, ws.directory,
-                                    mets_basename=os.path.basename(ws.mets_target))
-    mets_xml_len_after = len(readable_workspace.mets.to_xml())
-    assert mets_xml_len_after > mets_xml_len_before
-    print(readable_workspace.mets.to_xml())
-    assert b'mets:structMap TYPE="LOGICAL"' in readable_workspace.mets.to_xml()
+    ws.save_mets()
+    readable_workspace.reload_mets()
+    mets_xml_after = readable_workspace.mets.to_xml(xmllint=True).decode('utf-8')
+    assert len(mets_xml_after) > len(mets_xml_before), (mets_xml_before, mets_xml_after)
+    assert 'mets:structMap TYPE="LOGICAL"' in mets_xml_after, mets_xml_after

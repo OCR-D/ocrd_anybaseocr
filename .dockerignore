@@ -1,1 +1,4 @@
 .git
+tests
+build
+dist

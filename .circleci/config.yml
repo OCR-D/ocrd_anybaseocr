@@ -16,27 +16,26 @@ jobs:
     steps:
       - checkout
       - run:
-          name: install dependencies
+          name: install system dependencies
           command: |
             pip install --upgrade pip
-            pip install -r requirements.test.txt
-            pip install -r requirements.txt
             sudo apt-get update -y
             sudo apt-get install -y imagemagick
-            pip install .
+      - run:
+          name: install Python dependencies
+          command: |
+            make deps deps-test
+            make install-dev
       - run:
           name: run unit tests
           command: make test
       - run:
           name: run CLI tests
           command: make cli-test
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
 
   deploy-docker:
     docker:
-      - image: circleci/buildpack-deps:stretch
+      - image: circleci/buildpack-deps
     environment:
       DOCKER_TAG: ocrd/anybaseocr
     steps:

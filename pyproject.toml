@@ -7,6 +7,7 @@ authors = [
     {name = "Saqib Bukhari", email = "Saqib.Bukhari@dfki.de"},
     {name = "Mohammad Mohsin Reza", email = "Mohammad_mohsin.reza@dfki.de"},
 ]
+description = "DFKI Layout Detection for OCR-D"
 readme = "README.md"
 license.file = "LICENSE"
 requires-python = ">=3.8"
