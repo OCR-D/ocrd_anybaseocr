@@ -48,6 +48,7 @@ deps:
 deps-test:
 	$(PIP_INSTALL) -r requirements.test.txt
 
+.PHONY: install install-dev
 # Install
 install:
 	$(PIP_INSTALL) .
@@ -55,6 +56,11 @@ install:
 # Install
 install-dev: PIP_INSTALL = $(PIP) install -e
 install-dev: install
+
+.PHONY: build
+build:
+	$(PIP) install build
+	$(PYTHON) -m build .
 
 #
 # Assets
