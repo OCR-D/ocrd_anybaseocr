@@ -83,13 +83,13 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
         self.reset()
 
     def process_page_file(self, *input_files : Optional[OcrdFileType]) -> None:
-        self.logger.info("Overridden process_page_file")
         assert len(input_files) == 1 and input_files[0]
         input_file = input_files[0]
         page_id = input_file.pageId
+        self._base_logger.info("processing page %s", page_id)
+        self._base_logger.info(f"parsing file {input_file.ID} for page {page_id}")
         pcgts = page_from_file(input_file)
         page = pcgts.get_Page()
-        self.logger.info("INPUT FILE %s", page_id)
         page_image, _, _ = self.workspace.image_from_page(page, page_id, feature_selector='binarized')
         img_array = pil2array(page_image.resize((500, 600), Image.Resampling.LANCZOS))
         img_array = img_array / 255
@@ -126,7 +126,7 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
             # if no prediction get the maximum one
             predictions.append(self.label_mapping[np.argmax(pred)])
             #predictions.append('page') # default label
-        self.logger.debug(predictions)
+        self.logger.info(predictions)
         return predictions
 
     def img_resize(self, image_path):
@@ -201,7 +201,8 @@ class OcrdAnybaseocrLayoutAnalyser(Processor):
                     logIDs[label] = logID
                     page_logID = logID
                     logID += 1
-                    self.logger.debug("added %s to %s", "LOG_%04d" % page_logID, parent_node)
+                    self.logger.info("added %s[%s] to %s[%s]", "LOG_%04d" % page_logID, label,
+                                     parent_node.get('ID'), parent_node.get('TYPE'))
 
                 smLink = ET.SubElement(self.link, TAG_METS_SMLINK)
                 smLink.set('{'+NS['xlink']+'}'+'from', "LOG_%04d" % page_logID)
