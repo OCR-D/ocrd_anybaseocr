@@ -4,6 +4,21 @@ Versioned according to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 
+Changed:
+
+  * :fire: Port the processors (`ocrd-anybaseocr-crop` and `ocrd-anybaseocr-layout-analysis`) to OCR-D/core v3 API, #112, #113
+  * Run unit tests under various v3-specific conditions, #112
+  * Update Keras model metadata, #113
+
+Deleted:
+
+  * :fire: Dropped `ocrd-anybaseocr-dewarp`, #112
+  * :fire: Dropped `ocrd-anybaseocr-deskew`, #112
+  * :fire: Dropped `ocrd-anybaseocr-binarize`, #112
+  * :fire: Dropped `ocrd-anybaseocr-block-segmentation`, #112
+  * :fire: Dropped `ocrd-anybaseocr-textline`, #112
+  * :fire: Dropped `ocrd-anybaseocr-tiseg`, #112
+
 ## [1.10.0] - 2024-02-19
 
 Fixed:
