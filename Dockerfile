@@ -1,4 +1,4 @@
-ARG DOCKER_BASE_IMAGE=ocrd/core-cuda-tf2:v3.3.0
+ARG DOCKER_BASE_IMAGE=ocrd/core-cuda-tf2:latest
 FROM $DOCKER_BASE_IMAGE
 ARG VCS_REF
 ARG BUILD_DATE
@@ -35,6 +35,8 @@ COPY . .
 COPY ocrd-tool.json .
 # prepackage ocrd-tool.json as ocrd-all-tool.json
 RUN ocrd ocrd-tool ocrd-tool.json dump-tools > $(dirname $(ocrd bashlib filename))/ocrd-all-tool.json
+# prepackage ocrd-all-module-dir.json
+RUN ocrd ocrd-tool ocrd-tool.json dump-module-dirs > $(dirname $(ocrd bashlib filename))/ocrd-all-module-dir.json
 # install everything and reduce image size
 RUN pip install . && rm -fr /build/ocrd_anybaseocr
 
