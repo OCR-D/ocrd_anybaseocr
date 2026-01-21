@@ -1,11 +1,11 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "git_url": "https://github.com/OCR-D/ocrd_anybaseocr",
   "dockerhub": "ocrd/anybaseocr",
   "tools": {
     "ocrd-anybaseocr-crop": {
       "executable": "ocrd-anybaseocr-crop",
-      "description": "Detect the input images' page frame, annotate it as border polygon and add a cropped derived image.",
+      "description": "Detect page frames in the input images, annotate them as border polygon and add a cropped derived image. If passed 2 output file groups, also split double pages.",
       "categories": [
         "Image preprocessing"
       ],
@@ -13,7 +13,7 @@
         "preprocessing/optimization/cropping"
       ],
       "input_file_grp_cardinality": 1,
-      "output_file_grp_cardinality": 1,
+      "output_file_grp_cardinality": [1, 2],
       "parameters": {
         "dpi": {
           "type": "number",

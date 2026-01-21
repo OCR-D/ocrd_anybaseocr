@@ -19,6 +19,7 @@
 
 from functools import cached_property
 import os
+from copy import deepcopy
 from types import SimpleNamespace
 from typing import Optional
 
@@ -70,50 +71,69 @@ class OcrdAnybaseocrCropper(Processor):
         return 'ocrd-anybaseocr-crop'
 
     def process_page_pcgts(self, *input_pcgts: Optional[OcrdPage], page_id: Optional[str] = None) -> OcrdPageResult:
-        """Performs heuristic page frame detection (cropping) on the workspace.
+        """Performs heuristic page frame detection (cropping and splitting) on the workspace.
         
-        Open and deserialize PAGE input files and their respective images.
-        (Input should be deskewed already.) Retrieve the raw (non-binarized,
+        For each page, open and deserialize the PAGE input file and its respective
+        image. (Input should be deskewed already.) Retrieve the raw (non-binarized,
         uncropped) page image.
+
+        If passed a single output fileGrp, attempt to find a single page frame.
+        If passed two output fileGrps, attempt to find left and right page frames,
+        thus splitting double pages at the book spine.
+
+        Proceed as follows:
         
-        Detect line segments via edge gradients, and cluster them into contiguous
+        1. Detect line segments via edge gradients, and cluster them into contiguous
         horizontal and vertical lines if possible. If candidates which are located
-        at the margin and long enough (covering a large fraction of the page) exist
-        on all four sides, then pick the best (i.e. thickest, longest and inner-most)
-        one on each side and use their intersections as border points.
+        at the margin and long enough (i.e. covering a large fraction of the page)
+        exist on all four sides, then pick the best one (i.e. thickest, longest and
+        inner-most) on each side and use their intersection points to define a border
+        rectangle.
         
-        Otherwise, first try to detect a ruler (i.e. image segment depicting a rule
-        placed on the scan/photo for scale references) via thresholding and contour
+        When splitting, if vertical candidates exist in the center of the page, then
+        pick the best (i.e. thickest, longest and inner-most) to split the pages into
+        two border rectangles.
+
+        2. Otherwise (i.e. if line segments could not be found on all four sides),
+        first try to detect a ruler (i.e. an image segment depicting a rule that was
+        placed on the scan/photo feed for scale reference) via thresholding and contour
         detection, identifying a single large rectangular region with a certain aspect
         ratio. Suppress (mask) any such segment during further calculations.
 
         Next in that line, try to detect text segments on the page. For that purpose,
         get the gradient of grayscale image, threshold and morphologically close it,
         then determine contours to define approximate text boxes. Merge these into
-        columns, filtering candidates too small or entirely in the margin areas.
-        Finally, merge the remaining columns across short gaps. If only one column
-        remains, and it covers a significant fraction of the page, pick that segment
-        as solution.
+        columns, filtering candidates too small or entirely within the margin areas.
+        Finally, merge the remaining columns across short gaps. Sort the remaining
+        columns by size, and retain only those that cover a significant fraction of
+        the page. Pick the largest column as solution.
+
+        When splitting, pick the two largest columns as solution.
         
-        Otherwise, keep the border points derived from line segments (intersecting
-        with the full image on each side without line candidates).
-        
-        Lastly, map coordinates to the original (undeskewed) image and intersect
+        Otherwise (i.e. no such columns can be found), keep the border points derived
+        from line segments, substituting missing line candidates with image boundaries
+        on each side.
+
+        3. Lastly, map coordinates to the original (undeskewed) image and intersect
         the border polygon with the full image frame. Use that to define the page's
         Border.
         
-        Moreover, crop (and mask) the image accordingly, and reference the
+        4. Moreover, crop (and mask) the image accordingly, and reference the
         resulting image file as AlternativeImage in the Page element.
         Add the new image file to the workspace along with the output fileGrp,
         and using a file ID with suffix ``.IMG-CROP`` along with further
         identification of the input element.
         
-        Produce new output files by serialising the resulting hierarchy.
+        Produce a new output file by serialising the resulting hierarchy.
+
+        When splitting, if only one page frame could be found, then only write to the
+        first output fileGrp on that page. Otherwise produce two output files in this
+        manner.
         """
         assert self.parameter # to convince pyright that self.parameter is not None
         pcgts = input_pcgts[0]
         assert pcgts
-        result = OcrdPageResult(pcgts)
+        split = len(self.output_file_grp.split(',')) == 2
         page = pcgts.get_Page()
         page_image, page_xywh, page_image_info = self.workspace.image_from_page(
             page, page_id, # should be deskewed already
@@ -153,10 +173,14 @@ class OcrdAnybaseocrCropper(Processor):
         # detect rule placed in image next to page for scale reference:
         mask_array, mask_box = self.detect_ruler(img_array)
         # detect page frame via line segment detector:
-        border_polygon, prefer_border = self.select_borderLine(img_array, mask_box)
-        border_polygon = np.array(border_polygon) / zoom # unzoom
-        # pad inwards:
-        border_polygon = Polygon(border_polygon).buffer(-padding).exterior.coords[:-1]
+        border_polygon, prefer_border = self.select_borderLine(img_array, mask_box, split=split)
+        if split and isinstance(border_polygon, tuple):
+            border_polygons = list(border_polygon) # left, right
+        else:
+            border_polygons = [border_polygon]
+        # unzoom and pad inwards:
+        border_polygons = [Polygon(np.array(poly) / zoom).buffer(-padding).exterior.coords[:-1]
+                           for poly in border_polygons]
         # get the bounding box from the border polygon:
         # min_x, min_y = border_polygon.min(axis=0)
         # max_x, max_y = border_polygon.max(axis=0)
@@ -172,36 +196,50 @@ class OcrdAnybaseocrCropper(Processor):
                 textboxes = self.merge_boxes(textboxes, img_array)
             textboxes = np.array(textboxes) / zoom # unzoom
 
-            if (len(textboxes) == 1 and
-                self.parameter['columnAreaMin'] * size < self.get_area(textboxes[0])):
+            # get the largest N columns:
+            if split:
+                ncol = 2
+            else:
+                ncol = 1
+            for n, column in enumerate(textboxes[:ncol]):
+                if self.get_area(column) < self.parameter['columnAreaMin'] * size:
+                    break
                 self.logger.info("Using text area (%d%% area)",
-                                 100 * self.get_area(textboxes[0]) / size)
-                min_x, min_y, max_x, max_y = textboxes[0]
+                                 100 * self.get_area(column) / size)
+                min_x, min_y, max_x, max_y = column
                 # pad outwards
                 border_polygon = polygon_from_bbox(min_x - padding,
                                                    min_y - padding,
                                                    max_x + padding,
                                                    max_y + padding)
+                if n >= len(border_polygons):
+                    border_polygons.append(border_polygon)
+                else:
+                    border_polygons[n] = border_polygon
 
+        # convert to original image coordinates
         def clip(point):
             x, y = point
             x = max(0, min(page_image.width, x))
             y = max(0, min(page_image.height, y))
             return x, y
-        border_polygon = coordinates_for_segment(border_polygon, page_image, page_xywh)
-        border_polygon = list(map(clip, border_polygon))
-        border_points = points_from_polygon(border_polygon)
-        border = BorderType(Coords=CoordsType(border_points))
-        page.set_Border(border)
-
-        # get clipped relative coordinates for current image (because of the
-        # Border now set, image_from_page will return updated image and coords?)
-        cropped_image, cropped_coords, _ = self.workspace.image_from_page(
-            page, page_id, fill='background', transparency=True)
-        alt_image = AlternativeImageType(comments=cropped_coords['features'])
-        page.add_AlternativeImage(alt_image)
-        result.images.append(OcrdPageResultImage(cropped_image, '.IMG-CROP', alt_image))
-        return result
+        border_polygons = [list(map(clip, coordinates_for_segment(poly, page_image, page_xywh)))
+                           for poly in border_polygons]
+        if split and len(border_polygons) == 2:
+            results = OcrdPageResult(pcgts, deepcopy(pcgts))
+        else:
+            results = OcrdPageResult(pcgts)
+        for result, border_polygon in zip(results, border_polygons):
+            border = BorderType(Coords=CoordsType(points_from_polygon(border_polygon)))
+            result.pcgts.Page.set_Border(border)
+            # get clipped relative coordinates for current image (because of the
+            # Border now set, image_from_page will return updated image and coords?)
+            cropped_image, cropped_coords, _ = self.workspace.image_from_page(
+                result.pcgts.Page, page_id, fill='background', transparency=True)
+            alt_image = AlternativeImageType(comments=cropped_coords['features'])
+            result.pcgts.Page.add_AlternativeImage(alt_image)
+            result.images.append(OcrdPageResultImage(cropped_image, '.IMG-CROP', alt_image))
+        return results
 
     def detect_ruler(self, arg):
         gray = cv2.cvtColor(arg, cv2.COLOR_RGB2GRAY)
@@ -521,7 +559,7 @@ class OcrdAnybaseocrCropper(Processor):
             dshow('line candidates')
         return groups
 
-    def select_borderLine(self, arg, mask=None):
+    def select_borderLine(self, arg, mask=None, split=False):
         imgHeight, imgWidth, Hlines, Vlines = self.detect_lines(arg)
         perfect = True
         assert self.parameter # to convince pyright that self.parameter is not None
@@ -542,6 +580,8 @@ class OcrdAnybaseocrCropper(Processor):
                           group.pos < x1max, Vgroups)
         rgtlines = filter(lambda group: # x pos at right margin
                           group.pos > x2min, Vgroups)
+        midlines = filter(lambda group: # x pos in the middle
+                          group.pos >= x1max and group.pos <= x2min, Vgroups)
         if mask is not None:
             # apply outer boundaries where ruler is:
             mask_x, mask_y, mask_w, mask_h = mask
@@ -568,7 +608,8 @@ class OcrdAnybaseocrCropper(Processor):
             return x0 / np.exp(x0)
         toplines = sorted(toplines, reverse=True,
                           key=lambda group: # maximize product of length and y pos
-                          group.wgt**2 * group.length * attenuate_pos(group.pos / y1max))
+                          group.wgt**2 * group.length * attenuate_pos(
+                              group.pos / y1max))
         if toplines:
             self.logger.info("found top margin (pos: %d, length: %d)",
                              toplines[0].pos, toplines[0].length)
@@ -578,7 +619,8 @@ class OcrdAnybaseocrCropper(Processor):
             topline = [0, 0, imgWidth, 0]
         botlines = sorted(botlines, reverse=True,
                           key=lambda group: # maximize product of length and h-y pos
-                          group.wgt**2 * group.length * attenuate_pos((imgHeight - group.pos) / (imgHeight - y2min)))
+                          group.wgt**2 * group.length * attenuate_pos(
+                              (imgHeight - group.pos) / (imgHeight - y2min)))
         if botlines:
             self.logger.info("found bottom margin (pos: %d, length: %d)",
                              botlines[0].pos, botlines[0].length)
@@ -588,7 +630,8 @@ class OcrdAnybaseocrCropper(Processor):
             botline = [0, imgHeight, imgWidth, imgHeight]
         lftlines = sorted(lftlines, reverse=True,
                           key=lambda group: # maximize product of length and x pos
-                          group.wgt**2 * group.length * attenuate_pos(group.pos / x1max))
+                          group.wgt**2 * group.length * attenuate_pos(
+                              group.pos / x1max))
         if lftlines:
             self.logger.info("found left margin (pos: %d, length: %d)",
                              lftlines[0].pos, lftlines[0].length)
@@ -598,7 +641,8 @@ class OcrdAnybaseocrCropper(Processor):
             lftline = [0, 0, 0, imgHeight]
         rgtlines = sorted(rgtlines, reverse=True,
                           key=lambda group: # maximize product of length and w-x pos
-                          group.wgt**2 * group.length * attenuate_pos((imgWidth - group.pos) / (imgWidth - x2min)))
+                          group.wgt**2 * group.length * attenuate_pos(
+                              (imgWidth - group.pos) / (imgWidth - x2min)))
         if rgtlines:
             self.logger.info("found right margin (pos: %d, length: %d)",
                              rgtlines[0].pos, rgtlines[0].length)
@@ -606,23 +650,42 @@ class OcrdAnybaseocrCropper(Processor):
         else:
             rgtline = [imgWidth, 0, imgWidth, imgHeight]
             perfect = False
+        midlines = sorted(midlines, reverse=True,
+                          key=lambda group: # maximize product of length and min(x, w-x) pos
+                          group.wgt**2 * group.length * attenuate_pos(
+                              (group.pos / x1max) if group.pos < 0.5 * imgWidth else
+                              (imgWidth - group.pos) / (imgWidth - x2min)))
+        if midlines:
+            self.logger.info("found book spine (pos: %d, length: %d)",
+                             midlines[0].pos, midlines[0].length)
+            midline = midlines[0].line
+        else:
+            #midline = [(lftline[0] + rgtline[0]) // 2, 0, (lftline[2] + rgtline[2]) // 2, imgHeight]
+            midline = None
         if DEBUG:
             plt.imshow(arg)
             for x1, y1, x2, y2 in [topline, botline, lftline, rgtline]:
                 plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=2, linestyle='dotted'))
+            for x1, y1, x2, y2 in [midline] if midline else []:
+                plt.gca().add_artist(Line2D((x1,x2), (y1,y2), linewidth=2, linestyle='dotted', c='red'))
             dshow('border lines')
-        # intersect all sides
-        intersectPoint = []
-        for hx1, hy1, hx2, hy2 in [topline, botline]:
-            for vx1, vy1, vx2, vy2 in [lftline, rgtline]:
-                x, y = self.get_intersect((hx1, hy1),
-                                          (hx2, hy2),
-                                          (vx1, vy1),
-                                          (vx2, vy2))
-                intersectPoint.append([x, y])
-            lftline, rgtline = rgtline, lftline
-        # FIXME: return confidence value (length and no fallback on each side)
-        return intersectPoint, perfect
+        # FIXME: return confidence value, too (length and no fallback on each side)
+        def get_polygon(topline, botline, lftline, rgtline):
+            # intersect all sides
+            intersectPoints = []
+            for hx1, hy1, hx2, hy2 in [topline, botline]:
+                for vx1, vy1, vx2, vy2 in [lftline, rgtline]:
+                    x, y = self.get_intersect((hx1, hy1),
+                                              (hx2, hy2),
+                                              (vx1, vy1),
+                                              (vx2, vy2))
+                    intersectPoints.append([x, y])
+                lftline, rgtline = rgtline, lftline
+            return intersectPoints
+        if split and midline:
+            return (get_polygon(topline, botline, lftline, midline),
+                    get_polygon(topline, botline, midline, rgtline)), perfect
+        return get_polygon(topline, botline, lftline, rgtline), perfect
 
     def filter_noisebox(self, textboxes, height, width):
         tmp = []
@@ -750,27 +813,29 @@ class OcrdAnybaseocrCropper(Processor):
 
         textboxes = np.unique(textboxes, axis=0)
         i = 0
-        tmp = []
+        seen = []
         boxes = []
         while i < len(textboxes):
             textboxes = [list(x) for x in textboxes
-                         if x not in tmp]
-            tmp = []
+                         if x not in seen]
+            seen = []
             if len(textboxes) == 0:
                 break
             maxBox = textboxes[0]
             for chkBox in textboxes[1:]:
-                x11, y11, x12, y12 = maxBox
-                x21, y21, x22, y22 = chkBox
-                if ((x11 <= x21 <= x12) or (x21 <= x11 <= x22)):
-                    tmp.append(maxBox)
-                    tmp.append(chkBox)
-                    maxBox = [min(x11, x21), min(y11, y21),
-                              max(x12, x22), max(y12, y22)]
-            if len(tmp) == 0:
-                tmp.append(maxBox)
+                xm_min, ym_min, xm_max, ym_max = maxBox
+                xc_min, yc_min, xc_max, yc_max = chkBox
+                if ((xm_min <= xc_min <= xm_max) or
+                    (xc_min <= xm_min <= xc_max)):
+                    # x overlaps
+                    seen.append(maxBox)
+                    seen.append(chkBox)
+                    maxBox = [min(xm_min, xc_min), min(ym_min, yc_min),
+                              max(xm_max, xc_max), max(ym_max, yc_max)]
+            if len(seen) == 0:
+                seen.append(maxBox)
             boxes.append(maxBox)
-            i = i+1
+            i += 1
         self.logger.debug("merged into %d text boxes (i.e. columns)", len(boxes))
         if DEBUG:
             plt.imshow(img)

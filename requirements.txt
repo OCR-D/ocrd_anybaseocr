@@ -1,4 +1,4 @@
-ocrd >= 3.3.0
+ocrd >= 3.11.0
 keras < 3.0
 keras-preprocessing
 tensorflow < 2.16

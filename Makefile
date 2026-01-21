@@ -7,7 +7,7 @@ PIP_INSTALL = $(PIP) install
 PYTHONIOENCODING=utf8
 
 TESTDATA = tests/assets/dfki-testdata/data
-PYTEST_ARGS ?= -vv
+PYTEST_ARGS ?= -vv --isolate
 
 # Tag to publish docker image to
 DOCKER_TAG ?= ocrd/anybaseocr
